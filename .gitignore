@@ -1,6 +1,14 @@
 *.class
 
 # Package Files #
-*.jar
 *.war
 *.ear
+
+# Gedit/Vim  Temp Files
+*~
+*.swp
+
+# Ignore bin
+bin/
+
+Thumbs.db
