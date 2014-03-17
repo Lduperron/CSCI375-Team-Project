@@ -2,7 +2,10 @@ package gameCode.obj;
 
 public class Obj
 {
-	String name = "Undefined Object";
-	String description = "Undefined Description";
+	public String name = "Undefined Object";
+	public String description = "Undefined Description";
+	
+	public boolean dense = false;
+	public boolean opaque = false;
 	
 }
