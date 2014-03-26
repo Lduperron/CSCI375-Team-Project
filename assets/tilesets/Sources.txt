@@ -1,0 +1,6 @@
+REFERENCES:
+
+FILES - characters.png, enemies.png
+CREATOR - Enterbrain
+SOURCE - http://www.rpgmakervx.net/index.php?showtopic=5576
+STATUS - Not approved for commercial use
