@@ -475,9 +475,9 @@ public class CSCI375ProjectMain extends Game
 	{
 	  double x;
 	  double y;
-	  int i;
+	  double i;
 	  clearVisibleMap();//Initially set all tiles to not visible.
-	  for(i=0;i<360;i=i+1)
+	  for(i=0;i<360;i=i+0.5)
 	  {
 	    x=Math.cos((float)i*0.01745f);
 	    y=Math.sin((float)i*0.01745f);
