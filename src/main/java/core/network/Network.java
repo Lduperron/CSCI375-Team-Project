@@ -7,21 +7,9 @@ import java.util.List;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
 
-import core.shared.Alert;
-import core.shared.Background;
-import core.shared.Character;
-import core.shared.Decision;
-import core.shared.Dialogue;
-import core.shared.Document;
-import core.shared.Face;
-import core.shared.Level;
+
 import core.shared.Message;
-import core.shared.PersonPicture;
-import core.shared.Posture;
-import core.shared.Query;
-import core.shared.Result;
-import core.shared.Role;
-import core.shared.SoundTrack;
+
 
 /**
  * This class is a convenient place to keep things common to both the client and
@@ -59,22 +47,9 @@ public class Network {
 		/*
 		 * Register all classes in core.shared
 		 */
-		kryo.register(Alert.class);
-		kryo.register(Background.class);
-		kryo.register(Character.class);
-		kryo.register(Decision.class);
-		kryo.register(Dialogue.class);
-		kryo.register(Document.class);
-		kryo.register(Document.Type.class);
-		kryo.register(Face.class);
-		kryo.register(Level.class);
+
 		kryo.register(Message.class);
-		kryo.register(PersonPicture.class);
-		kryo.register(Posture.class);
-		kryo.register(Result.class);
-		kryo.register(Role.class);
-		kryo.register(Query.class);
-		kryo.register(SoundTrack.class);
+
 
 		kryo.register(List.class);
 		kryo.register(LinkedList.class);

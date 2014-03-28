@@ -12,9 +12,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Listener.ThreadedListener;
 
 import core.client.ClientEngine;
-import core.shared.Alert;
-import core.shared.Dialogue;
-import core.shared.Level;
+
 import core.shared.Message;
 
 /**
@@ -70,7 +68,6 @@ public class NetClient extends Network {
 		 *  ThreadedListener runs the listener methods on a different thread.
 		 */
 		client.addListener(new ThreadedListener(new Listener() {
-			private Dialogue[] dialogues;
 
 			/**
 			 * Override received method of Listener to specify game specific
@@ -83,83 +80,9 @@ public class NetClient extends Network {
 					 *  Process the message received from the server
 					 */
 					switch (netMsg.msg) {
-					case ALERT:
-						if (netMsg.obj instanceof Alert) {
-							Gdx.app.postRunnable(new Runnable() {
-								@Override
-								public void run() {
-									gameClient.addAlert((Alert) netMsg.obj);
-								}
-							});
-						}
-						break;
-					case DIALOGUE:
-						if (netMsg.obj instanceof List) {
-							List<Dialogue> dialogueList = new LinkedList<Dialogue>();
-							List<?> generic = (List<?>) netMsg.obj;
 
-							for (Object obj : generic) {
-								if (obj instanceof Dialogue) {
-									dialogueList.add((Dialogue) obj);
-								}
-							}
-
-							this.dialogues = new Dialogue[dialogueList.size()];
-							dialogueList.toArray(dialogues);
-
-							Gdx.app.postRunnable(new Runnable() {
-								@Override
-								public void run() {
-									gameClient.DisplayDialouge(dialogues);
-								}
-							});
-						}
-						break;
-					case DISCONNECT:
-						// server requested a disconnect
-						Gdx.app.postRunnable(new Runnable() {
-							@Override
-							public void run() {
-								gameClient.LeaveGame();
-							}
-						});
-						break;
-					case PAUSE:
-						Gdx.app.postRunnable(new Runnable() {
-							@Override
-							public void run() {
-								gameClient.PauseGame();
-							}
-						});
-						break;
-					case QUIT:
-						Gdx.app.postRunnable(new Runnable() {
-							@Override
-							public void run() {
-								gameClient.LeaveGame();
-							}
-						});
-						break;
-					case RESUME:
-						Gdx.app.postRunnable(new Runnable() {
-							@Override
-							public void run() {
-								gameClient.UnpauseGame();
-							}
-						});
-						break;
-					case START_LEVEL:
-						if (netMsg.obj instanceof Level) {
-							Gdx.app.postRunnable(new Runnable() {
-								@Override
-								public void run() {
-									gameClient.setLevel((Level) netMsg.obj);
-								}
-							});
-						}
-						break;
 					case TEST:
-						System.out.println("Message from Client Received");
+						System.out.println("Message from Server Received");
 						break;
 					default:
 						// invalid messages are simply ignored
@@ -174,8 +97,7 @@ public class NetClient extends Network {
 			 * it disconnected
 			 */
 			public void disconnected(Connection connection) {
-				// connection to Server was lost
-				gameClient.LeaveGame();
+
 			}
 		})); // end of addListener
 	} // end of constructor

@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 
 
+
 public class UIControlHandler implements InputProcessor {
 
 	ClientEngine centralEngine;
@@ -63,7 +64,7 @@ public class UIControlHandler implements InputProcessor {
 		
 		centralEngine.camera.unproject(position);
 
-		centralEngine.mouseEvent((int)(position.x/centralEngine.TILE_SIZE) , (int)(position.y/centralEngine.TILE_SIZE));
+		centralEngine.mouseEvent((int)(position.x/core.shared.ConfigOptions.TILE_SIZE) , (int)(position.y/core.shared.ConfigOptions.TILE_SIZE));
 		
 		return false;
 	}

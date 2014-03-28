@@ -8,4 +8,6 @@ public class Obj
 	public boolean dense = false;
 	public boolean opaque = false;
 	
+	public int UID = getObjUID.getUID();
+	
 }

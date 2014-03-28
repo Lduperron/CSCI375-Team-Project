@@ -1,5 +1,6 @@
 package core.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,33 +38,36 @@ import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
-import core.shared.Alert;
-import core.shared.Dialogue;
-import core.shared.Level;
-import core.shared.Result;
+import core.network.NetClient;
+import core.server.ServerEngine;
 
 
+import static core.shared.ConfigOptions.MAP_SIZE_X;
+import static core.shared.ConfigOptions.MAP_SIZE_Y;
+import static core.shared.ConfigOptions.TILE_SIZE;
+import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
+import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
 public class ClientEngine extends Game 
 {
+	
+	// Server used for hosting games
+	ServerEngine server;
+
+	// Used to connect to the server
+	static NetClient network;
+	
+	
 	public OrthographicCamera camera;
 	public OrthogonalTiledMapRenderer mapRenderer;
 	public TiledMap map;
-	
-	public static final int TILE_SIZE = 32;
-	public static final int VIEW_DISTANCE_X = 15;
-	public static final int VIEW_DISTANCE_Y = 15;
-	
-	public static final int MAP_SIZE_X = 300;
-	public static final int MAP_SIZE_Y = 300;
-	
-	public static final int MAX_OBJECTS_PER_TILE = 100;
+
+	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
 	
 	int cameraTileX = 2;
 	int cameraTileY = 3;
 	
 	
-	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>(MAX_OBJECTS_PER_TILE);
 	
 	
 	boolean[][] OccluedTiles;
@@ -125,6 +129,23 @@ public class ClientEngine extends Game
 		clearVisibleMap();
 		
 		calculateVisibleTiles();
+		
+		
+		server = new ServerEngine();
+
+		server.start();
+		
+		try
+		{
+			network = new NetClient(this, "localhost");
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		network.send(core.shared.Message.TEST);
 		
 		/*
 		camera = new OrthographicCamera(1, h/w);
@@ -304,6 +325,7 @@ public class ClientEngine extends Game
 	
 	public void mouseEvent(int tileX, int tileY)
 	{
+		
 		if( tileX < 0 || tileX > MAP_SIZE_X || tileY < 0 || tileY > MAP_SIZE_Y)
 		{
 			return;
@@ -320,8 +342,7 @@ public class ClientEngine extends Game
 				TiledMapTileLayer tiledLayer2 = (TiledMapTileLayer)map.getLayers().get("Floor");
 				
 				Door doorObj = (Door)obj;
-			
-				
+							
 				if(doorObj.dense && !doorObj.locked )
 				{
 					doorObj.dense = false;
@@ -453,6 +474,18 @@ public class ClientEngine extends Game
 			}
 			
 		}		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	}
 	
 	public void clearVisibleMap()
@@ -521,35 +554,6 @@ public class ClientEngine extends Game
 		}
 	}
 
-	public void addAlert(Alert obj) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void DisplayDialouge(Dialogue[] dialogues) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void LeaveGame() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void PauseGame() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void UnpauseGame() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setLevel(Level obj) {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	
 }

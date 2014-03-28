@@ -10,11 +10,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
 import core.server.ServerEngine;
-import core.shared.Decision;
 import core.shared.Message;
-import core.shared.Posture;
-import core.shared.Query;
-import core.shared.Role;
 
 /**
  * ServerEngine end for KryoNet network communications
@@ -26,7 +22,6 @@ import core.shared.Role;
 public class NetServer extends Network {
 	private ServerEngine gameServer;
 	private Server server;
-	private HashMap<Integer, Role> roles;
 
 	/**
 	 * Constructor for NetServer
@@ -46,10 +41,6 @@ public class NetServer extends Network {
 		} catch (IOException e) {
 			throw new IOException("Unable to bind to port");
 		}
-		/**
-		 * Create HashMap to map connections to roles
-		 */
-		roles = new HashMap<Integer, Role>();
 
 		/**
 		 * For consistency, the classes to be sent over the network are
@@ -81,36 +72,9 @@ public class NetServer extends Network {
 					 * Process message received from client
 					 */
 					switch (netMsg.msg) {
-					case CONNECT:
-						if (roles.containsKey(connection.getID())) {
-							// You are already connected
-							sendClient(roles.get(connection.getID()),
-									Message.CONNECT);
-						} else {
-							gameServer.onPlayerConnect(connection);
-						}
-						break;
-					case DISCONNECT:
-						// Only notify ServerEngine when this connection is in roles
-						if (roles.containsKey(connection.getID())) {
-							// Notify ServerEngine of disconnect
-							gameServer.onPlayerDisconnect();
-							// Remove connection from list of roles
-							roles.remove(connection.getID());
-						}
-						// ignore disconnects from unregistered connections
-						break;
-					case PAUSE:
-						gameServer.onPlayerPause();
-						break;
-					case QUIT:
-						gameServer.onPlayerQuit();
-						break;
-					case RESUME:
-						gameServer.onPlayerResume();
-						break;
 					case TEST:
 						System.out.println("Received Message from Client");
+						gameServer.test();
 						break;
 					default:
 						// invalid messages are simply ignored
@@ -125,36 +89,17 @@ public class NetServer extends Network {
 			 * that it disconnected
 			 */
 			public void disconnected(Connection connection) {
-				// Only notify ServerEngine when this connection is in roles
-				if (roles.containsKey(connection.getID())) {
-					gameServer.onPlayerDisconnect();
-					// Remove connection from list of roles
-					roles.remove(connection.getID());
-				}
-				// ignore disconnects from unregistered connections
+
 			}
 		}); // end of addListener
 	} // end of constructor
 
-	/**
-	 * Set an Enumerated {@link Role} for {@link Connection}
-	 * 
-	 * @param connection
-	 * @param role
-	 */
-	public void setRole(Connection connection, Role role) {
-		roles.put(connection.getID(), role);
-	}
 
 	/**
 	 * Stops the ServerEngine
 	 */
 	public void killServer() {
-		for (Integer connID : roles.keySet()) {
-			// tell client to disconnect
-			sendClient(roles.get(connID), Message.DISCONNECT);
-		}
-		roles.clear();
+
 		server.stop();
 	}
 
@@ -189,16 +134,7 @@ public class NetServer extends Network {
 		server.sendToTCP(conn.getID(), msg);
 	}
 
-	/**
-	 * Send an Enumerated {@link Message} to the client with a specific
-	 * {@link Role}
-	 * 
-	 * @param role
-	 * @param msg
-	 */
-	public void sendClient(Role role, Message msg) {
-		sendClient(role, msg, null);
-	}
+
 
 	/**
 	 * Send an Enumerated {@link Message} and a registered (
@@ -209,17 +145,7 @@ public class NetServer extends Network {
 	 * @param msg
 	 * @param obj
 	 */
-	public void sendClient(Role role, Message msg, Object obj) {
-		NetMessage netMsg = new NetMessage(msg, obj);
-		if (roles.containsValue(role)) {
-			for (Integer key : roles.keySet()) {
-				if (roles.get(key) == role) {
-					server.sendToTCP(key, netMsg);
-					break;
-				}
-			}
-		}
-	}
+
 	public static void main(String [ ] args) {
 		 Server server = new Server();
 		    server.start();
