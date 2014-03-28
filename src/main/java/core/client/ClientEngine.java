@@ -1,4 +1,4 @@
-package core.clientSide;
+package core.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +10,6 @@ import gameCode.obj.structure.Wall;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -39,9 +37,14 @@ import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import core.shared.Alert;
+import core.shared.Dialogue;
+import core.shared.Level;
+import core.shared.Result;
 
 
-public class CSCI375ProjectMain extends Game 
+
+public class ClientEngine extends Game 
 {
 	public OrthographicCamera camera;
 	public OrthogonalTiledMapRenderer mapRenderer;
@@ -225,7 +228,7 @@ public class CSCI375ProjectMain extends Game
 		cfg.height = VIEW_DISTANCE_Y*TILE_SIZE*2;
 		cfg.resizable = false;
 		
-		new LwjglApplication(new CSCI375ProjectMain(), cfg);
+		new LwjglApplication(new ClientEngine(), cfg);
 	}
 	
 	public void MoveCameraRelative(int x, int y)
@@ -516,6 +519,36 @@ public class CSCI375ProjectMain extends Game
 			cameraX+=x;
 			cameraY+=y;
 		}
+	}
+
+	public void addAlert(Alert obj) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void DisplayDialouge(Dialogue[] dialogues) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void LeaveGame() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void PauseGame() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void UnpauseGame() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setLevel(Level obj) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

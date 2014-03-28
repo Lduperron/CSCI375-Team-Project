@@ -1,4 +1,4 @@
-package core.clientSide;
+package core.client;
 
 import org.lwjgl.Sys;
 
@@ -10,9 +10,9 @@ import com.badlogic.gdx.math.collision.Ray;
 
 public class UIControlHandler implements InputProcessor {
 
-	CSCI375ProjectMain centralEngine;
+	ClientEngine centralEngine;
 	
-	public UIControlHandler(CSCI375ProjectMain s)
+	public UIControlHandler(ClientEngine s)
 	{
 		
 		centralEngine = s;
