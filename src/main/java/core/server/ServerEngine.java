@@ -8,6 +8,7 @@ import gameCode.obj.structure.Wall;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObjects;
@@ -28,7 +29,7 @@ public class ServerEngine extends Thread
 	boolean masterLoop = true;
 	public TiledMap map;
 	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
-	
+	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
 	
 	
 	public ServerEngine() 
@@ -111,13 +112,17 @@ public class ServerEngine extends Thread
 				
 				if(c != null)
 				{
-					ObjectArray.get(row).get(column).add(new Door());
+					Door d = new Door(row, column);
+					ObjectArray.get(row).get(column).add(d);
+					ObjectArrayByID.put(d.UID, d);
 				}
 				
 				c = tiledWallLayer.getCell(row,column);
 				if(c != null)
 				{
-					ObjectArray.get(row).get(column).add(new Wall());
+					Wall w = new Wall(row, column);
+					ObjectArray.get(row).get(column).add(w);
+					ObjectArrayByID.put(w.UID, w);
 				}
 				
 				
@@ -148,7 +153,7 @@ public class ServerEngine extends Thread
 					{
 						if(Door.class.isAssignableFrom(door.getClass()))
 						{
-							Door d = (Door)ObjectArray.get(x).get(y).get(0);
+							Door d = (Door)ObjectArrayByID.get(door.UID);
 							d.locked =Boolean.valueOf((String) properties.get("locked"));
 						}
 					}
@@ -157,8 +162,19 @@ public class ServerEngine extends Thread
 			}
 			
 		}		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	}
-	
 	
 	
 	public boolean isCellPassable(int x, int y)

@@ -2,11 +2,9 @@ package core.client;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-
+import java.util.HashMap;
 import gameCode.obj.Obj;
 import gameCode.obj.structure.Door;
-import gameCode.obj.structure.Structure;
 import gameCode.obj.structure.Wall;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -17,10 +15,6 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -31,13 +25,10 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader.Parameters;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
-
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import core.network.NetClient;
 import core.server.ServerEngine;
 
@@ -58,15 +49,19 @@ public class ClientEngine extends Game
 	static NetClient network;
 	
 	
-	public OrthographicCamera camera;
+	static public OrthographicCamera camera;
 	public OrthogonalTiledMapRenderer mapRenderer;
 	public TiledMap map;
 
 	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
+	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
 	
 	int cameraTileX = 2;
 	int cameraTileY = 3;
 	
+	
+	Stage uiStage;
+	Stage worldStage;
 	
 	
 	
@@ -112,11 +107,24 @@ public class ClientEngine extends Game
 		Texture.setEnforcePotImages(false);
 		map = new TmxMapLoader().load("maps/Map.tmx" , p );
 		
-	    multiplexer.addProcessor(uiControlHandler);
-	    Gdx.input.setInputProcessor(multiplexer);
-		
+
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
+		
+		
+		uiStage = new Stage();
+		worldStage = new Stage();
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	    multiplexer.addProcessor(uiControlHandler);
+	    Gdx.input.setInputProcessor(multiplexer);
 		
 		
 		camera.position.x=cameraTileX*TILE_SIZE+16;
@@ -180,7 +188,8 @@ public class ClientEngine extends Game
 
 		mapRenderer.render();
 		
-		
+		worldStage.act();
+		worldStage.draw();
 		
 		ShapeRenderer shapeRenderer = new ShapeRenderer();
 		
@@ -411,8 +420,8 @@ public class ClientEngine extends Game
 	public void generateMapObjects()
 	{
 		
-		
 		TiledMapTileLayer tiledDoorLayer = (TiledMapTileLayer)map.getLayers().get("Doors");
+		TiledMapTileLayer tiledFloorLayer = (TiledMapTileLayer)map.getLayers().get("Floor");
 		TiledMapTileLayer tiledWallLayer = (TiledMapTileLayer)map.getLayers().get("Walls");
 		
 		for(int row = 0; row <= MAP_SIZE_X; row++)
@@ -428,13 +437,28 @@ public class ClientEngine extends Game
 				
 				if(c != null)
 				{
-					ObjectArray.get(row).get(column).add(new Door());
+					Door d = new Door(row, column);
+					ObjectArray.get(row).get(column).add(d);
+					ObjectArrayByID.put(d.UID, d);
+					
+					Cell FloorTile = tiledFloorLayer.getCell(row,column);
+					c.setTile(new StaticTiledMapTile(FloorTile.getTile().getTextureRegion()));
+					
+					worldStage.addActor(d);
+					
 				}
 				
 				c = tiledWallLayer.getCell(row,column);
 				if(c != null)
 				{
-					ObjectArray.get(row).get(column).add(new Wall());
+					Wall w = new Wall(row, column);
+					ObjectArray.get(row).get(column).add(w);
+					ObjectArrayByID.put(w.UID, w);
+					
+					Cell FloorTile = tiledFloorLayer.getCell(row,column);
+					c.setTile(new StaticTiledMapTile(FloorTile.getTile().getTextureRegion()));
+					
+					worldStage.addActor(w);
 				}
 				
 				
@@ -465,7 +489,7 @@ public class ClientEngine extends Game
 					{
 						if(Door.class.isAssignableFrom(door.getClass()))
 						{
-							Door d = (Door)ObjectArray.get(x).get(y).get(0);
+							Door d = (Door)ObjectArrayByID.get(door.UID);
 							d.locked =Boolean.valueOf((String) properties.get("locked"));
 						}
 					}

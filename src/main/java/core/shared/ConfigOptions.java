@@ -1,5 +1,8 @@
 package core.shared;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+
 public class ConfigOptions
 {
 	
@@ -16,5 +19,8 @@ public class ConfigOptions
 	
 	public static final int MAX_OBJECTS_PER_TILE = 100;
 	
+	
+	public static Texture texture = new Texture((Gdx.files.internal("data/libgdx.png")));
+	public static Texture texture2 = new Texture((Gdx.files.internal("tilesets/tmw_desert_spacing - Copy.png")));
 }
 
