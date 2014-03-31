@@ -20,8 +20,8 @@ public class Obj extends Actor
 	protected Obj(int x, int y)
 	{
 		
-		this.setX(x);
-		this.setY(y);
+		this.setX(x*TILE_SIZE);
+		this.setY(y*TILE_SIZE);
 		this.setWidth(32);
 		this.setHeight(32);
 		
@@ -60,7 +60,7 @@ public class Obj extends Actor
     	Color color = getColor();
 		batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
 		
-		Vector3 test = new Vector3(getX()*TILE_SIZE,getY()*TILE_SIZE,1);
+		Vector3 test = new Vector3(getX(),getY(),1);
 		ClientEngine.camera.project(test);
 		
 		batch.draw(getTexture(), test.x, test.y, getOriginX(), getOriginY(), 64 , 64 , getScaleX(), getScaleY(), getRotation(), 0, 0, texture.getWidth(), texture.getHeight(), false,  false);

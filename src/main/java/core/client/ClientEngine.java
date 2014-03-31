@@ -27,6 +27,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import core.network.NetClient;
@@ -75,7 +76,7 @@ public class ClientEngine extends Game
 	
 	InputMultiplexer multiplexer = new InputMultiplexer();
 
-   
+	Rectangle cullingArea;
 	
 	
 	
@@ -111,11 +112,7 @@ public class ClientEngine extends Game
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
 		
-		
-		uiStage = new Stage();
-		worldStage = new Stage();
-		
-		
+
 		
 		
 		
@@ -129,6 +126,21 @@ public class ClientEngine extends Game
 		
 		camera.position.x=cameraTileX*TILE_SIZE+16;
 		camera.position.y=cameraTileY*TILE_SIZE+16;
+		
+		uiStage = new Stage();
+		
+		worldStage = new Stage();
+
+
+
+		cullingArea= new Rectangle(
+				(cameraTileX-VIEW_DISTANCE_X/2)*TILE_SIZE,
+				(cameraTileY-VIEW_DISTANCE_Y/2)*TILE_SIZE,
+				VIEW_DISTANCE_X*TILE_SIZE ,
+				VIEW_DISTANCE_Y*TILE_SIZE
+				);
+		worldStage.getRoot().setCullingArea(cullingArea);
+
 		
 		generateMapObjects();
 		
@@ -188,6 +200,8 @@ public class ClientEngine extends Game
 
 		mapRenderer.render();
 		
+		
+		
 		worldStage.act();
 		worldStage.draw();
 		
@@ -201,6 +215,10 @@ public class ClientEngine extends Game
 		 
 		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
 		 camera.project(test);
+		 
+		 
+
+			
 		 
 		 shapeRenderer.circle(test.x, test.y, 25);
 		 
@@ -280,9 +298,18 @@ public class ClientEngine extends Game
 			
 			camera.update();
 			
+			cullingArea.set(
+					(cameraTileX-VIEW_DISTANCE_X/2)*TILE_SIZE,
+					(cameraTileY-VIEW_DISTANCE_Y/2)*TILE_SIZE,
+					VIEW_DISTANCE_X*TILE_SIZE ,
+					VIEW_DISTANCE_Y*TILE_SIZE
+					);
+			
 			clearVisibleMap();
 			
 			calculateVisibleTiles();
+			
+			
 		}
 		
 		else
