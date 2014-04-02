@@ -1,27 +1,20 @@
-package core.clientSide;
+package core.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-
+import java.util.HashMap;
 import gameCode.obj.Obj;
 import gameCode.obj.structure.Door;
-import gameCode.obj.structure.Structure;
 import gameCode.obj.structure.Wall;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -32,35 +25,45 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader.Parameters;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import core.network.NetClient;
+import core.server.ServerEngine;
 
 
+import static core.shared.ConfigOptions.MAP_SIZE_X;
+import static core.shared.ConfigOptions.MAP_SIZE_Y;
+import static core.shared.ConfigOptions.TILE_SIZE;
+import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
+import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
-public class CSCI375ProjectMain extends Game 
+public class ClientEngine extends Game 
 {
-	public OrthographicCamera camera;
+	
+	// Server used for hosting games
+	ServerEngine server;
+
+	// Used to connect to the server
+	static NetClient network;
+	
+	
+	static public OrthographicCamera camera;
 	public OrthogonalTiledMapRenderer mapRenderer;
 	public TiledMap map;
-	
-	public static final int TILE_SIZE = 32;
-	public static final int VIEW_DISTANCE_X = 15;
-	public static final int VIEW_DISTANCE_Y = 15;
-	
-	public static final int MAP_SIZE_X = 300;
-	public static final int MAP_SIZE_Y = 300;
-	
-	public static final int MAX_OBJECTS_PER_TILE = 100;
+
+	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
+	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
 	
 	int cameraTileX = 2;
 	int cameraTileY = 3;
 	
 	
-	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>(MAX_OBJECTS_PER_TILE);
+	Stage uiStage;
+	Stage worldStage;
+	
 	
 	
 	boolean[][] OccluedTiles;
@@ -73,7 +76,7 @@ public class CSCI375ProjectMain extends Game
 	
 	InputMultiplexer multiplexer = new InputMultiplexer();
 
-   
+	Rectangle cullingArea;
 	
 	
 	
@@ -105,15 +108,39 @@ public class CSCI375ProjectMain extends Game
 		Texture.setEnforcePotImages(false);
 		map = new TmxMapLoader().load("maps/Map.tmx" , p );
 		
-	    multiplexer.addProcessor(uiControlHandler);
-	    Gdx.input.setInputProcessor(multiplexer);
-		
+
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
+		
+
+		
+		
+		
+		
+		
+		
+		
+	    multiplexer.addProcessor(uiControlHandler);
+	    Gdx.input.setInputProcessor(multiplexer);
 		
 		
 		camera.position.x=cameraTileX*TILE_SIZE+16;
 		camera.position.y=cameraTileY*TILE_SIZE+16;
+		
+		uiStage = new Stage();
+		
+		worldStage = new Stage();
+
+
+
+		cullingArea= new Rectangle(
+				(cameraTileX-VIEW_DISTANCE_X/2)*TILE_SIZE,
+				(cameraTileY-VIEW_DISTANCE_Y/2)*TILE_SIZE,
+				VIEW_DISTANCE_X*TILE_SIZE ,
+				VIEW_DISTANCE_Y*TILE_SIZE
+				);
+		worldStage.getRoot().setCullingArea(cullingArea);
+
 		
 		generateMapObjects();
 		
@@ -122,6 +149,23 @@ public class CSCI375ProjectMain extends Game
 		clearVisibleMap();
 		
 		calculateVisibleTiles();
+		
+		
+		server = new ServerEngine();
+
+		server.start();
+		
+		try
+		{
+			network = new NetClient(this, "localhost");
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		network.send(core.shared.Message.TEST);
 		
 		/*
 		camera = new OrthographicCamera(1, h/w);
@@ -158,6 +202,9 @@ public class CSCI375ProjectMain extends Game
 		
 		
 		
+		worldStage.act();
+		worldStage.draw();
+		
 		ShapeRenderer shapeRenderer = new ShapeRenderer();
 		
 		 shapeRenderer.begin(ShapeType.Filled);
@@ -168,6 +215,10 @@ public class CSCI375ProjectMain extends Game
 		 
 		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
 		 camera.project(test);
+		 
+		 
+
+			
 		 
 		 shapeRenderer.circle(test.x, test.y, 25);
 		 
@@ -225,7 +276,7 @@ public class CSCI375ProjectMain extends Game
 		cfg.height = VIEW_DISTANCE_Y*TILE_SIZE*2;
 		cfg.resizable = false;
 		
-		new LwjglApplication(new CSCI375ProjectMain(), cfg);
+		new LwjglApplication(new ClientEngine(), cfg);
 	}
 	
 	public void MoveCameraRelative(int x, int y)
@@ -247,9 +298,18 @@ public class CSCI375ProjectMain extends Game
 			
 			camera.update();
 			
+			cullingArea.set(
+					(cameraTileX-VIEW_DISTANCE_X/2)*TILE_SIZE,
+					(cameraTileY-VIEW_DISTANCE_Y/2)*TILE_SIZE,
+					VIEW_DISTANCE_X*TILE_SIZE ,
+					VIEW_DISTANCE_Y*TILE_SIZE
+					);
+			
 			clearVisibleMap();
 			
 			calculateVisibleTiles();
+			
+			
 		}
 		
 		else
@@ -301,6 +361,7 @@ public class CSCI375ProjectMain extends Game
 	
 	public void mouseEvent(int tileX, int tileY)
 	{
+		
 		if( tileX < 0 || tileX > MAP_SIZE_X || tileY < 0 || tileY > MAP_SIZE_Y)
 		{
 			return;
@@ -317,8 +378,7 @@ public class CSCI375ProjectMain extends Game
 				TiledMapTileLayer tiledLayer2 = (TiledMapTileLayer)map.getLayers().get("Floor");
 				
 				Door doorObj = (Door)obj;
-			
-				
+							
 				if(doorObj.dense && !doorObj.locked )
 				{
 					doorObj.dense = false;
@@ -387,8 +447,8 @@ public class CSCI375ProjectMain extends Game
 	public void generateMapObjects()
 	{
 		
-		
 		TiledMapTileLayer tiledDoorLayer = (TiledMapTileLayer)map.getLayers().get("Doors");
+		TiledMapTileLayer tiledFloorLayer = (TiledMapTileLayer)map.getLayers().get("Floor");
 		TiledMapTileLayer tiledWallLayer = (TiledMapTileLayer)map.getLayers().get("Walls");
 		
 		for(int row = 0; row <= MAP_SIZE_X; row++)
@@ -404,13 +464,28 @@ public class CSCI375ProjectMain extends Game
 				
 				if(c != null)
 				{
-					ObjectArray.get(row).get(column).add(new Door());
+					Door d = new Door(row, column);
+					ObjectArray.get(row).get(column).add(d);
+					ObjectArrayByID.put(d.UID, d);
+					
+					Cell FloorTile = tiledFloorLayer.getCell(row,column);
+					c.setTile(new StaticTiledMapTile(FloorTile.getTile().getTextureRegion()));
+					
+					worldStage.addActor(d);
+					
 				}
 				
 				c = tiledWallLayer.getCell(row,column);
 				if(c != null)
 				{
-					ObjectArray.get(row).get(column).add(new Wall());
+					Wall w = new Wall(row, column);
+					ObjectArray.get(row).get(column).add(w);
+					ObjectArrayByID.put(w.UID, w);
+					
+					Cell FloorTile = tiledFloorLayer.getCell(row,column);
+					c.setTile(new StaticTiledMapTile(FloorTile.getTile().getTextureRegion()));
+					
+					worldStage.addActor(w);
 				}
 				
 				
@@ -441,7 +516,7 @@ public class CSCI375ProjectMain extends Game
 					{
 						if(Door.class.isAssignableFrom(door.getClass()))
 						{
-							Door d = (Door)ObjectArray.get(x).get(y).get(0);
+							Door d = (Door)ObjectArrayByID.get(door.UID);
 							d.locked =Boolean.valueOf((String) properties.get("locked"));
 						}
 					}
@@ -450,6 +525,18 @@ public class CSCI375ProjectMain extends Game
 			}
 			
 		}		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	}
 	
 	public void clearVisibleMap()
@@ -475,9 +562,9 @@ public class CSCI375ProjectMain extends Game
 	{
 	  double x;
 	  double y;
-	  int i;
+	  double i;
 	  clearVisibleMap();//Initially set all tiles to not visible.
-	  for(i=0;i<360;i=i+1)
+	  for(i=0;i<360;i=i+0.5)
 	  {
 	    x=Math.cos((float)i*0.01745f);
 	    y=Math.sin((float)i*0.01745f);
@@ -517,6 +604,7 @@ public class CSCI375ProjectMain extends Game
 			cameraY+=y;
 		}
 	}
+
 	
 	
 }

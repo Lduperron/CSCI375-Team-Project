@@ -1,4 +1,4 @@
-package core.clientSide;
+package core.client;
 
 import org.lwjgl.Sys;
 
@@ -8,11 +8,12 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 
 
+
 public class UIControlHandler implements InputProcessor {
 
-	CSCI375ProjectMain centralEngine;
+	ClientEngine centralEngine;
 	
-	public UIControlHandler(CSCI375ProjectMain s)
+	public UIControlHandler(ClientEngine s)
 	{
 		
 		centralEngine = s;
@@ -63,7 +64,7 @@ public class UIControlHandler implements InputProcessor {
 		
 		centralEngine.camera.unproject(position);
 
-		centralEngine.mouseEvent((int)(position.x/centralEngine.TILE_SIZE) , (int)(position.y/centralEngine.TILE_SIZE));
+		centralEngine.mouseEvent((int)(position.x/core.shared.ConfigOptions.TILE_SIZE) , (int)(position.y/core.shared.ConfigOptions.TILE_SIZE));
 		
 		return false;
 	}
