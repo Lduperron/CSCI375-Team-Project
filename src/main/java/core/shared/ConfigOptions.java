@@ -2,6 +2,7 @@ package core.shared;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class ConfigOptions
 {
@@ -20,7 +21,10 @@ public class ConfigOptions
 	public static final int MAX_OBJECTS_PER_TILE = 100;
 	
 	
-	public static Texture texture = new Texture((Gdx.files.internal("data/libgdx.png")));
-	public static Texture texture2 = new Texture((Gdx.files.internal("tilesets/tmw_desert_spacing - Copy.png")));
+	public static Texture texturereg = new Texture((Gdx.files.internal("data/libgdx.png")));
+	public static TextureRegion texture = new TextureRegion(texturereg);
+	
+	public static Texture texture2reg = new Texture((Gdx.files.internal("tilesets/tmw_desert_spacing - Copy.png")));
+	public static TextureRegion texture2 = new TextureRegion(texture2reg);
 }
 

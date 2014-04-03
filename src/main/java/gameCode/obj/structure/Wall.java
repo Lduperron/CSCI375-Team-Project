@@ -2,6 +2,7 @@ package gameCode.obj.structure;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import core.shared.ConfigOptions;
 
@@ -14,11 +15,11 @@ public class Wall extends Structure
 		// TODO Auto-generated constructor stub
 	}
 	
-	protected Texture texture = ConfigOptions.texture2;
+	protected static TextureRegion texture = ConfigOptions.texture2;
 	
 	
 	@Override
-	public Texture getTexture()
+	public TextureRegion getTexture()
 	{
 		
 		return texture;
