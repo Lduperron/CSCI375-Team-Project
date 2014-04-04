@@ -1,5 +1,7 @@
 package core.network;
 
+import gameCode.obj.Obj;
+
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +15,7 @@ import com.esotericsoftware.kryonet.Listener.ThreadedListener;
 
 import core.client.ClientEngine;
 
+import core.shared.DistilledObject;
 import core.shared.Message;
 
 /**
@@ -84,6 +87,17 @@ public class NetClient extends Network {
 					case TEST:
 						System.out.println("Message from Server Received");
 						break;
+						
+					case NEWOBJECT:
+						DistilledObject o = (DistilledObject) netMsg.obj;
+						gameClient.addToWorld(o);
+						break;
+						
+					case YOUCONTROL:
+						int UID = (int) netMsg.obj;
+						gameClient.assignControl(UID);
+						break;
+						
 					default:
 						// invalid messages are simply ignored
 						break;

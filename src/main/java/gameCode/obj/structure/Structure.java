@@ -1,6 +1,7 @@
 package gameCode.obj.structure;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import gameCode.obj.*;
 
@@ -14,7 +15,7 @@ public class Structure extends Obj
 	}
 
 	@Override
-	public Texture getTexture()
+	public TextureRegion getTexture()
 	{
 		// TODO Auto-generated method stub
 		return texture;

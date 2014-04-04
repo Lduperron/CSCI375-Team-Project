@@ -1,9 +1,12 @@
 package core.client;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import gameCode.obj.Obj;
+import gameCode.obj.getObjUID;
+import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
 
@@ -15,6 +18,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -30,8 +34,15 @@ import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.tools.texturepacker.TexturePacker;
+import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
+import com.badlogic.gdx.utils.reflect.Constructor;
+
+
+
 import core.network.NetClient;
 import core.server.ServerEngine;
+import core.shared.DistilledObject;
 
 
 import static core.shared.ConfigOptions.MAP_SIZE_X;
@@ -64,6 +75,9 @@ public class ClientEngine extends Game
 	Stage uiStage;
 	Stage worldStage;
 	
+	ShapeRenderer occulsionTileRenderer;
+	
+	Obj controlledObject;
 	
 	
 	boolean[][] OccluedTiles;
@@ -89,14 +103,33 @@ public class ClientEngine extends Game
 	
 	
 	
-	
-	
-	
+	public static class Test
+	{
+		static ClientEngine Self;
+		
+		public static void setSelf(ClientEngine e)
+		{
+			
+			Self = e;
+			
+		}
+		
+		public static ClientEngine getSelf()
+		{
+			
+			return Self;
+			
+		}
+		
+	}
 	
 	
 	
 	@Override
 	public void create() {		
+		
+		Test.setSelf(this);
+		
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 		
@@ -114,22 +147,25 @@ public class ClientEngine extends Game
 		
 
 		
+		occulsionTileRenderer = new ShapeRenderer();
 		
 		
-		
+		uiStage = new Stage();
+
+		worldStage = new Stage();
 		
 		
 		
 	    multiplexer.addProcessor(uiControlHandler);
+	    multiplexer.addProcessor(uiStage);
+	    multiplexer.addProcessor(worldStage);
 	    Gdx.input.setInputProcessor(multiplexer);
 		
 		
 		camera.position.x=cameraTileX*TILE_SIZE+16;
 		camera.position.y=cameraTileY*TILE_SIZE+16;
 		
-		uiStage = new Stage();
-		
-		worldStage = new Stage();
+		worldStage.setCamera(camera);
 
 
 
@@ -166,6 +202,11 @@ public class ClientEngine extends Game
 		}
 		
 		network.send(core.shared.Message.TEST);
+		network.send(core.shared.Message.SPAWN);
+		
+		
+		
+		
 		
 		/*
 		camera = new OrthographicCamera(1, h/w);
@@ -202,27 +243,28 @@ public class ClientEngine extends Game
 		
 		
 		
-		worldStage.act();
+		//worldStage.act();
 		worldStage.draw();
 		
-		ShapeRenderer shapeRenderer = new ShapeRenderer();
-		
-		 shapeRenderer.begin(ShapeType.Filled);
-		 shapeRenderer.setColor(0, 1, 0, 1);
 		 
-		 
+	
 		 
 		 
 		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
 		 camera.project(test);
 		 
 		 
-
 			
+		 occulsionTileRenderer.begin(ShapeType.Filled);
 		 
-		 shapeRenderer.circle(test.x, test.y, 25);
+		 occulsionTileRenderer.setColor(0, 1, 0, 1);
+
+		 occulsionTileRenderer.circle(test.x, test.y, 25);
 		 
-		 shapeRenderer.setColor(0, 0, 0, 1);
+		 occulsionTileRenderer.setColor(0, 0, 0, 1);
+		 
+		 
+		 
 		 for(int column = 0; column < VIEW_DISTANCE_X; column++)
 		 {
 			 
@@ -230,18 +272,14 @@ public class ClientEngine extends Game
 			 {
 				 if(OccluedTiles[row][column])
 				 {
-					 shapeRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
+					 occulsionTileRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
 				 }
 //				 if(!LosToTile(cameraTileX, cameraTileY, cameraTileX+row-(VIEW_DISTANCE_X/2), cameraTileY+column-(VIEW_DISTANCE_Y/2)))
 //				 {
 //				 }
 			 }
 		 }
-		 
-		 
-		 
-	//	 System.out.println(test.x);
-		 shapeRenderer.end();
+		 occulsionTileRenderer.end();
 		
 		 
 		 
@@ -268,16 +306,7 @@ public class ClientEngine extends Game
 	
 	
 
-	public static void main(String[] args) {
-		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-		cfg.title = "CSCI-375-Project";
-		cfg.useGL20 = false;
-		cfg.width = VIEW_DISTANCE_X*TILE_SIZE*2;
-		cfg.height = VIEW_DISTANCE_Y*TILE_SIZE*2;
-		cfg.resizable = false;
-		
-		new LwjglApplication(new ClientEngine(), cfg);
-	}
+
 	
 	public void MoveCameraRelative(int x, int y)
 	{
@@ -378,21 +407,28 @@ public class ClientEngine extends Game
 				TiledMapTileLayer tiledLayer2 = (TiledMapTileLayer)map.getLayers().get("Floor");
 				
 				Door doorObj = (Door)obj;
-							
+					
+				if(doorObj.animated)
+				{
+					return;
+				}
+				
 				if(doorObj.dense && !doorObj.locked )
 				{
 					doorObj.dense = false;
 					doorObj.opaque = false;
-					TiledMapTile c = tiledLayer2.getCell(1,1).getTile();
-					tiledLayer.getCell(tileX, tileY).setTile(c);
+					
+					doorObj.animate("Opening", false);
+
 				}
 				
 				else
 				{
 					doorObj.dense = true;
 					doorObj.opaque = true;
-					TiledMapTile c = tiledLayer.getCell(7,11).getTile();
-					tiledLayer.getCell(tileX, tileY).setTile(c);
+					
+					doorObj.animate("Closing", false);
+
 				}
 				
 				calculateVisibleTiles();
@@ -607,7 +643,97 @@ public class ClientEngine extends Game
 
 	
 	
+	public void addToWorld(Obj o)
+	{
+		ObjectArray.get((int) o.getX()).get((int) o.getY()).add(o);
+		ObjectArrayByID.put(o.UID, o);
+		
+		worldStage.addActor(o);
+		
+	}
+	
+	public void addToWorld(DistilledObject distilled)
+	{
+		try
+		{
+			
+			java.lang.reflect.Constructor<?> ctor = distilled.ContainedClass.getDeclaredConstructor(int.class, int.class);
+			
+			Mob m = (Mob) ctor.newInstance(distilled.X, distilled.Y);
+			
+			m.UID = distilled.dUID;
+			
+			ObjectArray.get((int) m.getX()).get((int) m.getY()).add(m);
+			ObjectArrayByID.put(m.UID, m);
+			
+			worldStage.addActor(m);
+		}
+		catch (InstantiationException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (NoSuchMethodException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (SecurityException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalArgumentException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (InvocationTargetException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+	}
+
+	
+	
+	public void assignControl(int UID)
+	{
+		controlledObject = ObjectArrayByID.get(UID);
+	}
+
+	
+	public static void main(String[] args) 
+	{
+	LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+	cfg.title = "CSCI-375-Project";
+	cfg.useGL20 = false;
+	cfg.width = VIEW_DISTANCE_X*TILE_SIZE*2;
+	cfg.height = VIEW_DISTANCE_Y*TILE_SIZE*2;
+	cfg.resizable = false;
+	
+    Settings settings = new Settings();
+    settings.maxWidth = 32;
+    settings.maxHeight = 32;
+    
+    
+    TexturePacker.processIfModified("assets/AutopackingTiles/Door/images", "assets/AutopackingTiles/Door/", "PackedDoor");
+	
+	
+	new LwjglApplication(new ClientEngine(), cfg);
+	}
+
+
+
+	
 }
+
 
 
 

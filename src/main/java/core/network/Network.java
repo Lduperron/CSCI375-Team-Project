@@ -39,6 +39,9 @@ public class Network {
 		 * Instantiate the serializer
 		 */
 		Kryo kryo = endPoint.getKryo();
+		
+		endPoint.getKryo().setRegistrationRequired(false);
+		
 		/*
 		 * Register the message we'll be passing between the client(s) and
 		 * server
@@ -50,6 +53,7 @@ public class Network {
 
 		kryo.register(Message.class);
 
+		
 
 		kryo.register(List.class);
 		kryo.register(LinkedList.class);
@@ -58,5 +62,6 @@ public class Network {
 
 		kryo.register(String.class);
 		kryo.register(String[].class);
+		
 	}
 }

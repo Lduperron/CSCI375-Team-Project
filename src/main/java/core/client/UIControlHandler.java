@@ -58,13 +58,13 @@ public class UIControlHandler implements InputProcessor {
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) 
 	{
-		Vector3 position = new Vector3(screenX, screenY, 1);
-		
-		
-		
-		centralEngine.camera.unproject(position);
-
-		centralEngine.mouseEvent((int)(position.x/core.shared.ConfigOptions.TILE_SIZE) , (int)(position.y/core.shared.ConfigOptions.TILE_SIZE));
+//		Vector3 position = new Vector3(screenX, screenY, 1);
+//		
+//		
+//		
+//		centralEngine.camera.unproject(position);
+//
+//		centralEngine.mouseEvent((int)(position.x/core.shared.ConfigOptions.TILE_SIZE) , (int)(position.y/core.shared.ConfigOptions.TILE_SIZE));
 		
 		return false;
 	}

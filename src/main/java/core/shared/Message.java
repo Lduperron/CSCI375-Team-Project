@@ -21,5 +21,5 @@ public enum Message {
 	/**
 	 * Test functionality
 	 */
-	TEST
+	TEST, SPAWN, YOUCONTROL, NEWOBJECT
 }
