@@ -72,19 +72,31 @@ public class PixmapTextureAtlas implements Disposable {
 		Array<Pixmap> Pixmaps = createPixmaps(regionName);
 		Array<BitSet> transparencies = new Array<BitSet>();
 		
+		
 		for(int i = 0; i < Pixmaps.size; i++)
 		{
 			BitSet transparency = new BitSet();
-			for(int x = 0; x < Pixmaps.items[i].getWidth(); x++)
+			Array<Boolean> test = new Array<Boolean>();
+			for(int x = 0; x < Pixmaps.get(i).getWidth(); x++)
 			{
 				
-				for(int y = 0; y < Pixmaps.items[i].getHeight(); y++)
+				for(int y = 0; y < Pixmaps.get(i).getHeight(); y++)
 				{
-					int position = y * Pixmaps.items[i].getHeight() + x;
+					int position = y * Pixmaps.get(i).getHeight() + x;
 					
-					if((Pixmaps.items[i].getPixel(x, y) & 0x000000ff) != 0 )
+					int p = Pixmaps.get(i).getPixel(x, y);
+					
+					if(( p & 0x000000ff) != 0 )
+					{
+						test.add(false);
+						transparency.clear(position);
+					
+					}
+					else
 					{
 						
+						
+						test.add(true);
 						transparency.set(position);
 						
 					}
@@ -98,7 +110,7 @@ public class PixmapTextureAtlas implements Disposable {
 			
 		}
 		
-		return null;
+		return transparencies;
 		
 		
 		

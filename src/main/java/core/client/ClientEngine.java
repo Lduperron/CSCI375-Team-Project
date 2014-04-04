@@ -95,14 +95,33 @@ public class ClientEngine extends Game
 	
 	
 	
-	
-	
-	
+	public static class Test
+	{
+		static ClientEngine Self;
+		
+		public static void setSelf(ClientEngine e)
+		{
+			
+			Self = e;
+			
+		}
+		
+		public static ClientEngine getSelf()
+		{
+			
+			return Self;
+			
+		}
+		
+	}
 	
 	
 	
 	@Override
 	public void create() {		
+		
+		Test.setSelf(this);
+		
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 		
@@ -124,7 +143,7 @@ public class ClientEngine extends Game
 		
 		
 		uiStage = new Stage();
-		
+
 		worldStage = new Stage();
 		
 		
@@ -137,6 +156,8 @@ public class ClientEngine extends Game
 		
 		camera.position.x=cameraTileX*TILE_SIZE+16;
 		camera.position.y=cameraTileY*TILE_SIZE+16;
+		
+		worldStage.setCamera(camera);
 
 
 
@@ -210,7 +231,7 @@ public class ClientEngine extends Game
 		
 		
 		
-		worldStage.act();
+		//worldStage.act();
 		worldStage.draw();
 		
 		ShapeRenderer shapeRenderer = new ShapeRenderer();
@@ -380,9 +401,7 @@ public class ClientEngine extends Game
 					
 				if(doorObj.animated)
 				{
-					
 					return;
-					
 				}
 				
 				if(doorObj.dense && !doorObj.locked )

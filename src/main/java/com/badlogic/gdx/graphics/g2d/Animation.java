@@ -141,6 +141,8 @@ public class Animation {
 	
 	public BitSet getKeyFrameTransparency (float stateTime) {
 		int frameNumber = getKeyFrameIndex (stateTime);
+
+		
 		return transparencyData[frameNumber];
 	}
 	

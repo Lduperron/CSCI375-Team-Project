@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import core.client.PixmapTextureAtlas;
+import core.client.ClientEngine.Test;
 
 public class Door extends Structure
 {
@@ -31,7 +32,13 @@ public class Door extends Structure
 		
 
 		TransparentPixels = start.get(0);
+		
+		name = "Door";
+		
 	}
+	
+	
+	
 	public static HashMap<String, Animation> Animations = new HashMap<String, Animation>();
 
 	
@@ -40,6 +47,7 @@ public class Door extends Structure
 	static PixmapTextureAtlas p = new PixmapTextureAtlas(Gdx.files.internal("assets/AutopackingTiles/Door/PackedDoor.png") , Gdx.files.internal("assets/AutopackingTiles/Door/PackedDoor.atlas"));
 	
 	static Array<BitSet> transp = p.createTransparencies("hightechsecurity_opening");
+	static Array<BitSet> transc = p.createTransparencies("hightechsecurity_closing");
 	
 	
 	public static TextureRegion texture = new TextureRegion(atlas.findRegion("hightechsecurity_closed"));
@@ -54,11 +62,11 @@ public class Door extends Structure
 	}
 
 	static Array<AtlasRegion> openingRegion = atlas.findRegions("hightechsecurity_opening");
-	static Animation openAnimation = new Animation(0.1f, openingRegion);
+	static Animation openAnimation = new Animation(0.1f, openingRegion, 0, transp);
 	
 	
 	static Array<AtlasRegion> closingRegion = atlas.findRegions("hightechsecurity_closing");
-	static Animation closingAnimation = new Animation(0.1f, closingRegion);
+	static Animation closingAnimation = new Animation(0.1f, closingRegion, 0, transc);
 	
 	
 	public boolean locked = true;
@@ -66,6 +74,40 @@ public class Door extends Structure
 	
 	
 	
+	@Override
+	public void onClick()
+	{
+		
+		if(this.animated)
+		{
+			return;
+		}
+		
+		if(this.locked)
+		{
+			//this.animate("AccessDenied", false);
+		}
+		
+		else
+		{
+			if(this.dense)
+			{
+				this.dense = false;
+				this.opaque = false;
+				this.animate("Opening", false);
+				
+			}
+			else
+			{
+				this.dense = true;
+				this.opaque = true;
+				this.animate("Closing", false);
+			}
+			
+			Test.getSelf().calculateVisibleTiles();
+		}
+				
+	}
 	
 	
 	

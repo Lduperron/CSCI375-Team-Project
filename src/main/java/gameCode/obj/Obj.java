@@ -19,7 +19,9 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 
 import core.client.ClientEngine;
@@ -39,13 +41,29 @@ public class Obj extends Actor
 		
 		currentFrame = getTexture();
 		
+		
+	    this.addListener(new ClickListener() {
+	        @Override public void clicked(InputEvent event, float x, float y) {
+	            // When you click the button it will print this value you assign.
+	            // That way you will know 'which' button was clicked and can perform
+	            // the correct action based on it.
+	        	
+	        	Obj object = (Obj)event.getTarget();
+	        	
+	            object.onClick();
+
+	        };
+	    });
+		
+		
+		
 	}
 
 	public BitSet TransparentPixels = new BitSet(TILE_SIZE * TILE_SIZE);
 
 	protected TextureRegion texture = ConfigOptions.texture;
 	
-	//public String name = "Undefined Object";
+	public String name = "Undefined Object";
 	public String description = "Undefined Description";
 	
 	public boolean dense = false;
@@ -62,8 +80,7 @@ public class Obj extends Actor
 	public boolean LoopAnimation = false;
 	public static HashMap<String, Animation> Animations = new HashMap<String, Animation>();
 	public TextureRegion currentFrame;
-	
-	
+
 	public void onClick()
 	{
 		
@@ -72,9 +89,11 @@ public class Obj extends Actor
 	}
 	
 	
+	static Vector3 cameraProjectVector;
 	@Override
 	public Actor hit(float x, float y, boolean touchable) 
 	{
+		
 		 if (touchable && getTouchable() != Touchable.enabled)
 		 {
 		 		return null;
@@ -84,10 +103,12 @@ public class Obj extends Actor
 		 {
 			if(x >= 0 && x < getWidth() && y >= 0 && y < getHeight())
 			{	 
-				int position = (int) (y * getHeight() + x);
+				y = Math.abs(y - getWidth());
+				
+				int position = (int) ((int)y * getWidth() + x );
+
 				if (!TransparentPixels.get(position)) 
 				{
-					System.out.println("TEST");
 					return this;
 				}
 			
@@ -129,20 +150,17 @@ public class Obj extends Actor
     {
     	Color color = getColor();
 		batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
-		
-		Vector3 test = new Vector3(getX(),getY(),1);
-		ClientEngine.camera.project(test);
-		
-		
+
 		if(!animated)
 		{
-			batch.draw(currentFrame, test.x, test.y, getOriginX(), getOriginY(), 64 , 64 , getScaleX(), getScaleY(), getRotation());
+			batch.draw(currentFrame, getX(), getY(), getOriginX(), getOriginY(), 32 , 32 , getScaleX(), getScaleY(), getRotation());
+			//batch.draw(currentFrame, test.x, test.y, getOriginX(), getOriginY(), 32 , 32 , getScaleX(), getScaleY(), getRotation());
 		}
 		else
 		{
 			animatedTime += Gdx.graphics.getDeltaTime();           // #15
 			currentFrame = currentAnimation.getKeyFrame(animatedTime, LoopAnimation);  // #16
-	        batch.draw(currentFrame, test.x, test.y, 64, 64);           // #17
+	        batch.draw(currentFrame, getX(), getY(), 32, 32);           // #17
 	        
 	        if(currentAnimation.isAnimationFinished(animatedTime) && LoopAnimation == false)
 	        {

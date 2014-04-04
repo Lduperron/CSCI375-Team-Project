@@ -12,7 +12,10 @@ public class Wall extends Structure
 	public Wall(int x, int y)
 	{
 		super(x, y);
-		// TODO Auto-generated constructor stub
+		
+		
+		
+		name = "Wall";
 	}
 	
 	protected static TextureRegion texture = ConfigOptions.texture2;

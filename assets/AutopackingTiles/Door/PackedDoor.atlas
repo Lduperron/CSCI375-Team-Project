@@ -129,13 +129,6 @@ hightechsecurity_open
   orig: 32, 32
   offset: 0, 0
   index: 2
-hightechsecurity
-  rotate: false
-  xy: 70, 36
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 27
 hightechsecurity_opening
   rotate: false
   xy: 70, 36
@@ -143,6 +136,13 @@ hightechsecurity_opening
   orig: 32, 32
   offset: 0, 0
   index: 8
+hightechsecurity
+  rotate: false
+  xy: 70, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 27
 hightechsecurity_closing
   rotate: false
   xy: 70, 36
@@ -163,14 +163,14 @@ hightechsecurity
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 36
+  index: 38
 hightechsecurity
   rotate: false
   xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 38
+  index: 36
 hightechsecurity
   rotate: false
   xy: 70, 2
