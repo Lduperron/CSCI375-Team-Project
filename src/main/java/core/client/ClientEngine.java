@@ -1,9 +1,12 @@
 package core.client;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import gameCode.obj.Obj;
+import gameCode.obj.getObjUID;
+import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
 
@@ -33,11 +36,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
+import com.badlogic.gdx.utils.reflect.Constructor;
 
 
 
 import core.network.NetClient;
 import core.server.ServerEngine;
+import core.shared.DistilledObject;
 
 
 import static core.shared.ConfigOptions.MAP_SIZE_X;
@@ -70,6 +75,9 @@ public class ClientEngine extends Game
 	Stage uiStage;
 	Stage worldStage;
 	
+	ShapeRenderer occulsionTileRenderer;
+	
+	Obj controlledObject;
 	
 	
 	boolean[][] OccluedTiles;
@@ -139,7 +147,7 @@ public class ClientEngine extends Game
 		
 
 		
-		
+		occulsionTileRenderer = new ShapeRenderer();
 		
 		
 		uiStage = new Stage();
@@ -158,7 +166,6 @@ public class ClientEngine extends Game
 		camera.position.y=cameraTileY*TILE_SIZE+16;
 		
 		worldStage.setCamera(camera);
-
 
 
 
@@ -195,6 +202,11 @@ public class ClientEngine extends Game
 		}
 		
 		network.send(core.shared.Message.TEST);
+		network.send(core.shared.Message.SPAWN);
+		
+		
+		
+		
 		
 		/*
 		camera = new OrthographicCamera(1, h/w);
@@ -234,24 +246,25 @@ public class ClientEngine extends Game
 		//worldStage.act();
 		worldStage.draw();
 		
-		ShapeRenderer shapeRenderer = new ShapeRenderer();
-		
-		 shapeRenderer.begin(ShapeType.Filled);
-		 shapeRenderer.setColor(0, 1, 0, 1);
 		 
-		 
+	
 		 
 		 
 		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
 		 camera.project(test);
 		 
 		 
-
 			
+		 occulsionTileRenderer.begin(ShapeType.Filled);
 		 
-		 shapeRenderer.circle(test.x, test.y, 25);
+		 occulsionTileRenderer.setColor(0, 1, 0, 1);
+
+		 occulsionTileRenderer.circle(test.x, test.y, 25);
 		 
-		 shapeRenderer.setColor(0, 0, 0, 1);
+		 occulsionTileRenderer.setColor(0, 0, 0, 1);
+		 
+		 
+		 
 		 for(int column = 0; column < VIEW_DISTANCE_X; column++)
 		 {
 			 
@@ -259,18 +272,14 @@ public class ClientEngine extends Game
 			 {
 				 if(OccluedTiles[row][column])
 				 {
-					 shapeRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
+					 occulsionTileRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
 				 }
 //				 if(!LosToTile(cameraTileX, cameraTileY, cameraTileX+row-(VIEW_DISTANCE_X/2), cameraTileY+column-(VIEW_DISTANCE_Y/2)))
 //				 {
 //				 }
 			 }
 		 }
-		 
-		 
-		 
-	//	 System.out.println(test.x);
-		 shapeRenderer.end();
+		 occulsionTileRenderer.end();
 		
 		 
 		 
@@ -634,9 +643,74 @@ public class ClientEngine extends Game
 
 	
 	
+	public void addToWorld(Obj o)
+	{
+		ObjectArray.get((int) o.getX()).get((int) o.getY()).add(o);
+		ObjectArrayByID.put(o.UID, o);
+		
+		worldStage.addActor(o);
+		
+	}
+	
+	public void addToWorld(DistilledObject distilled)
+	{
+		try
+		{
+			
+			java.lang.reflect.Constructor<?> ctor = distilled.ContainedClass.getDeclaredConstructor(int.class, int.class);
+			
+			Mob m = (Mob) ctor.newInstance(distilled.X, distilled.Y);
+			
+			m.UID = distilled.dUID;
+			
+			ObjectArray.get((int) m.getX()).get((int) m.getY()).add(m);
+			ObjectArrayByID.put(m.UID, m);
+			
+			worldStage.addActor(m);
+		}
+		catch (InstantiationException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (NoSuchMethodException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (SecurityException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalArgumentException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (InvocationTargetException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+	}
+
 	
 	
-	public static void main(String[] args) {
+	public void assignControl(int UID)
+	{
+		controlledObject = ObjectArrayByID.get(UID);
+	}
+
+	
+	public static void main(String[] args) 
+	{
 	LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 	cfg.title = "CSCI-375-Project";
 	cfg.useGL20 = false;
@@ -653,7 +727,9 @@ public class ClientEngine extends Game
 	
 	
 	new LwjglApplication(new ClientEngine(), cfg);
-}
+	}
+
+
 
 	
 }

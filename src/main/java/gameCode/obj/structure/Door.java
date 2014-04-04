@@ -27,6 +27,7 @@ public class Door extends Structure
 		
 		Animations.put("Opening", openAnimation);
 		Animations.put("Closing", closingAnimation);
+		Animations.put("Denied", deniedAnimation);
 		
 		currentFrame = texture;
 		
@@ -48,6 +49,7 @@ public class Door extends Structure
 	
 	static Array<BitSet> transp = p.createTransparencies("hightechsecurity_opening");
 	static Array<BitSet> transc = p.createTransparencies("hightechsecurity_closing");
+	static Array<BitSet> transd = p.createTransparencies("hightechsecurity_denied");
 	
 	
 	public static TextureRegion texture = new TextureRegion(atlas.findRegion("hightechsecurity_closed"));
@@ -68,6 +70,8 @@ public class Door extends Structure
 	static Array<AtlasRegion> closingRegion = atlas.findRegions("hightechsecurity_closing");
 	static Animation closingAnimation = new Animation(0.1f, closingRegion, 0, transc);
 	
+	static Array<AtlasRegion> deniedRegion = atlas.findRegions("hightechsecurity_denied");
+	static Animation deniedAnimation = new Animation(0.1f, deniedRegion, 0, transd);
 	
 	public boolean locked = true;
 	
@@ -85,7 +89,7 @@ public class Door extends Structure
 		
 		if(this.locked)
 		{
-			//this.animate("AccessDenied", false);
+			this.animate("Denied", false);
 		}
 		
 		else

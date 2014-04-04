@@ -3,6 +3,7 @@ package core.server;
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import gameCode.obj.Obj;
+import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
 
@@ -18,9 +19,11 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.esotericsoftware.kryonet.Connection;
 
 import core.network.NetServer;
+import core.shared.Message;
 
 public class ServerEngine extends Thread
 {
@@ -92,11 +95,12 @@ public class ServerEngine extends Thread
 	
 	
 	
+
 	public void generateMapObjects()
 	{
 		
-		
 		TiledMapTileLayer tiledDoorLayer = (TiledMapTileLayer)map.getLayers().get("Doors");
+		TiledMapTileLayer tiledFloorLayer = (TiledMapTileLayer)map.getLayers().get("Floor");
 		TiledMapTileLayer tiledWallLayer = (TiledMapTileLayer)map.getLayers().get("Walls");
 		
 		for(int row = 0; row <= MAP_SIZE_X; row++)
@@ -115,6 +119,11 @@ public class ServerEngine extends Thread
 					Door d = new Door(row, column);
 					ObjectArray.get(row).get(column).add(d);
 					ObjectArrayByID.put(d.UID, d);
+					
+					Cell FloorTile = tiledFloorLayer.getCell(row,column);
+					c.setTile(new StaticTiledMapTile(FloorTile.getTile().getTextureRegion()));
+					
+					
 				}
 				
 				c = tiledWallLayer.getCell(row,column);
@@ -123,6 +132,10 @@ public class ServerEngine extends Thread
 					Wall w = new Wall(row, column);
 					ObjectArray.get(row).get(column).add(w);
 					ObjectArrayByID.put(w.UID, w);
+					
+					Cell FloorTile = tiledFloorLayer.getCell(row,column);
+					c.setTile(new StaticTiledMapTile(FloorTile.getTile().getTextureRegion()));
+					
 				}
 				
 				
@@ -162,9 +175,6 @@ public class ServerEngine extends Thread
 			}
 			
 		}		
-		
-		
-		
 		
 		
 		
@@ -217,6 +227,30 @@ public class ServerEngine extends Thread
 		}
 
 		return false;
+	}
+
+	public void spawnMob()
+	{
+		Mob m = new Mob(2, 3);
+		addToWorld(m);
+		
+		network.sendAll(Message.YOUCONTROL, m.UID);
+		
+	}
+	
+	public void addToWorld(Obj o)
+	{
+		ObjectArray.get((int) o.getX()).get((int) o.getY()).add(o);
+		ObjectArrayByID.put(o.UID, o);
+		
+		notifyClientsOfNewObject(o);
+	}
+
+	private void notifyClientsOfNewObject(Obj o)
+	{
+		
+		network.sendAll(Message.NEWOBJECT, o.distill());
+		
 	}
 
 

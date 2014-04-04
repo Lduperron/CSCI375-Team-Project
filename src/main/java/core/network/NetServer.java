@@ -76,6 +76,10 @@ public class NetServer extends Network {
 						System.out.println("Received Message from Client");
 						gameServer.test();
 						break;
+					case SPAWN:
+						gameServer.spawnMob();
+						
+						break;
 					default:
 						// invalid messages are simply ignored
 						break;

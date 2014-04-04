@@ -27,10 +27,13 @@ import com.badlogic.gdx.utils.Array;
 import core.client.ClientEngine;
 import core.client.animatedAssets;
 import core.shared.ConfigOptions;
+import core.shared.DistilledObject;
 import core.shared.Position;
 
 public class Obj extends Actor
 {
+
+	
 	protected Obj(int x, int y)
 	{
 		
@@ -79,8 +82,23 @@ public class Obj extends Actor
 	public Animation currentAnimation;
 	public boolean LoopAnimation = false;
 	public static HashMap<String, Animation> Animations = new HashMap<String, Animation>();
-	public TextureRegion currentFrame;
+	public TextureRegion currentFrame = null;
 
+	
+	public DistilledObject distill()
+	{
+		DistilledObject d = new DistilledObject();
+		
+		d.ContainedClass = this.getClass();
+		d.X = (int) this.getX()/TILE_SIZE;
+		d.Y = (int) this.getY()/TILE_SIZE;
+		d.dUID = this.UID;
+		
+		return d;
+		
+		
+	}
+	
 	public void onClick()
 	{
 		
