@@ -8,7 +8,7 @@ public class ConfigOptions
 {
 	
 	
-	double moveDelay = 20; // In miliseconds.
+	public static double moveDelay = 200; // In miliseconds.
 	
 	
 	public static final int TILE_SIZE = 32;

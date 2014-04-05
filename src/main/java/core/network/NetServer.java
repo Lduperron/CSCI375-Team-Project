@@ -11,6 +11,7 @@ import com.esotericsoftware.kryonet.Server;
 
 import core.server.ServerEngine;
 import core.shared.Message;
+import core.shared.Position;
 
 /**
  * ServerEngine end for KryoNet network communications
@@ -75,11 +76,21 @@ public class NetServer extends Network {
 					case TEST:
 						System.out.println("Received Message from Client");
 						gameServer.test();
+						
 						break;
 					case SPAWN:
 						gameServer.spawnMob();
 						
 						break;
+						
+					case REQUESTSTATE:
+						gameServer.sendCompleteState();
+						break;
+						
+					case REQUESTMOVE: // TODO: ... to most of these, send the connection in particular that asked for it.
+						Position P = (Position) netMsg.obj;
+						gameServer.requestMove(P);
+						
 					default:
 						// invalid messages are simply ignored
 						break;

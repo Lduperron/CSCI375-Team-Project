@@ -23,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 import core.client.ClientEngine;
 import core.client.animatedAssets;
@@ -41,9 +42,7 @@ public class Obj extends Actor
 		this.setY(y*TILE_SIZE);
 		this.setWidth(TILE_SIZE);
 		this.setHeight(TILE_SIZE);
-		
-		currentFrame = getTexture();
-		
+
 		
 	    this.addListener(new ClickListener() {
 	        @Override public void clicked(InputEvent event, float x, float y) {
@@ -59,12 +58,30 @@ public class Obj extends Actor
 	    });
 		
 		
+	    
+//	    UniqueData.put("Name" , "Undefined Object");
+//	    UniqueData.put("Desc" , "Undefined Description");
+//	    UniqueData.put("Dense" , "false");
+//	    UniqueData.put("Opaque" , "false");
+		
+	}
+	
+	public void refreshTexture()
+	{
+		
+		currentFrame = this.getTexture();
+		
 		
 	}
 
+	
 	public BitSet TransparentPixels = new BitSet(TILE_SIZE * TILE_SIZE);
 
+	@Optional(value = "Never")
 	protected TextureRegion texture = ConfigOptions.texture;
+	
+//	HashMap<String, String> UniqueData = new HashMap<>();
+	
 	
 	public String name = "Undefined Object";
 	public String description = "Undefined Description";
@@ -82,6 +99,8 @@ public class Obj extends Actor
 	public Animation currentAnimation;
 	public boolean LoopAnimation = false;
 	public static HashMap<String, Animation> Animations = new HashMap<String, Animation>();
+	
+	@Optional(value = "Never")
 	public TextureRegion currentFrame = null;
 
 	
@@ -90,9 +109,14 @@ public class Obj extends Actor
 		DistilledObject d = new DistilledObject();
 		
 		d.ContainedClass = this.getClass();
+		
+		
+		
 		d.X = (int) this.getX()/TILE_SIZE;
 		d.Y = (int) this.getY()/TILE_SIZE;
 		d.dUID = this.UID;
+		
+		
 		
 		return d;
 		
@@ -102,7 +126,8 @@ public class Obj extends Actor
 	public void onClick()
 	{
 		
-		
+		//System.out.println(UID);
+		//ClientEngine.Test.getSelf().removeFromWorld(UID);
 		
 	}
 	
@@ -188,6 +213,6 @@ public class Obj extends Actor
 	        }
 		}
     }
-
+	
 	
 }

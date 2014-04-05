@@ -81,6 +81,7 @@ public class Door extends Structure
 	@Override
 	public void onClick()
 	{
+		super.onClick();
 		
 		if(this.animated)
 		{

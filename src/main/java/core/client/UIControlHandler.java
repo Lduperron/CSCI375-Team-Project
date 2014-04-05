@@ -23,35 +23,43 @@ public class UIControlHandler implements InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) 
 	{
+		
+		centralEngine.pressedKeys[keycode] = true;
 
-		if(keycode == Keys.UP)
-		{       
-			centralEngine.MoveCameraRelative(0, 1);
-		}
-		if(keycode == Keys.DOWN)
-		{       
-			centralEngine.MoveCameraRelative(0, -1);
-		}
-		if(keycode == Keys.LEFT)
-		{       
-			centralEngine.MoveCameraRelative(-1, 0);
-		}
-		if(keycode == Keys.RIGHT)
-		{       
-			centralEngine.MoveCameraRelative(1, 0);
-		}
+//		if(keycode == Keys.UP)
+//		{       
+//			centralEngine.MoveCameraRelative(0, 1);
+//		}
+//		if(keycode == Keys.DOWN)
+//		{       
+//			centralEngine.MoveCameraRelative(0, -1);
+//		}
+//		if(keycode == Keys.LEFT)
+//		{       
+//			centralEngine.MoveCameraRelative(-1, 0);
+//		}
+//		if(keycode == Keys.RIGHT)
+//		{       
+//			centralEngine.MoveCameraRelative(1, 0);
+//		}
 	
-		return false;
+		return true;
 	
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
-		return false;
+		
+		centralEngine.pressedKeys[keycode] = false;
+		
+		return true;
 	}
 
 	@Override
 	public boolean keyTyped(char character) {
+		
+
+		
 		return false;
 	}
 
