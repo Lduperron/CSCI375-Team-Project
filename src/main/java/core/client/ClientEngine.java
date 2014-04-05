@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 import gameCode.obj.Obj;
 import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
@@ -104,7 +107,7 @@ public class ClientEngine extends Game
 	
 	
 	
-	
+	List<Position>  QueuedEvents = new LinkedList<Position>();
 	
 	
 	
@@ -235,28 +238,33 @@ public class ClientEngine extends Game
 		mapRenderer.dispose();
 		map.dispose();
 	}
-
+	
+	Position P = new Position();
 	public void handleKeyPresses()
 	{
-		Position P = new Position();
+		
 		
 		if(pressedKeys[Keys.UP])
 		{       
+			P.x = 0;
 			P.y = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if(pressedKeys[Keys.DOWN])
 		{       
+			P.x = 0;
 			P.y = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if(pressedKeys[Keys.RIGHT])
 		{       
+			P.y = 0;
 			P.x = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if(pressedKeys[Keys.LEFT])
 		{
+			P.y = 0;
 			P.x = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
@@ -265,11 +273,21 @@ public class ClientEngine extends Game
 		
 	}
 	
-	
+	Position TempPosition;
 	@Override
 	public void render() {		
 		Gdx.gl.glClearColor(0, 0, 1, 0);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		
+		// Access seemingly must be done on the rendering thread (which makes sense)
+		// Synronizing access doesn't seem feasable - multiple accesses
+		while(!QueuedEvents.isEmpty())
+		{
+			TempPosition = QueuedEvents.get(0);
+			objectMove(TempPosition);
+			QueuedEvents.remove(0);
+			
+		}
 		
 		
 		if(refocusCamera)
@@ -770,9 +788,18 @@ public class ClientEngine extends Game
 		}
 	}
 	
+	public void queueObjectPosition(Position P)
+	{
+		
+		QueuedEvents.add(P);
+		
+		
+	}
+	
 	
 	public void objectMove(Position P)
 	{
+	
 		Obj o = ObjectArrayByID.get(P.UID);
 		
 		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);

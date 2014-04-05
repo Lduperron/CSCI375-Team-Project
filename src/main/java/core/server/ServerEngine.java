@@ -245,13 +245,10 @@ public class ServerEngine extends Thread
 
 	public void spawnMob()
 	{
-		onlyPlayer = new Mob(6, 6);
+		onlyPlayer = new Mob(2,3);
 		addToWorld(onlyPlayer);
 		
 		network.sendAll(Message.YOUCONTROL, onlyPlayer.UID);
-		
-		Position p = new Position(onlyPlayer.UID, 5, 5);
-		network.sendAll(Message.OBJMOVE, p);
 		
 	}
 	

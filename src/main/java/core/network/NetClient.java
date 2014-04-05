@@ -104,7 +104,7 @@ public class NetClient extends Network {
 						
 					case OBJMOVE:
 						newPos = (Position) netMsg.obj;
-						gameClient.objectMove(newPos);
+						gameClient.queueObjectPosition(newPos);
 						break;
 						
 					case OBJRELOCATE:
