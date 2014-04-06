@@ -6,6 +6,7 @@ import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 import gameCode.obj.Obj;
+import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
@@ -44,8 +45,8 @@ public class ServerEngine extends Thread
 	public Lock standby = new ReentrantLock();
 	
 	Mob onlyPlayer;
-	long lastcommandTime = System.currentTimeMillis();
-	
+	long lastMoveTime = System.currentTimeMillis();
+	long lastActionTime = System.currentTimeMillis();
 	
 	public ServerEngine() 
 	{
@@ -300,14 +301,14 @@ public class ServerEngine extends Thread
 	public void requestMove(Position p)
 	{
 		long currentTime = System.currentTimeMillis();
-		if(currentTime < lastcommandTime + ConfigOptions.moveDelay)
+		if(currentTime < lastMoveTime + ConfigOptions.moveDelay)
 		{
 			return;
 			
 		}
 		else
 		{
-			lastcommandTime = currentTime;
+			lastMoveTime = currentTime;
 			
 		}
 		
@@ -329,6 +330,34 @@ public class ServerEngine extends Thread
 		
 		else
 		{}
+		
+		
+		
+	}
+
+	public void mouseEvent(int mouseEventUID)
+	{
+		
+		long currentTime = System.currentTimeMillis();
+		if(currentTime < lastMoveTime + ConfigOptions.actionDelay)
+		{
+			return;
+			
+		}
+		else
+		{
+			lastMoveTime = currentTime;
+			
+		}
+		
+		Obj o = ObjectArrayByID.get(mouseEventUID);
+		
+		// Do checks that we can actually click it, etc, etc...
+		
+		// TODO:  Send what we actually clicked it with (empty hand, divine rapier, etc.)
+		o.onClick();
+		
+		network.sendAll(Message.MOUSEEVENTFROMSERVER, mouseEventUID);
 		
 		
 		

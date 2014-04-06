@@ -9,7 +9,7 @@ public class ConfigOptions
 	
 	
 	public static double moveDelay = 200; // In miliseconds.
-	
+	public static double actionDelay = 500;
 	
 	public static final int TILE_SIZE = 32;
 	public static final int VIEW_DISTANCE_X = 15;
@@ -26,5 +26,8 @@ public class ConfigOptions
 	
 	public static Texture texture2reg = new Texture((Gdx.files.internal("tilesets/tmw_desert_spacing - Copy.png")));
 	public static TextureRegion texture2 = new TextureRegion(texture2reg);
+
+
+
 }
 

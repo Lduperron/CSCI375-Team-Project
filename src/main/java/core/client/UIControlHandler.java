@@ -1,11 +1,17 @@
 package core.client;
 
+import gameCode.obj.Obj;
+
 import org.lwjgl.Sys;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
+
+import core.shared.Message;
+import core.shared.Position;
 
 
 
@@ -62,19 +68,27 @@ public class UIControlHandler implements InputProcessor {
 		
 		return false;
 	}
+	
+	Position mouseEventCoords = new Position();
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) 
 	{
-//		Vector3 position = new Vector3(screenX, screenY, 1);
-//		
-//		
-//		
-//		centralEngine.camera.unproject(position);
-//
-//		centralEngine.mouseEvent((int)(position.x/core.shared.ConfigOptions.TILE_SIZE) , (int)(position.y/core.shared.ConfigOptions.TILE_SIZE));
+		Vector2 screenCoords = new Vector2(screenX, screenY);
 		
-		return false;
+		centralEngine.worldStage.screenToStageCoordinates(screenCoords);
+		
+		mouseEventCoords.x = (int) screenCoords.x;
+		mouseEventCoords.y = (int) screenCoords.y;
+				
+		Obj o = (Obj) centralEngine.worldStage.hit(screenCoords.x, screenCoords.y, true);
+		
+		if(o != null)
+		{
+			ClientEngine.network.send(Message.MOUSEEVENTTOSERVER, o.UID);	
+		}
+		
+		return true;
 	}
 
 	@Override

@@ -111,6 +111,11 @@ public class NetClient extends Network {
 						newPos = (Position) netMsg.obj;
 						gameClient.objectRelocate(newPos);
 						break;
+					
+					case MOUSEEVENTFROMSERVER:
+						int MouseEvent = (int) netMsg.obj;
+						gameClient.mouseEvent(MouseEvent);
+						break;
 						
 						
 					default:

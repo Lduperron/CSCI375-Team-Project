@@ -13,6 +13,12 @@ import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
 
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenEquation;
+import aurelienribon.tweenengine.TweenManager;
+import aurelienribon.tweenengine.equations.Linear;
+import aurelienribon.tweenengine.equations.Quad;
+
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.Game;
@@ -37,6 +43,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
@@ -46,10 +53,10 @@ import com.badlogic.gdx.utils.reflect.Constructor;
 
 import core.network.NetClient;
 import core.server.ServerEngine;
+import core.shared.ConfigOptions;
 import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
-
 
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
@@ -74,8 +81,8 @@ public class ClientEngine extends Game
 	public ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
 	public HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
 	
-	int cameraTileX = 2;
-	int cameraTileY = 3;
+	float cameraTileX = 2;
+	float cameraTileY = 3;
 	
 	
 	Stage uiStage;
@@ -102,7 +109,7 @@ public class ClientEngine extends Game
 	Rectangle cullingArea;
 	
 	
-	
+	TweenManager tweenManager = new TweenManager();
 	
 	
 	
@@ -153,6 +160,9 @@ public class ClientEngine extends Game
 
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
+		
+		
+		Tween.registerAccessor(Obj.class, new ObjTweener());
 		
 
 		
@@ -273,11 +283,48 @@ public class ClientEngine extends Game
 		
 	}
 	
+	
+	public void focusCameraOnControlled()
+	{
+		refocusCamera = false;
+		
+		
+		float x = controlledObject.getX();
+		float y = controlledObject.getY();
+		
+		cameraTileX = x/TILE_SIZE;
+		cameraTileY = y/TILE_SIZE;
+		
+		camera.position.x = x+TILE_SIZE/2;
+		camera.position.y = y+TILE_SIZE/2;
+		
+		camera.update();
+		
+		cullingArea.set(
+				(x-VIEW_DISTANCE_X/2*TILE_SIZE),
+				(y-VIEW_DISTANCE_Y/2*TILE_SIZE),
+				VIEW_DISTANCE_X*TILE_SIZE ,
+				VIEW_DISTANCE_Y*TILE_SIZE
+				);
+		
+		recaculateVisibleTiles = true;
+		
+		
+	}
+	
+	
+	
 	Position TempPosition;
 	@Override
 	public void render() {		
+		
+		super.render();
+		
 		Gdx.gl.glClearColor(0, 0, 1, 0);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+
+
+		handleKeyPresses();
 		
 		// Access seemingly must be done on the rendering thread (which makes sense)
 		// Synronizing access doesn't seem feasable - multiple accesses
@@ -287,32 +334,38 @@ public class ClientEngine extends Game
 			objectMove(TempPosition);
 			QueuedEvents.remove(0);
 			
+			
 		}
 		
-		
-		if(refocusCamera)
+	
+		//if(refocusCamera)
+		if(controlledObject != null)
 		{
 			focusCameraOnControlled();
 			
 		}
 		
 		
-		handleKeyPresses();
+		
+		
+		System.out.println(Gdx.graphics.getFramesPerSecond());
+		
 		
 		
 	//	MapProperties m =map.getLayers().get("Walls").
 		
-		mapRenderer.setView(camera);
 
+		
+		
+		
+		mapRenderer.setView(camera);
 		mapRenderer.render();
-		
-		
-		
+		worldStage.draw();
 		
 		
 		
 		//worldStage.act();
-		worldStage.draw();
+
 		
 		 
 	
@@ -322,14 +375,7 @@ public class ClientEngine extends Game
 		 camera.project(test);
 		 
 		 
-			
-		 occulsionTileRenderer.begin(ShapeType.Filled);
-		 
-//		 occulsionTileRenderer.setColor(0, 1, 0, 1);
-//
-//		 occulsionTileRenderer.circle(test.x, test.y, 25);
-//		 
-		 occulsionTileRenderer.setColor(0, 0, 0, 1);
+
 		 
 		 
 		 
@@ -337,6 +383,11 @@ public class ClientEngine extends Game
 		 {
 			 calculateVisibleTiles();
 		 }
+		 
+			
+		 occulsionTileRenderer.begin(ShapeType.Filled);
+
+		 occulsionTileRenderer.setColor(0, 0, 0, 1);
 		 
 		 for(int column = 0; column < VIEW_DISTANCE_X; column++)
 		 {
@@ -353,7 +404,9 @@ public class ClientEngine extends Game
 			 }
 		 }
 		 occulsionTileRenderer.end();
-		
+		 
+		 
+		tweenManager.update(Gdx.graphics.getDeltaTime());
 		 
 		 
 	}
@@ -377,34 +430,7 @@ public class ClientEngine extends Game
 	}
 	
 	
-	public void focusCameraOnControlled()
-	{
-		refocusCamera = false;
-		
-		
-		int x = (int) controlledObject.getX();
-		int y = (int) controlledObject.getY();
-		
-		cameraTileX = x/TILE_SIZE;
-		cameraTileY = y/TILE_SIZE;
-		
-		camera.position.x = x+TILE_SIZE/2;
-		camera.position.y = y+TILE_SIZE/2;
-		
-		camera.update();
-		
-		cullingArea.set(
-				(x-VIEW_DISTANCE_X/2*TILE_SIZE),
-				(y-VIEW_DISTANCE_Y/2*TILE_SIZE),
-				VIEW_DISTANCE_X*TILE_SIZE ,
-				VIEW_DISTANCE_Y*TILE_SIZE
-				);
-		
-		recaculateVisibleTiles = true;
-		
-		
-	}
-	
+
 
 
 	
@@ -494,46 +520,7 @@ public class ClientEngine extends Game
 			return;
 			
 		}
-		
-		
-		for(Obj obj : ObjectArray.get(tileX).get(tileY))
-		{
-			
-			if(Door.class.isAssignableFrom(obj.getClass()))
-			{
-				TiledMapTileLayer tiledLayer = (TiledMapTileLayer)map.getLayers().get("Doors");
-				TiledMapTileLayer tiledLayer2 = (TiledMapTileLayer)map.getLayers().get("Floor");
-				
-				Door doorObj = (Door)obj;
-					
-				if(doorObj.animated)
-				{
-					return;
-				}
-				
-				if(doorObj.dense && !doorObj.locked )
-				{
-					doorObj.dense = false;
-					doorObj.opaque = false;
-					
-					doorObj.animate("Opening", false);
 
-				}
-				
-				else
-				{
-					doorObj.dense = true;
-					doorObj.opaque = true;
-					
-					doorObj.animate("Closing", false);
-
-				}
-				
-				recaculateVisibleTiles = true;
-				
-			}
-			
-		}
 		
 	}
 	
@@ -710,8 +697,8 @@ public class ClientEngine extends Game
 	{
 		int i;
 			  
-		float ox =  (float) (cameraTileX)+.5f;
-		float oy =  (float) (cameraTileY)+.5f;
+		float ox =  (cameraTileX)+.5f;
+		float oy =  (cameraTileY)+.5f;
 	  
 		float cameraX =  7.5f;
 		float cameraY =  7.5f;
@@ -804,10 +791,14 @@ public class ClientEngine extends Game
 		
 		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
 		
-		o.setX(P.x*TILE_SIZE);
-		o.setY(P.y*TILE_SIZE);
+//		o.setX(P.x*TILE_SIZE);
+//		o.setY(P.y*TILE_SIZE);
 				
 		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+		
+		
+		Tween.to(o, ObjTweener.POSITION_XY , (float) (ConfigOptions.moveDelay/1000)).target(P.x*TILE_SIZE ,P.y*TILE_SIZE).ease(Linear.INOUT).start(tweenManager);
+		 
 		
 		if(P.UID == controlledObject.UID)
 		{
@@ -816,6 +807,14 @@ public class ClientEngine extends Game
 			
 		}
 	}
+
+	public void mouseEvent(int mouseEventUID)
+	{
+		Obj o = ObjectArrayByID.get(mouseEventUID);
+		o.onClick();
+		
+	}
+	
 	
 	
 	public void addToWorld(DistilledObject distilled)
@@ -877,23 +876,35 @@ public class ClientEngine extends Game
 	
 	public static void main(String[] args) 
 	{
-	LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-	cfg.title = "CSCI-375-Project";
-	cfg.useGL20 = false;
-	cfg.width = VIEW_DISTANCE_X*TILE_SIZE*2;
-	cfg.height = VIEW_DISTANCE_Y*TILE_SIZE*2;
-	cfg.resizable = false;
-	
-    Settings settings = new Settings();
-    settings.maxWidth = 32;
-    settings.maxHeight = 32;
-    
-    
-    TexturePacker.processIfModified("assets/AutopackingTiles/Door/images", "assets/AutopackingTiles/Door/", "PackedDoor");
-	
-	
-	new LwjglApplication(new ClientEngine(), cfg);
+		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+		cfg.title = "CSCI-375-Project";
+		cfg.useGL20 = true;
+		cfg.width = VIEW_DISTANCE_X*TILE_SIZE*2;
+		cfg.height = VIEW_DISTANCE_Y*TILE_SIZE*2;
+		
+		
+		cfg.resizable = false;
+		cfg.vSyncEnabled = true;
+		
+
+
+		
+		cfg.foregroundFPS = 60;
+		
+		
+	    Settings settings = new Settings();
+	    settings.maxWidth = 32;
+	    settings.maxHeight = 32;
+	    
+	    
+	    
+	    
+	    TexturePacker.processIfModified("assets/AutopackingTiles/Door/images", "assets/AutopackingTiles/Door/", "PackedDoor");
+		
+		
+		new LwjglApplication(new ClientEngine(), cfg);
 	}
+
 
 
 

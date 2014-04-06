@@ -43,6 +43,9 @@ public class Obj extends Actor
 		this.setWidth(TILE_SIZE);
 		this.setHeight(TILE_SIZE);
 
+		// Objects are initiated on the server and then sent to the clients
+		// The serverside field is not sent and defaults to false for the objects.
+		this.ServerSide = true;
 		
 	    this.addListener(new ClickListener() {
 	        @Override public void clicked(InputEvent event, float x, float y) {
@@ -57,7 +60,6 @@ public class Obj extends Actor
 	        };
 	    });
 		
-		
 	    
 //	    UniqueData.put("Name" , "Undefined Object");
 //	    UniqueData.put("Desc" , "Undefined Description");
@@ -66,6 +68,13 @@ public class Obj extends Actor
 		
 	}
 	
+	public void getXOffset()
+	{
+		
+		
+	}
+	
+	
 	public void refreshTexture()
 	{
 		
@@ -73,6 +82,7 @@ public class Obj extends Actor
 		
 		
 	}
+
 
 	
 	public BitSet TransparentPixels = new BitSet(TILE_SIZE * TILE_SIZE);
@@ -103,6 +113,8 @@ public class Obj extends Actor
 	@Optional(value = "Never")
 	public TextureRegion currentFrame = null;
 
+	@Optional(value = "Never")
+	public boolean ServerSide = false;
 	
 	public DistilledObject distill()
 	{
@@ -131,8 +143,6 @@ public class Obj extends Actor
 		
 	}
 	
-	
-	static Vector3 cameraProjectVector;
 	@Override
 	public Actor hit(float x, float y, boolean touchable) 
 	{

@@ -90,6 +90,16 @@ public class NetServer extends Network {
 					case REQUESTMOVE: // TODO: ... to most of these, send the connection in particular that asked for it.
 						Position P = (Position) netMsg.obj;
 						gameServer.requestMove(P);
+						break;
+						
+					case MOUSEEVENTTOSERVER:
+						int MouseEventUID = (int) netMsg.obj;
+						gameServer.mouseEvent(MouseEventUID);
+						break;
+						
+
+						
+						
 						
 					default:
 						// invalid messages are simply ignored
