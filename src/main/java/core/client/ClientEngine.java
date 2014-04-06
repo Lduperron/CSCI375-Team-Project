@@ -796,8 +796,12 @@ public class ClientEngine extends Game
 				
 		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
 		
+
+		o.setX(P.x*TILE_SIZE);
+		o.setY(P.y*TILE_SIZE);
 		
-		Tween.to(o, ObjTweener.POSITION_XY , (float) (ConfigOptions.moveDelay/1000)).target(P.x*TILE_SIZE ,P.y*TILE_SIZE).ease(Linear.INOUT).start(tweenManager);
+		// tl;dr tweener bad?
+	//	Tween.to(o, ObjTweener.POSITION_XY , (float) (ConfigOptions.moveDelay/1000)).target(P.x*TILE_SIZE ,P.y*TILE_SIZE).ease(Linear.INOUT).start(tweenManager);
 		 
 		
 		if(P.UID == controlledObject.UID)

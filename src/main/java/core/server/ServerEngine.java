@@ -301,16 +301,7 @@ public class ServerEngine extends Thread
 	public void requestMove(Position p)
 	{
 		long currentTime = System.currentTimeMillis();
-		if(currentTime < lastMoveTime + ConfigOptions.moveDelay)
-		{
-			return;
-			
-		}
-		else
-		{
-			lastMoveTime = currentTime;
-			
-		}
+
 		
 		int nextTileX = (int) (onlyPlayer.getX()/TILE_SIZE + p.x);
 		int nextTileY = (int) (onlyPlayer.getY()/TILE_SIZE + p.y);
@@ -318,6 +309,21 @@ public class ServerEngine extends Thread
 		if(isCellPassable(nextTileX, nextTileY))
 		{
 		
+			
+			if(currentTime < lastMoveTime + ConfigOptions.moveDelay)
+			{
+				return;
+				
+			}
+			else
+			{
+				lastMoveTime = currentTime;
+				
+			}
+			
+			
+			
+			
 			p.UID = onlyPlayer.UID;
 			p.x = nextTileX;
 			p.y = nextTileY;
@@ -339,14 +345,14 @@ public class ServerEngine extends Thread
 	{
 		
 		long currentTime = System.currentTimeMillis();
-		if(currentTime < lastMoveTime + ConfigOptions.actionDelay)
+		if(currentTime < lastActionTime + ConfigOptions.actionDelay)
 		{
 			return;
 			
 		}
 		else
 		{
-			lastMoveTime = currentTime;
+			lastActionTime = currentTime;
 			
 		}
 		
