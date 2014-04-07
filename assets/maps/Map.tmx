@@ -77,7 +77,11 @@
   <object x="209" y="79"/>
   <object x="1232" y="431"/>
   <object x="144" y="1296"/>
-  <object x="654" y="1200"/>
+  <object x="654" y="1200">
+   <properties>
+    <property name="locked" value="false"/>
+   </properties>
+  </object>
   <object x="594" y="1904"/>
   <object x="144" y="2385"/>
   <object x="144" y="3182"/>
