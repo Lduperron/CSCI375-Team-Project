@@ -2,7 +2,11 @@ package core.server;
 
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
+import static core.shared.ConfigOptions.TILE_SIZE;
+import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
+import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 import gameCode.obj.Obj;
+import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
@@ -10,6 +14,9 @@ import gameCode.obj.structure.Wall;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObjects;
@@ -23,7 +30,9 @@ import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.esotericsoftware.kryonet.Connection;
 
 import core.network.NetServer;
+import core.shared.ConfigOptions;
 import core.shared.Message;
+import core.shared.Position;
 
 public class ServerEngine extends Thread
 {
@@ -33,7 +42,11 @@ public class ServerEngine extends Thread
 	public TiledMap map;
 	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
 	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
+	public Lock standby = new ReentrantLock();
 	
+	Mob onlyPlayer;
+	long lastMoveTime = System.currentTimeMillis();
+	long lastActionTime = System.currentTimeMillis();
 	
 	public ServerEngine() 
 	{
@@ -48,7 +61,9 @@ public class ServerEngine extends Thread
 		Texture.setEnforcePotImages(false);
 		map = new TmxMapLoader().load("maps/Map.tmx" , p );
 		
+		standby.lock();
 		generateMapObjects();
+		standby.unlock();
 		
 	}
 	
@@ -231,10 +246,10 @@ public class ServerEngine extends Thread
 
 	public void spawnMob()
 	{
-		Mob m = new Mob(2, 3);
-		addToWorld(m);
+		onlyPlayer = new Mob(2,3);
+		addToWorld(onlyPlayer);
 		
-		network.sendAll(Message.YOUCONTROL, m.UID);
+		network.sendAll(Message.YOUCONTROL, onlyPlayer.UID);
 		
 	}
 	
@@ -249,7 +264,108 @@ public class ServerEngine extends Thread
 	private void notifyClientsOfNewObject(Obj o)
 	{
 		
-		network.sendAll(Message.NEWOBJECT, o.distill());
+		network.sendAll(Message.NEWOBJECT, o);
+
+		
+	}
+
+	public void sendCompleteState()
+	{
+		
+		standby.lock();
+		for(int i = 1; i < ObjectArrayByID.size() ; i++)
+		{
+			Obj o = ObjectArrayByID.get(i);
+			notifyClientsOfNewObject(o);
+			
+		}
+		
+		standby.unlock();
+		
+	}
+	
+	
+	public void objectRelocate(Position P)
+	{
+		Obj o = ObjectArrayByID.get(P.UID);
+		
+		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
+		
+		
+		o.setX(P.x*TILE_SIZE);
+		o.setY(P.y*TILE_SIZE);
+		
+		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+	}
+
+	public void requestMove(Position p)
+	{
+		long currentTime = System.currentTimeMillis();
+
+		
+		int nextTileX = (int) (onlyPlayer.getX()/TILE_SIZE + p.x);
+		int nextTileY = (int) (onlyPlayer.getY()/TILE_SIZE + p.y);
+		
+		if(isCellPassable(nextTileX, nextTileY))
+		{
+		
+			
+			if(currentTime < lastMoveTime + ConfigOptions.moveDelay)
+			{
+				return;
+				
+			}
+			else
+			{
+				lastMoveTime = currentTime;
+				
+			}
+			
+			
+			
+			
+			p.UID = onlyPlayer.UID;
+			p.x = nextTileX;
+			p.y = nextTileY;
+			objectRelocate(p);
+			
+			
+			network.sendAll(Message.OBJMOVE, p);
+			
+		}
+		
+		else
+		{}
+		
+		
+		
+	}
+
+	public void mouseEvent(int mouseEventUID)
+	{
+		
+		long currentTime = System.currentTimeMillis();
+		if(currentTime < lastActionTime + ConfigOptions.actionDelay)
+		{
+			return;
+			
+		}
+		else
+		{
+			lastActionTime = currentTime;
+			
+		}
+		
+		Obj o = ObjectArrayByID.get(mouseEventUID);
+		
+		// Do checks that we can actually click it, etc, etc...
+		
+		// TODO:  Send what we actually clicked it with (empty hand, divine rapier, etc.)
+		o.onClick();
+		
+		network.sendAll(Message.MOUSEEVENTFROMSERVER, mouseEventUID);
+		
+		
 		
 	}
 

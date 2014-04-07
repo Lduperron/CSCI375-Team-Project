@@ -17,6 +17,7 @@ import core.client.ClientEngine;
 
 import core.shared.DistilledObject;
 import core.shared.Message;
+import core.shared.Position;
 
 /**
  * Client end for KryoNet network communications
@@ -60,6 +61,7 @@ public class NetClient extends Network {
 		} catch (IOException e) {
 			throw new IOException("Unable to connect to Server");
 		}
+		
 		this.send(Message.CONNECT);
 		/**
 		 * change timeout to 60 secs so that client will not accidently
@@ -76,6 +78,8 @@ public class NetClient extends Network {
 			 * Override received method of Listener to specify game specific
 			 * management of received objects
 			 */
+			Position newPos ;
+			
 			public void received(Connection connection, Object object) {
 				if (object instanceof NetMessage) {
 					final NetMessage netMsg = (NetMessage) object;
@@ -89,7 +93,7 @@ public class NetClient extends Network {
 						break;
 						
 					case NEWOBJECT:
-						DistilledObject o = (DistilledObject) netMsg.obj;
+						Obj o = (Obj) netMsg.obj;
 						gameClient.addToWorld(o);
 						break;
 						
@@ -97,6 +101,22 @@ public class NetClient extends Network {
 						int UID = (int) netMsg.obj;
 						gameClient.assignControl(UID);
 						break;
+						
+					case OBJMOVE:
+						newPos = (Position) netMsg.obj;
+						gameClient.queueObjectPosition(newPos);
+						break;
+						
+					case OBJRELOCATE:
+						newPos = (Position) netMsg.obj;
+						gameClient.objectRelocate(newPos);
+						break;
+					
+					case MOUSEEVENTFROMSERVER:
+						int MouseEvent = (int) netMsg.obj;
+						gameClient.mouseEvent(MouseEvent);
+						break;
+						
 						
 					default:
 						// invalid messages are simply ignored

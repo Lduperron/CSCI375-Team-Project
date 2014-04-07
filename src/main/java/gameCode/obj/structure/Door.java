@@ -40,6 +40,7 @@ public class Door extends Structure
 	
 	
 	
+	
 	public static HashMap<String, Animation> Animations = new HashMap<String, Animation>();
 
 	
@@ -81,12 +82,8 @@ public class Door extends Structure
 	@Override
 	public void onClick()
 	{
-		
-		if(this.animated)
-		{
-			return;
-		}
-		
+		super.onClick();
+				
 		if(this.locked)
 		{
 			this.animate("Denied", false);

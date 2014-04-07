@@ -4,16 +4,26 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 import gameCode.obj.Obj;
 import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
 
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenEquation;
+import aurelienribon.tweenengine.TweenManager;
+import aurelienribon.tweenengine.equations.Linear;
+import aurelienribon.tweenengine.equations.Quad;
+
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -33,6 +43,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
@@ -42,8 +53,10 @@ import com.badlogic.gdx.utils.reflect.Constructor;
 
 import core.network.NetClient;
 import core.server.ServerEngine;
+import core.shared.ConfigOptions;
 import core.shared.DistilledObject;
-
+import core.shared.Message;
+import core.shared.Position;
 
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
@@ -65,11 +78,11 @@ public class ClientEngine extends Game
 	public OrthogonalTiledMapRenderer mapRenderer;
 	public TiledMap map;
 
-	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
-	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
+	public ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
+	public HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
 	
-	int cameraTileX = 2;
-	int cameraTileY = 3;
+	float cameraTileX = 2;
+	float cameraTileY = 3;
 	
 	
 	Stage uiStage;
@@ -79,8 +92,11 @@ public class ClientEngine extends Game
 	
 	Obj controlledObject;
 	
-	
+	boolean recaculateVisibleTiles = false;
+	boolean refocusCamera = false;
 	boolean[][] OccluedTiles;
+	
+	boolean[] pressedKeys = new boolean[256];
 	
 	//Obj[][][] ObjectArray = new Obj[MAP_SIZE_X][MAP_SIZE_Y][MAX_OBJECTS_PER_TILE];
 
@@ -93,12 +109,12 @@ public class ClientEngine extends Game
 	Rectangle cullingArea;
 	
 	
+	TweenManager tweenManager = new TweenManager();
 	
 	
 	
 	
-	
-	
+	List<Position>  QueuedEvents = new LinkedList<Position>();
 	
 	
 	
@@ -144,6 +160,9 @@ public class ClientEngine extends Game
 
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
+		
+		
+		Tween.registerAccessor(Obj.class, new ObjTweener());
 		
 
 		
@@ -202,6 +221,7 @@ public class ClientEngine extends Game
 		}
 		
 		network.send(core.shared.Message.TEST);
+		network.send(Message.REQUESTSTATE);
 		network.send(core.shared.Message.SPAWN);
 		
 		
@@ -228,23 +248,124 @@ public class ClientEngine extends Game
 		mapRenderer.dispose();
 		map.dispose();
 	}
-
+	
+	Position P = new Position();
+	public void handleKeyPresses()
+	{
+		
+		
+		if(pressedKeys[Keys.UP])
+		{       
+			P.x = 0;
+			P.y = 1;
+			network.send(Message.REQUESTMOVE, P);
+		}
+		if(pressedKeys[Keys.DOWN])
+		{       
+			P.x = 0;
+			P.y = -1;
+			network.send(Message.REQUESTMOVE, P);
+		}
+		if(pressedKeys[Keys.RIGHT])
+		{       
+			P.y = 0;
+			P.x = 1;
+			network.send(Message.REQUESTMOVE, P);
+		}
+		if(pressedKeys[Keys.LEFT])
+		{
+			P.y = 0;
+			P.x = -1;
+			network.send(Message.REQUESTMOVE, P);
+		}
+		
+		
+		
+	}
+	
+	
+	public void focusCameraOnControlled()
+	{
+		refocusCamera = false;
+		
+		
+		float x = controlledObject.getX();
+		float y = controlledObject.getY();
+		
+		cameraTileX = x/TILE_SIZE;
+		cameraTileY = y/TILE_SIZE;
+		
+		camera.position.x = x+TILE_SIZE/2;
+		camera.position.y = y+TILE_SIZE/2;
+		
+		camera.update();
+		
+		cullingArea.set(
+				(x-VIEW_DISTANCE_X/2*TILE_SIZE),
+				(y-VIEW_DISTANCE_Y/2*TILE_SIZE),
+				VIEW_DISTANCE_X*TILE_SIZE ,
+				VIEW_DISTANCE_Y*TILE_SIZE
+				);
+		
+		recaculateVisibleTiles = true;
+		
+		
+	}
+	
+	
+	
+	Position TempPosition;
 	@Override
 	public void render() {		
+		
+		super.render();
+		
 		Gdx.gl.glClearColor(0, 0, 1, 0);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
+
+		handleKeyPresses();
+		
+		// Access seemingly must be done on the rendering thread (which makes sense)
+		// Synronizing access doesn't seem feasable - multiple accesses
+		while(!QueuedEvents.isEmpty())
+		{
+			TempPosition = QueuedEvents.get(0);
+			objectMove(TempPosition);
+			QueuedEvents.remove(0);
+			
+			
+		}
+		
+	
+		//if(refocusCamera)
+		if(controlledObject != null)
+		{
+			focusCameraOnControlled();
+			
+		}
+		
+		
+		
+		
+		System.out.println(Gdx.graphics.getFramesPerSecond());
+		
+		
 		
 	//	MapProperties m =map.getLayers().get("Walls").
 		
-		mapRenderer.setView(camera);
 
+		
+		
+		
+		mapRenderer.setView(camera);
 		mapRenderer.render();
+		worldStage.draw();
 		
 		
 		
 		//worldStage.act();
-		worldStage.draw();
+
 		
 		 
 	
@@ -254,16 +375,19 @@ public class ClientEngine extends Game
 		 camera.project(test);
 		 
 		 
+
+		 
+		 
+		 
+		 if(recaculateVisibleTiles)
+		 {
+			 calculateVisibleTiles();
+		 }
+		 
 			
 		 occulsionTileRenderer.begin(ShapeType.Filled);
-		 
-		 occulsionTileRenderer.setColor(0, 1, 0, 1);
 
-		 occulsionTileRenderer.circle(test.x, test.y, 25);
-		 
 		 occulsionTileRenderer.setColor(0, 0, 0, 1);
-		 
-		 
 		 
 		 for(int column = 0; column < VIEW_DISTANCE_X; column++)
 		 {
@@ -280,7 +404,9 @@ public class ClientEngine extends Game
 			 }
 		 }
 		 occulsionTileRenderer.end();
-		
+		 
+		 
+		tweenManager.update(Gdx.graphics.getDeltaTime());
 		 
 		 
 	}
@@ -304,45 +430,43 @@ public class ClientEngine extends Game
 	}
 	
 	
-	
+
 
 
 	
 	public void MoveCameraRelative(int x, int y)
 	{
-		
-		int nextTileX = cameraTileX + x;
-		int nextTileY = cameraTileY + y;
-		
-		if(isCellPassable(nextTileX, nextTileY))
-		{
-		
-			cameraTileX += x;
-			cameraTileY += y;
+//		
+//		int nextTileX = cameraTileX + x;
+//		int nextTileY = cameraTileY + y;
+//		
+//		if(isCellPassable(nextTileX, nextTileY))
+//		{
+//		
+//			cameraTileX += x;
+//			cameraTileY += y;
+//			
+//			
+//			
+//			camera.position.x = cameraTileX*TILE_SIZE+TILE_SIZE/2;
+//			camera.position.y = cameraTileY*TILE_SIZE+TILE_SIZE/2;
+//			
+//			camera.update();
+//			
+//			cullingArea.set(
+//					(cameraTileX-VIEW_DISTANCE_X/2)*TILE_SIZE,
+//					(cameraTileY-VIEW_DISTANCE_Y/2)*TILE_SIZE,
+//					VIEW_DISTANCE_X*TILE_SIZE ,
+//					VIEW_DISTANCE_Y*TILE_SIZE
+//					);
+//			
+//			recaculateVisibleTiles = true;
 			
-			
-			
-			camera.position.x = cameraTileX*TILE_SIZE+16;
-			camera.position.y = cameraTileY*TILE_SIZE+16;
-			
-			camera.update();
-			
-			cullingArea.set(
-					(cameraTileX-VIEW_DISTANCE_X/2)*TILE_SIZE,
-					(cameraTileY-VIEW_DISTANCE_Y/2)*TILE_SIZE,
-					VIEW_DISTANCE_X*TILE_SIZE ,
-					VIEW_DISTANCE_Y*TILE_SIZE
-					);
-			
-			clearVisibleMap();
-			
-			calculateVisibleTiles();
-			
-			
-		}
-		
-		else
-		{}
+//			
+//		}
+//		
+//		else
+//		{}
 		
 	}
 	
@@ -396,46 +520,7 @@ public class ClientEngine extends Game
 			return;
 			
 		}
-		
-		
-		for(Obj obj : ObjectArray.get(tileX).get(tileY))
-		{
-			
-			if(Door.class.isAssignableFrom(obj.getClass()))
-			{
-				TiledMapTileLayer tiledLayer = (TiledMapTileLayer)map.getLayers().get("Doors");
-				TiledMapTileLayer tiledLayer2 = (TiledMapTileLayer)map.getLayers().get("Floor");
-				
-				Door doorObj = (Door)obj;
-					
-				if(doorObj.animated)
-				{
-					return;
-				}
-				
-				if(doorObj.dense && !doorObj.locked )
-				{
-					doorObj.dense = false;
-					doorObj.opaque = false;
-					
-					doorObj.animate("Opening", false);
 
-				}
-				
-				else
-				{
-					doorObj.dense = true;
-					doorObj.opaque = true;
-					
-					doorObj.animate("Closing", false);
-
-				}
-				
-				calculateVisibleTiles();
-				
-			}
-			
-		}
 		
 	}
 	
@@ -500,69 +585,69 @@ public class ClientEngine extends Game
 				
 				if(c != null)
 				{
-					Door d = new Door(row, column);
-					ObjectArray.get(row).get(column).add(d);
-					ObjectArrayByID.put(d.UID, d);
+//					Door d = new Door(row, column);
+//					ObjectArray.get(row).get(column).add(d);
+//					ObjectArrayByID.put(d.UID, d);
 					
 					Cell FloorTile = tiledFloorLayer.getCell(row,column);
 					c.setTile(new StaticTiledMapTile(FloorTile.getTile().getTextureRegion()));
 					
-					worldStage.addActor(d);
+//					worldStage.addActor(d);
 					
 				}
 				
 				c = tiledWallLayer.getCell(row,column);
 				if(c != null)
 				{
-					Wall w = new Wall(row, column);
-					ObjectArray.get(row).get(column).add(w);
-					ObjectArrayByID.put(w.UID, w);
+//					Wall w = new Wall(row, column);
+//					ObjectArray.get(row).get(column).add(w);
+//					ObjectArrayByID.put(w.UID, w);
 					
 					Cell FloorTile = tiledFloorLayer.getCell(row,column);
 					c.setTile(new StaticTiledMapTile(FloorTile.getTile().getTextureRegion()));
 					
-					worldStage.addActor(w);
+//					worldStage.addActor(w);
 				}
 				
 				
 			}
 		}
 		
-		MapObjects DoorControls = map.getLayers().get("DoorControls").getObjects();
-		
-		
-		for(int i = 0; i < DoorControls.getCount(); i++)
-		{
-			
-			Object o = DoorControls.get(i);
-			
-			if(o.getClass() == RectangleMapObject.class)
-			{
-				
-				RectangleMapObject area = (RectangleMapObject) o;
-				
-				int x = (int) area.getRectangle().x;
-				int y = (int) area.getRectangle().y;
-				
-				MapProperties properties = area.getProperties();		
-
-				if(properties.containsKey("locked"))
-				{
-					for(Obj door : ObjectArray.get(x).get(y))
-					{
-						if(Door.class.isAssignableFrom(door.getClass()))
-						{
-							Door d = (Door)ObjectArrayByID.get(door.UID);
-							d.locked =Boolean.valueOf((String) properties.get("locked"));
-						}
-					}
-
-				}
-			}
-			
-		}		
-		
-		
+//		MapObjects DoorControls = map.getLayers().get("DoorControls").getObjects();
+//		
+//		
+//		for(int i = 0; i < DoorControls.getCount(); i++)
+//		{
+//			
+//			Object o = DoorControls.get(i);
+//			
+//			if(o.getClass() == RectangleMapObject.class)
+//			{
+//				
+//				RectangleMapObject area = (RectangleMapObject) o;
+//				
+//				int x = (int) area.getRectangle().x;
+//				int y = (int) area.getRectangle().y;
+//				
+//				MapProperties properties = area.getProperties();		
+//
+//				if(properties.containsKey("locked"))
+//				{
+//					for(Obj door : ObjectArray.get(x).get(y))
+//					{
+//						if(Door.class.isAssignableFrom(door.getClass()))
+//						{
+//							Door d = (Door)ObjectArrayByID.get(door.UID);
+//							d.locked =Boolean.valueOf((String) properties.get("locked"));
+//						}
+//					}
+//
+//				}
+//			}
+//			
+//		}		
+//		
+//		
 		
 		
 		
@@ -589,7 +674,7 @@ public class ClientEngine extends Game
 	
 	public void calculateVisibleTiles()
 	{
-		
+		recaculateVisibleTiles = false;
 		FOV();
 		
 	}
@@ -612,8 +697,8 @@ public class ClientEngine extends Game
 	{
 		int i;
 			  
-		float ox =  (float) (cameraTileX)+.5f;
-		float oy =  (float) (cameraTileY)+.5f;
+		float ox =  (cameraTileX)+.5f;
+		float oy =  (cameraTileY)+.5f;
 	  
 		float cameraX =  7.5f;
 		float cameraY =  7.5f;
@@ -645,12 +730,96 @@ public class ClientEngine extends Game
 	
 	public void addToWorld(Obj o)
 	{
-		ObjectArray.get((int) o.getX()).get((int) o.getY()).add(o);
+		
+		o.refreshTexture();
+	
+		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
 		ObjectArrayByID.put(o.UID, o);
+		
+	//	System.out.println(o.UID);
 		
 		worldStage.addActor(o);
 		
+		recaculateVisibleTiles = true;
+		
 	}
+	
+	public void removeFromWorld(int UID)
+	{
+		Obj o = ObjectArrayByID.get(UID);
+		o.remove();
+		ObjectArrayByID.remove(UID);
+		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
+	
+		recaculateVisibleTiles = true;
+	}
+	
+	
+	public void objectRelocate(Position P)
+	{
+		Obj o = ObjectArrayByID.get(P.UID);
+		
+		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
+		
+		
+		o.setX(P.x*TILE_SIZE);
+		o.setY(P.y*TILE_SIZE);
+		
+		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+		
+		
+		if(P.UID == controlledObject.UID)
+		{
+			refocusCamera = true;
+			
+		}
+	}
+	
+	public void queueObjectPosition(Position P)
+	{
+		
+		QueuedEvents.add(P);
+		
+		
+	}
+	
+	
+	public void objectMove(Position P)
+	{
+	
+		Obj o = ObjectArrayByID.get(P.UID);
+		
+		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
+		
+//		o.setX(P.x*TILE_SIZE);
+//		o.setY(P.y*TILE_SIZE);
+				
+		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+		
+
+		o.setX(P.x*TILE_SIZE);
+		o.setY(P.y*TILE_SIZE);
+		
+		// tl;dr tweener bad?
+	//	Tween.to(o, ObjTweener.POSITION_XY , (float) (ConfigOptions.moveDelay/1000)).target(P.x*TILE_SIZE ,P.y*TILE_SIZE).ease(Linear.INOUT).start(tweenManager);
+		 
+		
+		if(P.UID == controlledObject.UID)
+		{
+			
+			refocusCamera = true;
+			
+		}
+	}
+
+	public void mouseEvent(int mouseEventUID)
+	{
+		Obj o = ObjectArrayByID.get(mouseEventUID);
+		o.onClick();
+		
+	}
+	
+	
 	
 	public void addToWorld(DistilledObject distilled)
 	{
@@ -659,11 +828,11 @@ public class ClientEngine extends Game
 			
 			java.lang.reflect.Constructor<?> ctor = distilled.ContainedClass.getDeclaredConstructor(int.class, int.class);
 			
-			Mob m = (Mob) ctor.newInstance(distilled.X, distilled.Y);
+			Obj m = (Obj) ctor.newInstance(distilled.X, distilled.Y);
 			
 			m.UID = distilled.dUID;
 			
-			ObjectArray.get((int) m.getX()).get((int) m.getY()).add(m);
+			ObjectArray.get(distilled.X).get(distilled.Y).add(m);
 			ObjectArrayByID.put(m.UID, m);
 			
 			worldStage.addActor(m);
@@ -711,23 +880,35 @@ public class ClientEngine extends Game
 	
 	public static void main(String[] args) 
 	{
-	LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-	cfg.title = "CSCI-375-Project";
-	cfg.useGL20 = false;
-	cfg.width = VIEW_DISTANCE_X*TILE_SIZE*2;
-	cfg.height = VIEW_DISTANCE_Y*TILE_SIZE*2;
-	cfg.resizable = false;
-	
-    Settings settings = new Settings();
-    settings.maxWidth = 32;
-    settings.maxHeight = 32;
-    
-    
-    TexturePacker.processIfModified("assets/AutopackingTiles/Door/images", "assets/AutopackingTiles/Door/", "PackedDoor");
-	
-	
-	new LwjglApplication(new ClientEngine(), cfg);
+		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+		cfg.title = "CSCI-375-Project";
+		cfg.useGL20 = true;
+		cfg.width = VIEW_DISTANCE_X*TILE_SIZE*2;
+		cfg.height = VIEW_DISTANCE_Y*TILE_SIZE*2;
+		
+		
+		cfg.resizable = false;
+		cfg.vSyncEnabled = true;
+		
+
+
+		
+		cfg.foregroundFPS = 60;
+		
+		
+	    Settings settings = new Settings();
+	    settings.maxWidth = 32;
+	    settings.maxHeight = 32;
+	    
+	    
+	    
+	    
+	    TexturePacker.processIfModified("assets/AutopackingTiles/Door/images", "assets/AutopackingTiles/Door/", "PackedDoor");
+		
+		
+		new LwjglApplication(new ClientEngine(), cfg);
 	}
+
 
 
 
