@@ -1,6 +1,6 @@
 *.class
 assets/AutopackingTiles/Door/PackedDoor.atlas
-
+*.log
 # Package Files #
 *.war
 *.ear
