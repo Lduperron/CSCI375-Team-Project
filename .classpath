@@ -13,12 +13,17 @@
 	<classpathentry exported="true" kind="lib" path="libs/gdx-freetype.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gdx-natives.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gdx-sources.jar"/>
+<<<<<<< HEAD
 	<classpathentry exported="true" kind="lib" path="libs/kryo-2.23.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/kryonet-2.21-all.jar"/>
+=======
+	<classpathentry exported="true" kind="lib" path="libs/kryo-2.23.0.jar" sourcepath="C:/Users/Xerxes/Documents/CSCI375/kryo"/>
+	<classpathentry kind="lib" path="/home/the/workspace/CSCI375-Team-Project/libs/kryonet-2.21-all.jar" sourcepath="C:/Users/Xerxes/Documents/CSCI375/kryonet"/>
+>>>>>>> unitTest
 	<classpathentry exported="true" kind="lib" path="libs/sqlite-jdbc-3.7.15-M1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gdx-tools.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/tween-engine-api-sources.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,6 +1,10 @@
 *.class
 assets/AutopackingTiles/Door/PackedDoor.atlas
+<<<<<<< HEAD
 *.log
+=======
+
+>>>>>>> unitTest
 # Package Files #
 *.war
 *.ear
