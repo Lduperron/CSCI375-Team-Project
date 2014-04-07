@@ -101,20 +101,33 @@ hightechsecurity_closing
   orig: 32, 32
   offset: 0, 0
   index: 2
+<<<<<<< HEAD
 hightechsecurity_opening
+=======
+hightechsecurity
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
   rotate: false
   xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 7
 hightechsecurity
+=======
+  index: 28
+hightechsecurity_opening
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
   rotate: false
   xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 28
+=======
+  index: 7
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
 hightechsecurity
   rotate: false
   xy: 70, 36
@@ -128,28 +141,47 @@ hightechsecurity_closing
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 1
 hightechsecurity_opening
+=======
+  index: 2
+hightechsecurity
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
   rotate: false
   xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 8
 hightechsecurity
+=======
+  index: 27
+hightechsecurity_opening
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
   rotate: false
   xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 27
 hightechsecurity_open
+=======
+  index: 8
+hightechsecurity_closing
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
   rotate: false
   xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 2
+=======
+  index: 1
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
 hightechsecurity
   rotate: false
   xy: 104, 70
@@ -157,20 +189,29 @@ hightechsecurity
   orig: 32, 32
   offset: 0, 0
   index: 35
-hightechsecurity_denied
-  rotate: false
-  xy: 104, 70
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 7
 hightechsecurity
   rotate: false
   xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
+  index: 7
+hightechsecurity
+=======
   index: 38
+hightechsecurity_denied
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
+  rotate: false
+  xy: 104, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+<<<<<<< HEAD
+  index: 38
+=======
+  index: 7
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
 hightechsecurity_denied
   rotate: false
   xy: 104, 70
@@ -184,7 +225,11 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 1
+=======
+  index: 3
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
 hightechsecurity_denied
   rotate: false
   xy: 104, 70
@@ -325,14 +370,14 @@ hightechsecurity_closed
   orig: 32, 32
   offset: 0, 0
   index: 1
-hightechsecurity_closing
+hightechsecurity_denied
   rotate: false
   xy: 274, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 9
-hightechsecurity_denied
+hightechsecurity_closing
   rotate: false
   xy: 274, 2
   size: 32, 32
@@ -436,18 +481,30 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 4
-hightechsecurity_denied
-  rotate: false
-  xy: 376, 36
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 8
-hightechsecurity_denied
-  rotate: false
-  xy: 376, 36
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
+=======
   index: 6
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
+hightechsecurity_denied
+  rotate: false
+  xy: 376, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+<<<<<<< HEAD
+  index: 8
+=======
+  index: 4
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
+hightechsecurity_denied
+  rotate: false
+  xy: 376, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+<<<<<<< HEAD
+  index: 6
+=======
+  index: 8
+>>>>>>> 27dc4cec1202e2339591553e017485a4fee312bb
