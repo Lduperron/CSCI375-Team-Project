@@ -101,20 +101,33 @@ hightechsecurity_closing
   orig: 32, 32
   offset: 0, 0
   index: 2
+<<<<<<< HEAD
 hightechsecurity_opening
+=======
+hightechsecurity
+>>>>>>> SmoothMovement
   rotate: false
   xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 7
 hightechsecurity
+=======
+  index: 28
+hightechsecurity_opening
+>>>>>>> SmoothMovement
   rotate: false
   xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 28
+=======
+  index: 7
+>>>>>>> SmoothMovement
 hightechsecurity
   rotate: false
   xy: 70, 36
@@ -128,21 +141,31 @@ hightechsecurity_open
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 2
 hightechsecurity_closing
-  rotate: false
-  xy: 70, 36
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
+=======
   index: 1
 hightechsecurity
+>>>>>>> SmoothMovement
   rotate: false
   xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
+  index: 1
+hightechsecurity
+=======
   index: 27
+hightechsecurity_open
+>>>>>>> SmoothMovement
+  rotate: false
+  xy: 70, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 2
 hightechsecurity_opening
   rotate: false
   xy: 70, 36
@@ -163,35 +186,53 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 3
+  index: 5
 hightechsecurity_denied
   rotate: false
   xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 1
 hightechsecurity_denied
-  rotate: false
-  xy: 104, 70
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
+=======
   index: 7
 hightechsecurity
+>>>>>>> SmoothMovement
   rotate: false
   xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
+  index: 7
+hightechsecurity
+=======
   index: 38
+hightechsecurity_denied
+>>>>>>> SmoothMovement
+  rotate: false
+  xy: 104, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+<<<<<<< HEAD
+  index: 38
+=======
+  index: 1
+>>>>>>> SmoothMovement
 hightechsecurity_denied
   rotate: false
   xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 5
+=======
+  index: 3
+>>>>>>> SmoothMovement
 hightechsecurity
   rotate: false
   xy: 70, 2
@@ -443,7 +484,11 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+<<<<<<< HEAD
   index: 8
+=======
+  index: 4
+>>>>>>> SmoothMovement
 hightechsecurity_denied
   rotate: false
   xy: 376, 36
