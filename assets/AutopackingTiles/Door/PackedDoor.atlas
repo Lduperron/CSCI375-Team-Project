@@ -94,13 +94,6 @@ hightechsecurity
   orig: 32, 32
   offset: 0, 0
   index: 25
-hightechsecurity
-  rotate: false
-  xy: 36, 2
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 28
 hightechsecurity_opening
   rotate: false
   xy: 36, 2
@@ -115,6 +108,13 @@ hightechsecurity_closing
   orig: 32, 32
   offset: 0, 0
   index: 2
+hightechsecurity
+  rotate: false
+  xy: 36, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 28
 hightechsecurity
   rotate: false
   xy: 70, 36
@@ -136,6 +136,13 @@ hightechsecurity_closing
   orig: 32, 32
   offset: 0, 0
   index: 1
+hightechsecurity
+  rotate: false
+  xy: 70, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 27
 hightechsecurity_open
   rotate: false
   xy: 70, 36
@@ -145,18 +152,25 @@ hightechsecurity_open
   index: 2
 hightechsecurity
   rotate: false
-  xy: 70, 36
+  xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 27
+  index: 35
+hightechsecurity_denied
+  rotate: false
+  xy: 104, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 5
 hightechsecurity
   rotate: false
   xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 35
+  index: 38
 hightechsecurity_denied
   rotate: false
   xy: 104, 70
@@ -177,21 +191,7 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 5
-hightechsecurity_denied
-  rotate: false
-  xy: 104, 70
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
   index: 7
-hightechsecurity
-  rotate: false
-  xy: 104, 70
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 38
 hightechsecurity
   rotate: false
   xy: 70, 2
@@ -436,7 +436,7 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 8
+  index: 4
 hightechsecurity_denied
   rotate: false
   xy: 376, 36
@@ -450,4 +450,4 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 8
