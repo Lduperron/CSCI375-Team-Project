@@ -101,33 +101,20 @@ hightechsecurity_closing
   orig: 32, 32
   offset: 0, 0
   index: 2
-<<<<<<< HEAD
 hightechsecurity
-=======
-hightechsecurity_opening
->>>>>>> origin/mapBranch
   rotate: false
   xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-<<<<<<< HEAD
   index: 28
 hightechsecurity_opening
-=======
-  index: 7
-hightechsecurity
->>>>>>> origin/mapBranch
   rotate: false
   xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-<<<<<<< HEAD
   index: 7
-=======
-  index: 28
->>>>>>> origin/mapBranch
 hightechsecurity
   rotate: false
   xy: 70, 36
@@ -142,45 +129,27 @@ hightechsecurity_closing
   orig: 32, 32
   offset: 0, 0
   index: 1
-<<<<<<< HEAD
 hightechsecurity
-=======
-hightechsecurity_opening
->>>>>>> origin/mapBranch
   rotate: false
   xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-<<<<<<< HEAD
   index: 27
 hightechsecurity_open
-=======
-  index: 8
-hightechsecurity
->>>>>>> origin/mapBranch
   rotate: false
   xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-<<<<<<< HEAD
   index: 2
 hightechsecurity_opening
-=======
-  index: 27
-hightechsecurity_open
->>>>>>> origin/mapBranch
   rotate: false
   xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-<<<<<<< HEAD
   index: 8
-=======
-  index: 2
->>>>>>> origin/mapBranch
 hightechsecurity
   rotate: false
   xy: 104, 70
@@ -194,31 +163,21 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-<<<<<<< HEAD
   index: 5
 hightechsecurity_denied
-=======
-  index: 7
-hightechsecurity
->>>>>>> origin/mapBranch
   rotate: false
   xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-<<<<<<< HEAD
   index: 7
 hightechsecurity
-=======
+  rotate: false
+  xy: 104, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
   index: 38
-hightechsecurity_denied
->>>>>>> origin/mapBranch
-  rotate: false
-  xy: 104, 70
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 5
 hightechsecurity_denied
   rotate: false
   xy: 104, 70
@@ -477,18 +436,14 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 8
 hightechsecurity_denied
   rotate: false
   xy: 376, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-<<<<<<< HEAD
   index: 4
-=======
-  index: 8
->>>>>>> origin/mapBranch
 hightechsecurity_denied
   rotate: false
   xy: 376, 36
