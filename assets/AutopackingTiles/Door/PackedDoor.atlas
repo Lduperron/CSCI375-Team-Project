@@ -94,20 +94,6 @@ hightechsecurity
   orig: 32, 32
   offset: 0, 0
   index: 25
-hightechsecurity_opening
-  rotate: false
-  xy: 36, 2
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 7
-hightechsecurity
-  rotate: false
-  xy: 36, 2
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 28
 hightechsecurity_closing
   rotate: false
   xy: 36, 2
@@ -117,18 +103,25 @@ hightechsecurity_closing
   index: 2
 hightechsecurity
   rotate: false
-  xy: 70, 36
+  xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 26
-hightechsecurity_open
+  index: 28
+hightechsecurity_opening
+  rotate: false
+  xy: 36, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 7
+hightechsecurity
   rotate: false
   xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 26
 hightechsecurity
   rotate: false
   xy: 70, 36
@@ -136,6 +129,13 @@ hightechsecurity
   orig: 32, 32
   offset: 0, 0
   index: 27
+hightechsecurity_open
+  rotate: false
+  xy: 70, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 2
 hightechsecurity_closing
   rotate: false
   xy: 70, 36
@@ -163,21 +163,14 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 3
-hightechsecurity
-  rotate: false
-  xy: 104, 70
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 38
+  index: 7
 hightechsecurity_denied
   rotate: false
   xy: 104, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 7
+  index: 3
 hightechsecurity_denied
   rotate: false
   xy: 104, 70
@@ -192,6 +185,13 @@ hightechsecurity_denied
   orig: 32, 32
   offset: 0, 0
   index: 1
+hightechsecurity
+  rotate: false
+  xy: 104, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 38
 hightechsecurity
   rotate: false
   xy: 70, 2
@@ -436,7 +436,7 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 4
 hightechsecurity_denied
   rotate: false
   xy: 376, 36
@@ -450,4 +450,4 @@ hightechsecurity_denied
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 6
