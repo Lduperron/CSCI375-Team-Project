@@ -93,7 +93,7 @@ public class NetServer extends Network {
 						break;
 						
 					case MOUSEEVENTTOSERVER:
-						int MouseEventUID = (int) netMsg.obj;
+						int MouseEventUID = (Integer) netMsg.obj;
 						gameServer.mouseEvent(MouseEventUID);
 						break;
 						

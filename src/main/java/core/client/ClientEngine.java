@@ -84,7 +84,7 @@ public class ClientEngine extends Game
 	public TiledMap map;
 
 	public ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
-	public HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
+	public HashMap<Integer, Obj> ObjectArrayByID = new HashMap<Integer, Obj>();
 	
 	float cameraTileX = 2;
 	float cameraTileY = 3;
@@ -807,11 +807,11 @@ public class ClientEngine extends Game
 		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
 		
 
-		o.setX(P.x*TILE_SIZE);
-		o.setY(P.y*TILE_SIZE);
+//		o.setX(P.x*TILE_SIZE);
+//		o.setY(P.y*TILE_SIZE);
 		
 		// tl;dr tweener bad?
-	//	Tween.to(o, ObjTweener.POSITION_XY , (float) (ConfigOptions.moveDelay/1000)).target(P.x*TILE_SIZE ,P.y*TILE_SIZE).ease(Linear.INOUT).start(tweenManager);
+		Tween.to(o, ObjTweener.POSITION_XY , (float) (ConfigOptions.moveDelay/1000)).target(P.x*TILE_SIZE ,P.y*TILE_SIZE).ease(Linear.INOUT).start(tweenManager);
 		 
 		
 		if(P.UID == controlledObject.UID)
