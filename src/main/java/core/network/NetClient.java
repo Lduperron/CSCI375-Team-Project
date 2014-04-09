@@ -98,7 +98,7 @@ public class NetClient extends Network {
 						break;
 						
 					case YOUCONTROL:
-						int UID = (int) netMsg.obj;
+						int UID = (Integer) netMsg.obj;
 						gameClient.assignControl(UID);
 						break;
 						
@@ -113,7 +113,7 @@ public class NetClient extends Network {
 						break;
 					
 					case MOUSEEVENTFROMSERVER:
-						int MouseEvent = (int) netMsg.obj;
+						int MouseEvent = (Integer) netMsg.obj;
 						gameClient.mouseEvent(MouseEvent);
 						break;
 						

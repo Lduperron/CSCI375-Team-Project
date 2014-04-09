@@ -41,7 +41,7 @@ public class ServerEngine extends Thread
 	boolean masterLoop = true;
 	public TiledMap map;
 	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
-	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<>();
+	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<Integer, Obj>();
 	public Lock standby = new ReentrantLock();
 	
 	Mob onlyPlayer;
