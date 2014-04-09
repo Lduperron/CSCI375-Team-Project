@@ -8,7 +8,7 @@
 	<classpathentry exported="true" kind="lib" path="libs/bodyeditor-loader-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gdx-backend-lwjgl-natives.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gdx-backend-lwjgl-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/gdx-backend-lwjgl.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/gdx-backend-lwjgl.jar" sourcepath="libs/gdx-backend-lwjgl.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gdx-freetype-natives.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gdx-freetype.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gdx-natives.jar"/>
@@ -19,6 +19,6 @@
 	<classpathentry exported="true" kind="lib" path="libs/gdx-tools.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/tween-engine-api-sources.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

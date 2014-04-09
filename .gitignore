@@ -1,4 +1,5 @@
 *.class
+*.log
 *.atlas
 
 # Package Files #
