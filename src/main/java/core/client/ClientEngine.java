@@ -434,6 +434,8 @@ public class ClientEngine extends Game
 		 
 		 
 		tweenManager.update(Gdx.graphics.getDeltaTime());
+		switchToNewScreen(ScreenEnumerations.MainMenu);
+
 		 
 		 
 	}
@@ -676,6 +678,7 @@ public class ClientEngine extends Game
 //		}		
 //		
 //		
+	
 public void switchToNewScreen(ScreenEnumerations newLevel) {
 	switch (newLevel) {
 	case ClientEngine:
