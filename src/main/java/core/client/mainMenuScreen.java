@@ -6,10 +6,14 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import core.client.ClientEngine;
 import core.shared.Background;
+import core.client.ScreenEnumerations;
 /**
  * Main menu screen. 
  * @author the
@@ -45,6 +49,21 @@ public class mainMenuScreen implements Screen{
 	    // Sets up an input multiplexer to handle our input to the buttons
 	    multiplexer = new InputMultiplexer();
 	    multiplexer.addProcessor(mainMenuStage);
+	    
+	 // Creates our buttons
+	    TextButton NewGame = new TextButton("Connect" , parentEngine.buttonStyle);
+	    mainMenuStage.addActor(NewGame);
+	    NewGame.addListener(new ClickListener() {
+    		
+    		
+    	    @Override
+    	    public void clicked(InputEvent event, float x, float y) 
+    	    {
+    	    	parentEngine.switchToNewScreen(ScreenEnumerations.MainMenu);
+    	    	
+    	    };
+    		
+    	});
 	}
 
 	@Override

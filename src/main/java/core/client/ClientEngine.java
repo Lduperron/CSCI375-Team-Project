@@ -47,14 +47,11 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.badlogic.gdx.utils.reflect.Constructor;
-
-
-
-
-
+import com.badlogic.gdx.Screen;
 
 import core.network.NetClient;
 import core.server.ServerEngine;
@@ -63,6 +60,13 @@ import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
 import core.shared.Background;
+import core.client.ConnectingScreen;
+import core.client.ErrorScreen;
+import core.client.HostingScreen;
+import core.client.mainMenuScreen;
+import core.client.PauseScreen;
+import core.client.ScreenEnumerations;
+import core.client.SettingsScreen;
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
@@ -89,6 +93,19 @@ public class ClientEngine extends Game
 	float cameraTileX = 2;
 	float cameraTileY = 3;
 	static SpriteBatch primarySpriteBatch;
+	
+	// Styles used in the game
+	TextButtonStyle dialogueStyle;
+	TextButtonStyle buttonStyle;
+	TextButtonStyle radioButtonStyle;
+	
+	//Declare all the screen
+	mainMenuScreen MainMenuScreen;
+	HostingScreen hostingScreen;
+	PauseScreen pauseScreen;
+	SettingsScreen settingsScreen;
+	ConnectingScreen connectingScreen;
+	ErrorScreen errorScreen;
 	
 	// Used for assets that will not be interacted with by the user
 	static AssetManager gameTextureManager;
@@ -619,8 +636,9 @@ public class ClientEngine extends Game
 //					worldStage.addActor(w);
 				}
 				
-				
 			}
+		}
+			
 		}
 		
 //		MapObjects DoorControls = map.getLayers().get("DoorControls").getObjects();
@@ -658,7 +676,57 @@ public class ClientEngine extends Game
 //		}		
 //		
 //		
-		
+public void switchToNewScreen(ScreenEnumerations newLevel) {
+	switch (newLevel) {
+	case ClientEngine:
+		this.setScreen(null);
+
+	case MainMenu:
+		if (MainMenuScreen == null) {
+			MainMenuScreen = new mainMenuScreen(this);
+		}
+		this.setScreen(MainMenuScreen);
+		break;
+
+	case Hosting:
+		if (hostingScreen == null) {
+			hostingScreen = new HostingScreen(this);
+		}
+		this.setScreen(hostingScreen);
+		break;
+
+	case Connecting:
+		if (connectingScreen == null) {
+			connectingScreen = new ConnectingScreen(this);
+		}
+		this.setScreen(connectingScreen);
+		break;
+
+	case Settings:
+		if (settingsScreen == null) {
+			settingsScreen = new SettingsScreen(this);
+		}
+		this.setScreen(settingsScreen);
+		break;
+
+	case PauseScreen:
+		if (pauseScreen == null) {
+			pauseScreen = new PauseScreen(this);
+		}
+		this.setScreen(pauseScreen);
+		break;
+
+	case ErrorScreen:
+		if (errorScreen == null) {
+			errorScreen = new ErrorScreen(this);
+		}
+		this.setScreen(errorScreen);
+		break;
+
+	default:
+		return;
+
+	}
 		
 		
 		

@@ -4,6 +4,12 @@ package core.client;
  */
 public enum ScreenEnumerations {
 
+	ClientEngine,
 	MainMenu,
+	Hosting,
+	Connecting,
+	Settings,
+	PauseScreen,
+	ErrorScreen,
 	;
 }
