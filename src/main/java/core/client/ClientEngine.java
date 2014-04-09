@@ -12,13 +12,14 @@ import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
-
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenEquation;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Linear;
 import aurelienribon.tweenengine.equations.Quad;
 
+import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.Game;
@@ -29,6 +30,7 @@ import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -51,13 +53,16 @@ import com.badlogic.gdx.utils.reflect.Constructor;
 
 
 
+
+
+
 import core.network.NetClient;
 import core.server.ServerEngine;
 import core.shared.ConfigOptions;
 import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
-
+import core.shared.Background;
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
@@ -83,7 +88,12 @@ public class ClientEngine extends Game
 	
 	float cameraTileX = 2;
 	float cameraTileY = 3;
+	static SpriteBatch primarySpriteBatch;
 	
+	// Used for assets that will not be interacted with by the user
+	static AssetManager gameTextureManager;
+	static HashMap<Background, AssetDescriptor<Texture>> Backgrounds;
+
 	
 	Stage uiStage;
 	Stage worldStage;
