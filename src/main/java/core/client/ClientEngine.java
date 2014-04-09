@@ -26,11 +26,14 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -47,7 +50,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.badlogic.gdx.utils.reflect.Constructor;
@@ -67,6 +72,7 @@ import core.client.mainMenuScreen;
 import core.client.PauseScreen;
 import core.client.ScreenEnumerations;
 import core.client.SettingsScreen;
+import core.client.MenuNinePatch;
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
@@ -89,6 +95,8 @@ public class ClientEngine extends Game
 
 	public ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
 	public HashMap<Integer, Obj> ObjectArrayByID = new HashMap<Integer, Obj>();
+	static HashMap<String, AssetDescriptor<Texture>> Textures;
+
 	
 	float cameraTileX = 2;
 	float cameraTileY = 3;
@@ -98,6 +106,18 @@ public class ClientEngine extends Game
 	TextButtonStyle dialogueStyle;
 	TextButtonStyle buttonStyle;
 	TextButtonStyle radioButtonStyle;
+
+	// Font used in the game
+	static BitmapFont gameFont;
+	
+	// Used to display the 'loading' screen
+	static FreeTypeFontGenerator generator;
+	LabelStyle rawTextStyle;
+
+
+	// Button ninepatch
+	MenuNinePatch menuNinePatch;
+	NinePatchDrawable ninePatchDrawable;
 	
 	//Declare all the screen
 	mainMenuScreen MainMenuScreen;
@@ -172,6 +192,17 @@ public class ClientEngine extends Game
 	public void create() {		
 		
 		Test.setSelf(this);
+		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
+		gameTextureManager = new AssetManager();
+		buttonStyle = new TextButtonStyle();
+		buttonStyle.font = gameFont;
+		buttonStyle.up = ninePatchDrawable;
+
+		buttonStyle.down = buttonStyle.up;
+		buttonStyle.over = buttonStyle.up;
+		buttonStyle.fontColor = Color.WHITE;
+		buttonStyle.downFontColor = Color.LIGHT_GRAY;
+
 		
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
@@ -200,6 +231,20 @@ public class ClientEngine extends Game
 
 		worldStage = new Stage();
 		
+		
+		//backgrounds
+		Backgrounds.put(Background.MENUSCREEN, new AssetDescriptor<Texture>(
+				"backgrounds/spacebg.png", Texture.class));
+		
+		//AssetManager
+		for (AssetDescriptor<Texture> theTexture : Backgrounds.values()) {
+			gameTextureManager.load(theTexture);
+		}
+		
+		gameTextureManager.finishLoading();
+		generator = new FreeTypeFontGenerator(
+		Gdx.files.internal("fonts/ubuntur.ttf"));
+		gameFont = generator.generateFont(25);
 		
 		
 	    multiplexer.addProcessor(uiControlHandler);
