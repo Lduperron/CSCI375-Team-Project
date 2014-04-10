@@ -42,6 +42,9 @@ public class Obj extends Actor
 		this.setY(y*TILE_SIZE);
 		this.setWidth(TILE_SIZE);
 		this.setHeight(TILE_SIZE);
+		
+		this.tileXPosition = x;
+		this.tileYPosition = y;
 
 		// Objects are initiated on the server and then sent to the clients
 		// The serverside field is not sent and defaults to false for the objects.
@@ -68,12 +71,30 @@ public class Obj extends Actor
 		
 	}
 	
-	public void getXOffset()
+	public float getXOffset()
 	{
 		
+		return 0;  // not supported
+	}
+	
+	
+	public float getYOffset()
+	{
+		
+		return 0;// not supported
+	}
+	
+	public float getXCameraOffset()
+	{
+		return tileXPosition - this.getX()/TILE_SIZE;
 		
 	}
 	
+	public float getYCameraOffset()
+	{
+		
+		return tileYPosition - this.getY()/TILE_SIZE;
+	}
 	
 	public void refreshTexture()
 	{
@@ -82,6 +103,9 @@ public class Obj extends Actor
 		
 		
 	}
+	
+	public int tileXPosition;
+	public int tileYPosition;
 
 
 	
