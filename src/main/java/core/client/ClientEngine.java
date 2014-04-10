@@ -12,24 +12,29 @@ import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
-
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenEquation;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Linear;
 import aurelienribon.tweenengine.equations.Quad;
 
+import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -46,11 +51,13 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.badlogic.gdx.utils.reflect.Constructor;
-
-
+import com.badlogic.gdx.Screen;
 
 import core.network.NetClient;
 import core.server.ServerEngine;
@@ -58,7 +65,15 @@ import core.shared.ConfigOptions;
 import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
-
+import core.shared.Background;
+import core.client.ConnectingScreen;
+import core.client.ErrorScreen;
+import core.client.HostingScreen;
+import core.client.mainMenuScreen;
+import core.client.PauseScreen;
+import core.client.ScreenEnumerations;
+import core.client.SettingsScreen;
+import core.client.MenuNinePatch;
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
@@ -84,10 +99,42 @@ public class ClientEngine extends Game
 
 	public ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
 	public HashMap<Integer, Obj> ObjectArrayByID = new HashMap<Integer, Obj>();
+	static HashMap<String, AssetDescriptor<Texture>> Textures;
+
 	
 	float cameraTileX = 2;
 	float cameraTileY = 3;
+	static SpriteBatch primarySpriteBatch;
 	
+	// Styles used in the game
+	TextButtonStyle dialogueStyle;
+	TextButtonStyle buttonStyle;
+	TextButtonStyle radioButtonStyle;
+
+	// Font used in the game
+	static BitmapFont gameFont;
+	
+	// Used to display the 'loading' screen
+	static FreeTypeFontGenerator generator;
+	LabelStyle rawTextStyle;
+
+
+	// Button ninepatch
+	MenuNinePatch menuNinePatch;
+	NinePatchDrawable ninePatchDrawable;
+	
+	//Declare all the screen
+	mainMenuScreen MainMenuScreen;
+	HostingScreen hostingScreen;
+	PauseScreen pauseScreen;
+	SettingsScreen settingsScreen;
+	ConnectingScreen connectingScreen;
+	ErrorScreen errorScreen;
+	
+	// Used for assets that will not be interacted with by the user
+	static AssetManager gameTextureManager;
+	static HashMap<Background, AssetDescriptor<Texture>> Backgrounds;
+
 	float xCameraOffset;
 	float yCameraOffset;
 	
@@ -158,6 +205,10 @@ public class ClientEngine extends Game
 	public void create() {		
 		
 		Test.setSelf(this);
+		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
+		gameTextureManager = new AssetManager();
+
+
 		
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
@@ -190,6 +241,30 @@ public class ClientEngine extends Game
 		uiStage = new Stage();
 
 		worldStage = new Stage();
+		
+		
+		//backgrounds
+		Backgrounds.put(Background.MENUSCREEN, new AssetDescriptor<Texture>(
+				"backgrounds/spacebg.png", Texture.class));
+		
+		//AssetManager
+		for (AssetDescriptor<Texture> theTexture : Backgrounds.values()) {
+			gameTextureManager.load(theTexture);
+		}
+		
+		gameTextureManager.finishLoading();
+		generator = new FreeTypeFontGenerator(
+		Gdx.files.internal("fonts/ubuntur.ttf"));
+		gameFont = generator.generateFont(25);
+		
+		buttonStyle = new TextButtonStyle();
+		buttonStyle.font = gameFont;
+		buttonStyle.up = ninePatchDrawable;
+
+		buttonStyle.down = buttonStyle.up;
+		buttonStyle.over = buttonStyle.up;
+		buttonStyle.fontColor = Color.WHITE;
+		buttonStyle.downFontColor = Color.LIGHT_GRAY;
 		
 		
 		
@@ -444,6 +519,8 @@ public class ClientEngine extends Game
 		 
 		 
 		tweenManager.update(Gdx.graphics.getDeltaTime());
+		switchToNewScreen(ScreenEnumerations.MainMenu);
+
 		 
 		 
 	}
@@ -646,8 +723,9 @@ public class ClientEngine extends Game
 //					worldStage.addActor(w);
 				}
 				
-				
 			}
+		}
+			
 		}
 		
 //		MapObjects DoorControls = map.getLayers().get("DoorControls").getObjects();
@@ -685,7 +763,58 @@ public class ClientEngine extends Game
 //		}		
 //		
 //		
-		
+	
+public void switchToNewScreen(ScreenEnumerations newLevel) {
+	switch (newLevel) {
+	case ClientEngine:
+		this.setScreen(null);
+
+	case MainMenu:
+		if (MainMenuScreen == null) {
+			MainMenuScreen = new mainMenuScreen(this);
+		}
+		this.setScreen(MainMenuScreen);
+		break;
+
+	case Hosting:
+		if (hostingScreen == null) {
+			hostingScreen = new HostingScreen(this);
+		}
+		this.setScreen(hostingScreen);
+		break;
+
+	case Connecting:
+		if (connectingScreen == null) {
+			connectingScreen = new ConnectingScreen(this);
+		}
+		this.setScreen(connectingScreen);
+		break;
+
+	case Settings:
+		if (settingsScreen == null) {
+			settingsScreen = new SettingsScreen(this);
+		}
+		this.setScreen(settingsScreen);
+		break;
+
+	case PauseScreen:
+		if (pauseScreen == null) {
+			pauseScreen = new PauseScreen(this);
+		}
+		this.setScreen(pauseScreen);
+		break;
+
+	case ErrorScreen:
+		if (errorScreen == null) {
+			errorScreen = new ErrorScreen(this);
+		}
+		this.setScreen(errorScreen);
+		break;
+
+	default:
+		return;
+
+	}
 		
 		
 		
