@@ -423,7 +423,7 @@ public class ClientEngine extends Game
 		
 		
 		
-		System.out.println(Gdx.graphics.getFramesPerSecond());
+		//System.out.println(Gdx.graphics.getFramesPerSecond());
 		
 		
 		
