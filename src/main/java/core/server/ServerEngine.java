@@ -29,6 +29,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.esotericsoftware.kryonet.Connection;
 
+import core.client.ClientEngine;
 import core.network.NetServer;
 import core.shared.ConfigOptions;
 import core.shared.Message;
@@ -67,6 +68,26 @@ public class ServerEngine extends Thread
 		
 	}
 	
+	public static class ServerEngineReference
+	{
+		static ServerEngine Self;
+		
+		public static void setSelf(ServerEngine e)
+		{
+			
+			Self = e;
+			
+		}
+		
+		public static ServerEngine getSelf()
+		{
+			
+			return Self;
+			
+		}
+		
+	}
+	
 	@Override
 	public void run() 
 	{
@@ -74,6 +95,7 @@ public class ServerEngine extends Thread
 		// The network could not bind a port. Fatal error
 		try {
 			network = new NetServer(this);
+			ServerEngineReference.setSelf(this);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -289,13 +311,19 @@ public class ServerEngine extends Thread
 	{
 		Obj o = ObjectArrayByID.get(P.UID);
 		
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
+		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+	
+		o.tileXPosition = P.x;
+		o.tileYPosition = P.y;
+				
+		ObjectArray.get(P.x).get(P.y).add(o);
 		
-		
+
 		o.setX(P.x*TILE_SIZE);
 		o.setY(P.y*TILE_SIZE);
+
 		
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+		network.sendAll(Message.OBJMOVE, P);
 	}
 
 	public void requestMove(Position p)
@@ -329,8 +357,6 @@ public class ServerEngine extends Thread
 			p.y = nextTileY;
 			objectRelocate(p);
 			
-			
-			network.sendAll(Message.OBJMOVE, p);
 			
 		}
 		

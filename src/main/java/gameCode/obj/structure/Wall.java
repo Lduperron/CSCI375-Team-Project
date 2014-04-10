@@ -28,6 +28,14 @@ public class Wall extends Structure
 		return texture;
 		
 	}
+	
+	@Override
+	public void onClick()
+	{
+		
+		this.move(this.tileXPosition+1, this.tileYPosition);
+		
+	}
 
 
 }

@@ -125,7 +125,7 @@ public class ClientEngine extends Game
 	
 	
 	
-	public static class Test
+	public static class ClientEngineReference
 	{
 		static ClientEngine Self;
 		
@@ -150,7 +150,7 @@ public class ClientEngine extends Game
 	@Override
 	public void create() {		
 		
-		Test.setSelf(this);
+		ClientEngineReference.setSelf(this);
 		
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();

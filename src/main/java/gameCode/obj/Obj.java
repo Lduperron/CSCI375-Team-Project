@@ -27,6 +27,7 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 import core.client.ClientEngine;
 import core.client.animatedAssets;
+import core.server.ServerEngine.ServerEngineReference;
 import core.shared.ConfigOptions;
 import core.shared.DistilledObject;
 import core.shared.Position;
@@ -104,10 +105,26 @@ public class Obj extends Actor
 		
 	}
 	
+	public void move(int newX, int newY)
+	{
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			Position P = new Position();
+			P.UID = this.UID;
+			P.x = newX;
+			P.y = newY;
+			
+			ServerEngineReference.getSelf().objectRelocate(P);
+			
+		}
+		
+		
+	}
+	
 	public int tileXPosition;
 	public int tileYPosition;
 
-
+	
 	
 	public BitSet TransparentPixels = new BitSet(TILE_SIZE * TILE_SIZE);
 
@@ -159,8 +176,12 @@ public class Obj extends Actor
 		
 	}
 	
+	
+	
 	public void onClick()
 	{
+		
+		//System.out.println(this.ServerSide);
 		
 		//System.out.println(UID);
 		//ClientEngine.Test.getSelf().removeFromWorld(UID);
