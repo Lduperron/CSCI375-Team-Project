@@ -349,7 +349,20 @@ public class ClientEngine extends Game
 			
 			
 		}
-
+		
+		 
+		//if(refocusCamera)
+		if(controlledObject != null)
+		{
+			focusCameraOnControlled();
+			
+			 xCameraOffset = controlledObject.getXCameraOffset();
+			 yCameraOffset = controlledObject.getYCameraOffset();
+			
+			
+			
+		}
+	 
 		
 		
 		
@@ -394,16 +407,7 @@ public class ClientEngine extends Game
 		 occulsionTileRenderer.begin(ShapeType.Filled);
 
 		 occulsionTileRenderer.setColor(0, 0, 0, 1);
-		 
-			//if(refocusCamera)
-			if(controlledObject != null)
-			{
-				focusCameraOnControlled();
-				
-				 xCameraOffset = controlledObject.getXCameraOffset();
-				 yCameraOffset = controlledObject.getYCameraOffset();			
-			}
-		 
+
 		 
 		 
 		 
