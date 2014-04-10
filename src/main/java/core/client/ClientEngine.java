@@ -194,14 +194,7 @@ public class ClientEngine extends Game
 		Test.setSelf(this);
 		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
 		gameTextureManager = new AssetManager();
-		buttonStyle = new TextButtonStyle();
-		buttonStyle.font = gameFont;
-		buttonStyle.up = ninePatchDrawable;
 
-		buttonStyle.down = buttonStyle.up;
-		buttonStyle.over = buttonStyle.up;
-		buttonStyle.fontColor = Color.WHITE;
-		buttonStyle.downFontColor = Color.LIGHT_GRAY;
 
 		
 		float w = Gdx.graphics.getWidth();
@@ -245,6 +238,16 @@ public class ClientEngine extends Game
 		generator = new FreeTypeFontGenerator(
 		Gdx.files.internal("fonts/ubuntur.ttf"));
 		gameFont = generator.generateFont(25);
+		
+		buttonStyle = new TextButtonStyle();
+		buttonStyle.font = gameFont;
+		buttonStyle.up = ninePatchDrawable;
+
+		buttonStyle.down = buttonStyle.up;
+		buttonStyle.over = buttonStyle.up;
+		buttonStyle.fontColor = Color.WHITE;
+		buttonStyle.downFontColor = Color.LIGHT_GRAY;
+		
 		
 		
 	    multiplexer.addProcessor(uiControlHandler);
