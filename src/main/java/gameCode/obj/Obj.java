@@ -235,9 +235,9 @@ public class Obj extends Actor
 		}
 		else
 		{
-			animatedTime += Gdx.graphics.getDeltaTime();           // #15
-			currentFrame = currentAnimation.getKeyFrame(animatedTime, LoopAnimation);  // #16
-	        batch.draw(currentFrame, getX(), getY(), 32, 32);           // #17
+			animatedTime += Gdx.graphics.getDeltaTime();
+			currentFrame = currentAnimation.getKeyFrame(animatedTime, LoopAnimation); 
+	        batch.draw(currentFrame, getX(), getY(), 32, 32);
 	        
 	        if(currentAnimation.isAnimationFinished(animatedTime) && LoopAnimation == false)
 	        {
