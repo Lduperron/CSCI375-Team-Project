@@ -260,25 +260,25 @@ public class ClientEngine extends Game
 	{
 		
 		
-		if(pressedKeys[Keys.UP])
+		if(pressedKeys[Keys.UP] || pressedKeys[Keys.W])
 		{       
 			P.x = 0;
 			P.y = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-		if(pressedKeys[Keys.DOWN])
+		if(pressedKeys[Keys.DOWN] || pressedKeys[Keys.S])
 		{       
 			P.x = 0;
 			P.y = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-		if(pressedKeys[Keys.RIGHT])
+		if(pressedKeys[Keys.RIGHT] || pressedKeys[Keys.D])
 		{       
 			P.y = 0;
 			P.x = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-		if(pressedKeys[Keys.LEFT])
+		if(pressedKeys[Keys.LEFT] || pressedKeys[Keys.A])
 		{
 			P.y = 0;
 			P.x = -1;
