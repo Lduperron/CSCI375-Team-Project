@@ -64,6 +64,9 @@ import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
+import static core.shared.ConfigOptions.VIEW_DISTANCE_X_EXTENDED;
+import static core.shared.ConfigOptions.VIEW_DISTANCE_Y_EXTENDED;
+
 public class ClientEngine extends Game 
 {
 	
@@ -83,6 +86,9 @@ public class ClientEngine extends Game
 	
 	float cameraTileX = 2;
 	float cameraTileY = 3;
+	
+	float xCameraOffset;
+	float yCameraOffset;
 	
 	
 	Stage uiStage;
@@ -199,7 +205,7 @@ public class ClientEngine extends Game
 		
 		generateMapObjects();
 		
-		OccluedTiles = new boolean[VIEW_DISTANCE_X][VIEW_DISTANCE_Y];
+		OccluedTiles = new boolean[VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED][VIEW_DISTANCE_Y  + VIEW_DISTANCE_Y_EXTENDED];
 		
 		clearVisibleMap();
 		
@@ -318,11 +324,18 @@ public class ClientEngine extends Game
 	@Override
 	public void render() {		
 		
-		super.render();
+		if(controlledObject == null)
+		{
+			return; // ...whatever.  Nothing to see here.
+			
+		}
 		
 		Gdx.gl.glClearColor(0, 0, 1, 0);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
+		
+		super.render();
+	
 
 		handleKeyPresses();
 		
@@ -336,19 +349,11 @@ public class ClientEngine extends Game
 			
 			
 		}
-		
-	
-		//if(refocusCamera)
-		if(controlledObject != null)
-		{
-			focusCameraOnControlled();
-			
-		}
+
 		
 		
 		
-		
-		System.out.println(Gdx.graphics.getFramesPerSecond());
+	//	System.out.println(Gdx.graphics.getFramesPerSecond());
 		
 		
 		
@@ -369,38 +374,52 @@ public class ClientEngine extends Game
 		
 		 
 	
-		 
-		 
-		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
-		 camera.project(test);
-		 
-		 
-
+		
 		 
 		 
 		 
 		 if(recaculateVisibleTiles)
 		 {
 			 calculateVisibleTiles();
+
 		 }
 		 
 			
+		 
+ 
+		 
+		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
+		 camera.project(test);
+
 		 occulsionTileRenderer.begin(ShapeType.Filled);
 
 		 occulsionTileRenderer.setColor(0, 0, 0, 1);
 		 
-		 for(int column = 0; column < VIEW_DISTANCE_X; column++)
+			//if(refocusCamera)
+			if(controlledObject != null)
+			{
+				focusCameraOnControlled();
+				
+				 xCameraOffset = controlledObject.getXCameraOffset();
+				 yCameraOffset = controlledObject.getYCameraOffset();			
+			}
+		 
+		 
+		 
+		 
+		 
+		 for(int column = 0; column < VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED; column++)
 		 {
 			 
-			 for(int row = 0; row < VIEW_DISTANCE_Y; row++)
+			 for(int row = 0; row < VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED; row++)
 			 {
 				 if(OccluedTiles[row][column])
 				 {
-					 occulsionTileRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
+					 occulsionTileRenderer.rect(test.x - (VIEW_DISTANCE_X+VIEW_DISTANCE_X_EXTENDED)*TILE_SIZE + row*TILE_SIZE*2 + xCameraOffset*TILE_SIZE*2,
+							 					test.y - (VIEW_DISTANCE_Y+VIEW_DISTANCE_Y_EXTENDED)*TILE_SIZE + column*TILE_SIZE*2+ yCameraOffset*TILE_SIZE*2,
+							 					64,
+							 					64);	
 				 }
-//				 if(!LosToTile(cameraTileX, cameraTileY, cameraTileX+row-(VIEW_DISTANCE_X/2), cameraTileY+column-(VIEW_DISTANCE_Y/2)))
-//				 {
-//				 }
 			 }
 		 }
 		 occulsionTileRenderer.end();
@@ -663,9 +682,9 @@ public class ClientEngine extends Game
 	public void clearVisibleMap()
 	{
 		
-		for(int i = 0; i < VIEW_DISTANCE_X; i++)
+		for(int i = 0; i < VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED; i++)
 		{
-			for(int j = 0 ; j < VIEW_DISTANCE_Y; j++)
+			for(int j = 0 ; j < VIEW_DISTANCE_Y  + VIEW_DISTANCE_Y_EXTENDED; j++)
 			{
 				OccluedTiles[i][j] = true;
 			}
@@ -675,7 +694,11 @@ public class ClientEngine extends Game
 	public void calculateVisibleTiles()
 	{
 		recaculateVisibleTiles = false;
-		FOV();
+		
+		if(controlledObject != null)
+		{
+			FOV();
+		}
 		
 	}
 	
@@ -697,16 +720,18 @@ public class ClientEngine extends Game
 	{
 		int i;
 			  
-		float ox =  (cameraTileX)+.5f;
-		float oy =  (cameraTileY)+.5f;
+		
+		
+		float ox =  controlledObject.tileXPosition+.5f;
+		float oy =  controlledObject.tileYPosition+.5f;
 	  
-		float cameraX =  7.5f;
-		float cameraY =  7.5f;
+		float cameraX =  (VIEW_DISTANCE_X+VIEW_DISTANCE_X_EXTENDED) / 2.0f;
+		float cameraY =  (VIEW_DISTANCE_Y+VIEW_DISTANCE_Y_EXTENDED) / 2.0f;
 		
 		for(i=0;i<VIEW_DISTANCE_X;i++)
 		{
 			
-			if(cameraX < 0 || cameraX >= 15 || cameraY < 0 || cameraY >= 15)
+			if(cameraX < 0 || cameraX >= (VIEW_DISTANCE_X+VIEW_DISTANCE_X_EXTENDED) || cameraY < 0 || cameraY >= (VIEW_DISTANCE_Y+VIEW_DISTANCE_Y_EXTENDED))
 			{
 				
 				return;
@@ -732,8 +757,8 @@ public class ClientEngine extends Game
 	{
 		
 		o.refreshTexture();
-	
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+
+		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
 		ObjectArrayByID.put(o.UID, o);
 		
 	//	System.out.println(o.UID);
@@ -765,6 +790,9 @@ public class ClientEngine extends Game
 		o.setX(P.x*TILE_SIZE);
 		o.setY(P.y*TILE_SIZE);
 		
+		o.tileXPosition = P.x;
+		o.tileYPosition = P.y;	
+		
 		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
 		
 		
@@ -789,12 +817,12 @@ public class ClientEngine extends Game
 	
 		Obj o = ObjectArrayByID.get(P.UID);
 		
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
-		
-//		o.setX(P.x*TILE_SIZE);
-//		o.setY(P.y*TILE_SIZE);
+		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+	
+		o.tileXPosition = P.x;
+		o.tileYPosition = P.y;
 				
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+		ObjectArray.get(P.x).get(P.y).add(o);
 		
 
 //		o.setX(P.x*TILE_SIZE);
