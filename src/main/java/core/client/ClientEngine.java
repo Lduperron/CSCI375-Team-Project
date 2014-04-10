@@ -29,6 +29,7 @@ import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -89,6 +90,12 @@ public class ClientEngine extends Game
 	
 	float xCameraOffset;
 	float yCameraOffset;
+	
+	
+	//SidePanel 
+	private OrthographicCamera cameraSidePanel;
+	private SpriteBatch batchSidePanel;
+	//**********
 	
 	
 	Stage uiStage;
@@ -166,6 +173,10 @@ public class ClientEngine extends Game
 
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
+		
+		//StagePanel
+		cameraSidePanel = new OrthographicCamera(w,h);
+		cameraSidePanel.zoom = 4; //scale
 		
 		
 		Tween.registerAccessor(Obj.class, new ObjTweener());
