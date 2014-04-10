@@ -33,7 +33,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+<<<<<<< HEAD
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+=======
+>>>>>>> 9f74e756be5261a0624fddd8a1e599393705864d
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -79,6 +82,9 @@ import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
+import static core.shared.ConfigOptions.VIEW_DISTANCE_X_EXTENDED;
+import static core.shared.ConfigOptions.VIEW_DISTANCE_Y_EXTENDED;
+
 public class ClientEngine extends Game 
 {
 	
@@ -102,6 +108,7 @@ public class ClientEngine extends Game
 	float cameraTileY = 3;
 	static SpriteBatch primarySpriteBatch;
 	
+<<<<<<< HEAD
 	// Styles used in the game
 	TextButtonStyle dialogueStyle;
 	TextButtonStyle buttonStyle;
@@ -131,6 +138,17 @@ public class ClientEngine extends Game
 	static AssetManager gameTextureManager;
 	static HashMap<Background, AssetDescriptor<Texture>> Backgrounds;
 
+=======
+	float xCameraOffset;
+	float yCameraOffset;
+	
+	
+	//SidePanel 
+	private OrthographicCamera cameraSidePanel;
+	private SpriteBatch batchSidePanel;
+	//**********
+	
+>>>>>>> 9f74e756be5261a0624fddd8a1e599393705864d
 	
 	Stage uiStage;
 	Stage worldStage;
@@ -212,6 +230,10 @@ public class ClientEngine extends Game
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
 		
+		//StagePanel
+		cameraSidePanel = new OrthographicCamera(w,h);
+		cameraSidePanel.zoom = 4; //scale
+		
 		
 		Tween.registerAccessor(Obj.class, new ObjTweener());
 		
@@ -274,7 +296,7 @@ public class ClientEngine extends Game
 		
 		generateMapObjects();
 		
-		OccluedTiles = new boolean[VIEW_DISTANCE_X][VIEW_DISTANCE_Y];
+		OccluedTiles = new boolean[VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED][VIEW_DISTANCE_Y  + VIEW_DISTANCE_Y_EXTENDED];
 		
 		clearVisibleMap();
 		
@@ -329,25 +351,25 @@ public class ClientEngine extends Game
 	{
 		
 		
-		if(pressedKeys[Keys.UP])
+		if(pressedKeys[Keys.UP] || pressedKeys[Keys.W])
 		{       
 			P.x = 0;
 			P.y = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-		if(pressedKeys[Keys.DOWN])
+		if(pressedKeys[Keys.DOWN] || pressedKeys[Keys.S])
 		{       
 			P.x = 0;
 			P.y = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-		if(pressedKeys[Keys.RIGHT])
+		if(pressedKeys[Keys.RIGHT] || pressedKeys[Keys.D])
 		{       
 			P.y = 0;
 			P.x = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-		if(pressedKeys[Keys.LEFT])
+		if(pressedKeys[Keys.LEFT] || pressedKeys[Keys.A])
 		{
 			P.y = 0;
 			P.x = -1;
@@ -393,11 +415,18 @@ public class ClientEngine extends Game
 	@Override
 	public void render() {		
 		
-		super.render();
+		if(controlledObject == null)
+		{
+			return; // ...whatever.  Nothing to see here.
+			
+		}
 		
 		Gdx.gl.glClearColor(0, 0, 1, 0);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
+		
+		super.render();
+	
 
 		handleKeyPresses();
 		
@@ -412,18 +441,23 @@ public class ClientEngine extends Game
 			
 		}
 		
-	
+		 
 		//if(refocusCamera)
 		if(controlledObject != null)
 		{
 			focusCameraOnControlled();
 			
+			 xCameraOffset = controlledObject.getXCameraOffset();
+			 yCameraOffset = controlledObject.getYCameraOffset();
+			
+			
+			
 		}
+	 
 		
 		
 		
-		
-		System.out.println(Gdx.graphics.getFramesPerSecond());
+	//	System.out.println(Gdx.graphics.getFramesPerSecond());
 		
 		
 		
@@ -444,38 +478,43 @@ public class ClientEngine extends Game
 		
 		 
 	
-		 
-		 
-		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
-		 camera.project(test);
-		 
-		 
-
+		
 		 
 		 
 		 
 		 if(recaculateVisibleTiles)
 		 {
 			 calculateVisibleTiles();
+
 		 }
 		 
 			
+		 
+ 
+		 
+		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
+		 camera.project(test);
+
 		 occulsionTileRenderer.begin(ShapeType.Filled);
 
 		 occulsionTileRenderer.setColor(0, 0, 0, 1);
+
 		 
-		 for(int column = 0; column < VIEW_DISTANCE_X; column++)
+		 
+		 
+		 
+		 for(int column = 0; column < VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED; column++)
 		 {
 			 
-			 for(int row = 0; row < VIEW_DISTANCE_Y; row++)
+			 for(int row = 0; row < VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED; row++)
 			 {
 				 if(OccluedTiles[row][column])
 				 {
-					 occulsionTileRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
+					 occulsionTileRenderer.rect(test.x - (VIEW_DISTANCE_X+VIEW_DISTANCE_X_EXTENDED)*TILE_SIZE + row*TILE_SIZE*2 + xCameraOffset*TILE_SIZE*2,
+							 					test.y - (VIEW_DISTANCE_Y+VIEW_DISTANCE_Y_EXTENDED)*TILE_SIZE + column*TILE_SIZE*2+ yCameraOffset*TILE_SIZE*2,
+							 					64,
+							 					64);	
 				 }
-//				 if(!LosToTile(cameraTileX, cameraTileY, cameraTileX+row-(VIEW_DISTANCE_X/2), cameraTileY+column-(VIEW_DISTANCE_Y/2)))
-//				 {
-//				 }
 			 }
 		 }
 		 occulsionTileRenderer.end();
@@ -792,9 +831,9 @@ public void switchToNewScreen(ScreenEnumerations newLevel) {
 	public void clearVisibleMap()
 	{
 		
-		for(int i = 0; i < VIEW_DISTANCE_X; i++)
+		for(int i = 0; i < VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED; i++)
 		{
-			for(int j = 0 ; j < VIEW_DISTANCE_Y; j++)
+			for(int j = 0 ; j < VIEW_DISTANCE_Y  + VIEW_DISTANCE_Y_EXTENDED; j++)
 			{
 				OccluedTiles[i][j] = true;
 			}
@@ -804,7 +843,11 @@ public void switchToNewScreen(ScreenEnumerations newLevel) {
 	public void calculateVisibleTiles()
 	{
 		recaculateVisibleTiles = false;
-		FOV();
+		
+		if(controlledObject != null)
+		{
+			FOV();
+		}
 		
 	}
 	
@@ -826,16 +869,18 @@ public void switchToNewScreen(ScreenEnumerations newLevel) {
 	{
 		int i;
 			  
-		float ox =  (cameraTileX)+.5f;
-		float oy =  (cameraTileY)+.5f;
+		
+		
+		float ox =  controlledObject.tileXPosition+.5f;
+		float oy =  controlledObject.tileYPosition+.5f;
 	  
-		float cameraX =  7.5f;
-		float cameraY =  7.5f;
+		float cameraX =  (VIEW_DISTANCE_X+VIEW_DISTANCE_X_EXTENDED) / 2.0f;
+		float cameraY =  (VIEW_DISTANCE_Y+VIEW_DISTANCE_Y_EXTENDED) / 2.0f;
 		
 		for(i=0;i<VIEW_DISTANCE_X;i++)
 		{
 			
-			if(cameraX < 0 || cameraX >= 15 || cameraY < 0 || cameraY >= 15)
+			if(cameraX < 0 || cameraX >= (VIEW_DISTANCE_X+VIEW_DISTANCE_X_EXTENDED) || cameraY < 0 || cameraY >= (VIEW_DISTANCE_Y+VIEW_DISTANCE_Y_EXTENDED))
 			{
 				
 				return;
@@ -861,8 +906,8 @@ public void switchToNewScreen(ScreenEnumerations newLevel) {
 	{
 		
 		o.refreshTexture();
-	
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+
+		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
 		ObjectArrayByID.put(o.UID, o);
 		
 	//	System.out.println(o.UID);
@@ -894,6 +939,9 @@ public void switchToNewScreen(ScreenEnumerations newLevel) {
 		o.setX(P.x*TILE_SIZE);
 		o.setY(P.y*TILE_SIZE);
 		
+		o.tileXPosition = P.x;
+		o.tileYPosition = P.y;	
+		
 		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
 		
 		
@@ -918,12 +966,12 @@ public void switchToNewScreen(ScreenEnumerations newLevel) {
 	
 		Obj o = ObjectArrayByID.get(P.UID);
 		
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
-		
-//		o.setX(P.x*TILE_SIZE);
-//		o.setY(P.y*TILE_SIZE);
+		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+	
+		o.tileXPosition = P.x;
+		o.tileYPosition = P.y;
 				
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+		ObjectArray.get(P.x).get(P.y).add(o);
 		
 
 //		o.setX(P.x*TILE_SIZE);
