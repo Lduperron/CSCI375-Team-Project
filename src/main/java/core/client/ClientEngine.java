@@ -33,10 +33,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-<<<<<<< HEAD
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-=======
->>>>>>> 9f74e756be5261a0624fddd8a1e599393705864d
+
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -108,7 +106,6 @@ public class ClientEngine extends Game
 	float cameraTileY = 3;
 	static SpriteBatch primarySpriteBatch;
 	
-<<<<<<< HEAD
 	// Styles used in the game
 	TextButtonStyle dialogueStyle;
 	TextButtonStyle buttonStyle;
@@ -138,7 +135,6 @@ public class ClientEngine extends Game
 	static AssetManager gameTextureManager;
 	static HashMap<Background, AssetDescriptor<Texture>> Backgrounds;
 
-=======
 	float xCameraOffset;
 	float yCameraOffset;
 	
@@ -148,7 +144,6 @@ public class ClientEngine extends Game
 	private SpriteBatch batchSidePanel;
 	//**********
 	
->>>>>>> 9f74e756be5261a0624fddd8a1e599393705864d
 	
 	Stage uiStage;
 	Stage worldStage;
