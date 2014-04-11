@@ -53,7 +53,10 @@ public class mainMenuScreen implements Screen{
 	    multiplexer.addProcessor(mainMenuStage);
 	    
 	 // Creates our buttons
-	    TextButton NewGame = new TextButton("Connect" , parentEngine.buttonStyle);
+	    TextButton NewGame = new TextButton("New Game" , parentEngine.buttonStyle);
+	 //   NewGame.setWidth(300);
+	 //   NewGame.setHeight(300);
+	    NewGame.setPosition(600,500);
 	    mainMenuStage.addActor(NewGame);
 	    NewGame.addListener(new ClickListener() {
     		
@@ -61,7 +64,7 @@ public class mainMenuScreen implements Screen{
     	    @Override
     	    public void clicked(InputEvent event, float x, float y) 
     	    {
-    	    	parentEngine.switchToNewScreen(ScreenEnumerations.MainMenu);
+    	    	parentEngine.screenRender=true;
     	    	
     	    };
     		
@@ -79,7 +82,6 @@ public class mainMenuScreen implements Screen{
 		System.out.println("Test1");
 		System.out.println(camera.combined.toString());
 		batch.setProjectionMatrix(camera.combined);
-		System.out.println("Test2");
 		batch.begin();
 		batch.disableBlending();
 		

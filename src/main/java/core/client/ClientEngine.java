@@ -142,6 +142,7 @@ public class ClientEngine extends Game
 	boolean recaculateVisibleTiles = false;
 	boolean refocusCamera = false;
 	boolean[][] OccluedTiles;
+	boolean screenRender;
 	
 	boolean[] pressedKeys = new boolean[256];
 	
@@ -194,7 +195,7 @@ public class ClientEngine extends Game
 		Test.setSelf(this);
 		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
 		gameTextureManager = new AssetManager();
-
+		primarySpriteBatch = new SpriteBatch();
 
 		
 		float w = Gdx.graphics.getWidth();
@@ -299,8 +300,8 @@ public class ClientEngine extends Game
 		network.send(Message.REQUESTSTATE);
 		network.send(core.shared.Message.SPAWN);
 		
-		
-		
+		screenRender = false;
+		switchToNewScreen(ScreenEnumerations.MainMenu);
 		
 		
 		/*
@@ -392,100 +393,76 @@ public class ClientEngine extends Game
 	Position TempPosition;
 	@Override
 	public void render() {		
-		
-		super.render();
-		
-		Gdx.gl.glClearColor(0, 0, 1, 0);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-
-
-		handleKeyPresses();
-		
-		// Access seemingly must be done on the rendering thread (which makes sense)
-		// Synronizing access doesn't seem feasable - multiple accesses
-		while(!QueuedEvents.isEmpty())
+						
+		if (screenRender)
 		{
-			TempPosition = QueuedEvents.get(0);
-			objectMove(TempPosition);
-			QueuedEvents.remove(0);
+			handleKeyPresses();
+			
+			// Access seemingly must be done on the rendering thread (which makes sense)
+			// Synronizing access doesn't seem feasable - multiple accesses
+			while(!QueuedEvents.isEmpty())
+			{
+				TempPosition = QueuedEvents.get(0);
+				objectMove(TempPosition);
+				QueuedEvents.remove(0);
+				
+				
+			}
+			
+		
+			//if(refocusCamera)
+			if(controlledObject != null)
+			{
+				focusCameraOnControlled();
+				
+			}
 			
 			
-		}
-		
-	
-		//if(refocusCamera)
-		if(controlledObject != null)
-		{
-			focusCameraOnControlled();
 			
-		}
-		
-		
-		
-		
-		//System.out.println(Gdx.graphics.getFramesPerSecond());
-		
-		
-		
-	//	MapProperties m =map.getLayers().get("Walls").
-		
-
-		
-		
-		
-		mapRenderer.setView(camera);
-		mapRenderer.render();
-		worldStage.draw();
-		
-		
-		
-		//worldStage.act();
-
-		
-		 
-	
-		 
-		 
-		 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
-		 camera.project(test);
-		 
-		 
-
-		 
-		 
-		 
-		 if(recaculateVisibleTiles)
-		 {
-			 calculateVisibleTiles();
-		 }
-		 
 			
-		 occulsionTileRenderer.begin(ShapeType.Filled);
-
-		 occulsionTileRenderer.setColor(0, 0, 0, 1);
-		 
-		 for(int column = 0; column < VIEW_DISTANCE_X; column++)
-		 {
+			//System.out.println(Gdx.graphics.getFramesPerSecond());
+			
+			
+			mapRenderer.setView(camera);
+			mapRenderer.render();
+			worldStage.draw();
+			
 			 
-			 for(int row = 0; row < VIEW_DISTANCE_Y; row++)
+			 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
+			 camera.project(test);
+			 
+			 
+			 if(recaculateVisibleTiles)
 			 {
-				 if(OccluedTiles[row][column])
-				 {
-					 occulsionTileRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
-				 }
-//				 if(!LosToTile(cameraTileX, cameraTileY, cameraTileX+row-(VIEW_DISTANCE_X/2), cameraTileY+column-(VIEW_DISTANCE_Y/2)))
-//				 {
-//				 }
+				 calculateVisibleTiles();
 			 }
-		 }
-		 occulsionTileRenderer.end();
-		 
-		 
-		 tweenManager.update(Gdx.graphics.getDeltaTime());
-		 switchToNewScreen(ScreenEnumerations.MainMenu);
-		 
-		 
-		 
+			 
+				
+			 occulsionTileRenderer.begin(ShapeType.Filled);
+	
+			 occulsionTileRenderer.setColor(0, 0, 0, 1);
+			 
+			 for(int column = 0; column < VIEW_DISTANCE_X; column++)
+			 {
+				 
+				 for(int row = 0; row < VIEW_DISTANCE_Y; row++)
+				 {
+					 if(OccluedTiles[row][column])
+					 {
+						 occulsionTileRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
+					 }
+				 }
+			 }
+			 occulsionTileRenderer.end();
+			 
+			 
+			 tweenManager.update(Gdx.graphics.getDeltaTime());
+			 //
+		}
+		else
+		{
+			super.render();
+		} 
 	}
 
 	@Override
