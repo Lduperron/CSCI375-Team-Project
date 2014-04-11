@@ -54,9 +54,7 @@ public class mainMenuScreen implements Screen{
 	    
 	 // Creates our buttons
 	    TextButton NewGame = new TextButton("New Game" , parentEngine.buttonStyle);
-	 //   NewGame.setWidth(300);
-	 //   NewGame.setHeight(300);
-	    NewGame.setPosition(600,500);
+	    NewGame.setPosition(800,700);
 	    mainMenuStage.addActor(NewGame);
 	    NewGame.addListener(new ClickListener() {
     		
@@ -66,6 +64,34 @@ public class mainMenuScreen implements Screen{
     	    {
     	    	parentEngine.screenRender=true;
     	    	
+    	    };
+    		
+    	});
+	    
+	    TextButton Options = new TextButton("Options" , parentEngine.buttonStyle);
+	    Options.setPosition(800,662);
+	    mainMenuStage.addActor(Options);
+	    Options.addListener(new ClickListener() {
+    		
+    		
+    	    @Override
+    	    public void clicked(InputEvent event, float x, float y) 
+    	    {
+    	    	
+    	    	
+    	    };
+    		
+    	});
+	    TextButton Quit = new TextButton("Quit" , parentEngine.buttonStyle);
+	    Quit.setPosition(800,625);
+	    mainMenuStage.addActor(Quit);
+	    Quit.addListener(new ClickListener() {
+    		
+    		
+    	    @Override
+    	    public void clicked(InputEvent event, float x, float y) 
+    	    {
+    	    	Gdx.app.exit();
     	    };
     		
     	});
@@ -79,8 +105,6 @@ public class mainMenuScreen implements Screen{
 		
 		//camera = new OrthographicCamera();
 		camera.update();
-		System.out.println("Test1");
-		System.out.println(camera.combined.toString());
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		batch.disableBlending();
