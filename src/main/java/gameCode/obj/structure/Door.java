@@ -1,5 +1,7 @@
 package gameCode.obj.structure;
 
+import gameCode.obj.item.Item;
+
 import java.util.BitSet;
 import java.util.HashMap;
 
@@ -80,9 +82,9 @@ public class Door extends Structure
 	
 	
 	@Override
-	public void onClick()
+	public void onClick(Item attackedBy)
 	{
-		super.onClick();
+		super.onClick(attackedBy);
 				
 		if(this.locked)
 		{

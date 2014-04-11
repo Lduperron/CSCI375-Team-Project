@@ -226,7 +226,6 @@ public class ClientEngine extends Game
 			e.printStackTrace();
 		}
 		
-		network.send(core.shared.Message.TEST);
 		network.send(Message.REQUESTSTATE);
 		network.send(core.shared.Message.SPAWN);
 		
@@ -762,12 +761,18 @@ public class ClientEngine extends Game
 		
 		o.refreshTexture();
 
-		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
+		
+		if(o.tileXPosition >= 0)
+		{
+			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
+			worldStage.addActor(o);
+		}
+		
 		ObjectArrayByID.put(o.UID, o);
 		
 	//	System.out.println(o.UID);
 		
-		worldStage.addActor(o);
+
 		
 		recaculateVisibleTiles = true;
 		
@@ -778,8 +783,12 @@ public class ClientEngine extends Game
 		Obj o = ObjectArrayByID.get(UID);
 		o.remove();
 		ObjectArrayByID.remove(UID);
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
-	
+		
+		if(o.tileXPosition >= 0)
+		{
+			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+		}
+		
 		recaculateVisibleTiles = true;
 	}
 	
@@ -847,7 +856,7 @@ public class ClientEngine extends Game
 	public void mouseEvent(int mouseEventUID)
 	{
 		Obj o = ObjectArrayByID.get(mouseEventUID);
-		o.onClick();
+		o.onClick(null);
 		
 	}
 	
