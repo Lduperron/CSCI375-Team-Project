@@ -16,7 +16,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import core.client.PixmapTextureAtlas;
-import core.client.ClientEngine.Test;
+import core.client.ClientEngine.ClientEngineReference;
 
 public class Door extends Structure
 {
@@ -105,7 +105,11 @@ public class Door extends Structure
 				this.animate("Closing", false);
 			}
 			
-			Test.getSelf().calculateVisibleTiles();
+			
+			if(!this.ServerSide)
+			{
+				ClientEngineReference.getSelf().calculateVisibleTiles();
+			}
 		}
 				
 	}
