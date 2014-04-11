@@ -486,9 +486,15 @@ public class ClientEngine extends Game {
 
 	@Override
 	public void resize(int width, int height) {
+		
+		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
+		
+		
 		camera.viewportHeight = VIEW_DISTANCE_X * TILE_SIZE;
 		camera.viewportWidth = VIEW_DISTANCE_Y * TILE_SIZE;
 
+		
+		
 		camera.update();
 
 	}
@@ -959,10 +965,10 @@ public class ClientEngine extends Game {
 		cfg.title = "CSCI-375-Project";
 		cfg.useGL20 = true;
 		cfg.width = VIEW_DISTANCE_X * TILE_SIZE * 2;
-		// cfg.height = VIEW_DISTANCE_Y * TILE_SIZE * 2;
-		cfg.height = 9 * 64;
+//		 cfg.height = VIEW_DISTANCE_Y * TILE_SIZE * 2;
+		cfg.height = 10 * 64;
 
-		cfg.resizable = false;
+		//cfg.resizable = false;
 		cfg.vSyncEnabled = true;
 
 		cfg.foregroundFPS = 60;
