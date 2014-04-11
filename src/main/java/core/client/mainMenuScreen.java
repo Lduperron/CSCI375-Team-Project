@@ -3,6 +3,7 @@ package core.client;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,9 +19,10 @@ import core.client.ScreenEnumerations;
  * Main menu screen. 
  * @author the
  */
+
 public class mainMenuScreen implements Screen{
 	
-	ClientEngine parentEngine;
+	final ClientEngine parentEngine;
 	Texture backgroundImage;
 	SpriteBatch batch;
 	Stage mainMenuStage;
@@ -68,8 +70,25 @@ public class mainMenuScreen implements Screen{
 
 	@Override
 	public void render(float delta) {
-		// TODO Auto-generated method stub
 		
+		Gdx.graphics.getGL20().glClearColor( 0, 0, 0, 1 );
+		Gdx.graphics.getGL20().glClear( GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT );
+		
+		//camera = new OrthographicCamera();
+		camera.update();
+		System.out.println("Test1");
+		System.out.println(camera.combined.toString());
+		batch.setProjectionMatrix(camera.combined);
+		System.out.println("Test2");
+		batch.begin();
+		batch.disableBlending();
+		
+		batch.draw(backgroundImage , 0 ,0 , Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		batch.enableBlending();
+		batch.end();
+		
+		mainMenuStage.act();
+		mainMenuStage.draw();
 	}
 
 	@Override
@@ -81,12 +100,14 @@ public class mainMenuScreen implements Screen{
 	@Override
 	public void show() {
 		// TODO Auto-generated method stub
+		Gdx.input.setInputProcessor(multiplexer);
 		
 	}
 
 	@Override
 	public void hide() {
 		// TODO Auto-generated method stub
+		Gdx.input.setInputProcessor(null);
 		
 	}
 

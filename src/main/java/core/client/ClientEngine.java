@@ -481,9 +481,9 @@ public class ClientEngine extends Game
 		 occulsionTileRenderer.end();
 		 
 		 
-		tweenManager.update(Gdx.graphics.getDeltaTime());
-		switchToNewScreen(ScreenEnumerations.MainMenu);
-
+		 tweenManager.update(Gdx.graphics.getDeltaTime());
+		 switchToNewScreen(ScreenEnumerations.MainMenu);
+		 
 		 
 		 
 	}
