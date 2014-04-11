@@ -154,12 +154,8 @@ public class ClientEngine extends Game {
 	boolean recaculateVisibleTiles = false;
 	boolean refocusCamera = false;
 	boolean[][] OccluedTiles;
-<<<<<<< HEAD
 	boolean screenRender;
 	
-=======
-
->>>>>>> master
 	boolean[] pressedKeys = new boolean[256];
 
 	// Handles first-chance keyboard presses
@@ -199,17 +195,13 @@ public class ClientEngine extends Game {
 
 	public void create() {		
 		
-<<<<<<< HEAD
-		Test.setSelf(this);
+
 		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
 		gameTextureManager = new AssetManager();
 		primarySpriteBatch = new SpriteBatch();
 
-		
-=======
 		ClientEngineReference.setSelf(this);
 
->>>>>>> master
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 
@@ -308,14 +300,10 @@ public class ClientEngine extends Game {
 		network.send(core.shared.Message.SPAWN);
 
 
-		
-<<<<<<< HEAD
-		screenRender = false;
+		screenRender = true;
 		switchToNewScreen(ScreenEnumerations.MainMenu);
 		
-=======
 		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
->>>>>>> master
 		
 		/*
 		 * camera = new OrthographicCamera(1, h/w); batch = new SpriteBatch();
@@ -390,90 +378,16 @@ public class ClientEngine extends Game {
 	Position TempPosition;
 
 	@Override
-<<<<<<< HEAD
-	public void render() {		
-						
-		if (screenRender)
-		{
-			handleKeyPresses();
-			
-			// Access seemingly must be done on the rendering thread (which makes sense)
-			// Synronizing access doesn't seem feasable - multiple accesses
-			while(!QueuedEvents.isEmpty())
-			{
-				TempPosition = QueuedEvents.get(0);
-				objectMove(TempPosition);
-				QueuedEvents.remove(0);
-				
-				
-			}
-			
-		
-			//if(refocusCamera)
-			if(controlledObject != null)
-			{
-				focusCameraOnControlled();
-				
-			}
-			
-			
-			
-			
-			//System.out.println(Gdx.graphics.getFramesPerSecond());
-			
-			
-			mapRenderer.setView(camera);
-			mapRenderer.render();
-			worldStage.draw();
-			
-			 
-			 Vector3 test = new Vector3(cameraTileX*TILE_SIZE+16,cameraTileY*TILE_SIZE+16,1);
-			 camera.project(test);
-			 
-			 
-			 if(recaculateVisibleTiles)
-			 {
-				 calculateVisibleTiles();
-			 }
-			 
-				
-			 occulsionTileRenderer.begin(ShapeType.Filled);
-	
-			 occulsionTileRenderer.setColor(0, 0, 0, 1);
-			 
-			 for(int column = 0; column < VIEW_DISTANCE_X; column++)
-			 {
-				 
-				 for(int row = 0; row < VIEW_DISTANCE_Y; row++)
-				 {
-					 if(OccluedTiles[row][column])
-					 {
-						 occulsionTileRenderer.rect(test.x - VIEW_DISTANCE_X*TILE_SIZE + row*TILE_SIZE*2, test.y- VIEW_DISTANCE_Y*TILE_SIZE + column*TILE_SIZE*2, 64, 64);	
-					 }
-				 }
-			 }
-			 occulsionTileRenderer.end();
-			 
-			 
-			 tweenManager.update(Gdx.graphics.getDeltaTime());
-			 //
-		}
-		else
+	public void render() {
+
+		if(screenRender)
 		{
 			super.render();
 		} 
-=======
-	public void render() {
-
+	
 		if (controlledObject == null) {
 			return; // ...whatever. Nothing to see here.
 		}
-
-		// Clear the screen
-		Gdx.gl.glClearColor(0, 0, 1, 0);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-
-		super.render();
 
 		handleKeyPresses();
 
@@ -558,9 +472,8 @@ public class ClientEngine extends Game {
 				(int) (Gdx.graphics.getWidth() * 0.37),
 				Gdx.graphics.getHeight());
 		drawSidePanel();
-
-		//switchToNewScreen(ScreenEnumerations.MainMenu);
-
+		
+	
 	}
 
 	private void drawSidePanel() {
@@ -574,8 +487,6 @@ public class ClientEngine extends Game {
 		// Gdx.graphics.getHeight());
 		shapeRenderer.end();
 		
-		
->>>>>>> master
 	}
 
 	@Override
