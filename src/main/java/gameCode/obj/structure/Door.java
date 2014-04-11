@@ -1,5 +1,7 @@
 package gameCode.obj.structure;
 
+import gameCode.obj.item.Item;
+
 import java.util.BitSet;
 import java.util.HashMap;
 
@@ -16,7 +18,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import core.client.PixmapTextureAtlas;
-import core.client.ClientEngine.Test;
+import core.client.ClientEngine.ClientEngineReference;
 
 public class Door extends Structure
 {
@@ -80,9 +82,9 @@ public class Door extends Structure
 	
 	
 	@Override
-	public void onClick()
+	public void onClick(Item attackedBy)
 	{
-		super.onClick();
+		super.onClick(attackedBy);
 				
 		if(this.locked)
 		{
@@ -105,7 +107,11 @@ public class Door extends Structure
 				this.animate("Closing", false);
 			}
 			
-			Test.getSelf().calculateVisibleTiles();
+			
+			if(!this.ServerSide)
+			{
+				ClientEngineReference.getSelf().calculateVisibleTiles();
+			}
 		}
 				
 	}

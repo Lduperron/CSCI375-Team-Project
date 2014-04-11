@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.collision.Ray;
 
 import core.shared.Message;
 import core.shared.Position;
-
+import static core.shared.ConfigOptions.TILE_SIZE;
 
 
 public class UIControlHandler implements InputProcessor {
@@ -76,16 +76,24 @@ public class UIControlHandler implements InputProcessor {
 	{
 		Vector2 screenCoords = new Vector2(screenX, screenY);
 		
+		
 		centralEngine.worldStage.screenToStageCoordinates(screenCoords);
 		
-		mouseEventCoords.x = (int) screenCoords.x;
-		mouseEventCoords.y = (int) screenCoords.y;
+		mouseEventCoords.UID = -1;
+		mouseEventCoords.x = (int) (screenCoords.x / TILE_SIZE);
+		mouseEventCoords.y = (int) (screenCoords.y / TILE_SIZE);
 				
 		Obj o = (Obj) centralEngine.worldStage.hit(screenCoords.x, screenCoords.y, true);
 		
-		if(o != null)
+		if(o != null) // Clicked on an object in the world
 		{
-			ClientEngine.network.send(Message.MOUSEEVENTTOSERVER, o.UID);	
+			ClientEngine.network.send(Message.MOUSEEVENTTOSERVERONOBJECT, o.UID);	
+		}
+		else
+		{ // Clicked on an empty tile
+			
+			ClientEngine.network.send(Message.MOUSEEVENTTOSERVERONTILE, mouseEventCoords);	
+			
 		}
 		
 		return true;

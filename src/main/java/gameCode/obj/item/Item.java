@@ -1,6 +1,8 @@
 package gameCode.obj.item;
-import core.shared.Position;
-import gameCode.obj.*;
+
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+import gameCode.obj.Obj;
 
 public class Item extends Obj
 {
@@ -11,5 +13,10 @@ public class Item extends Obj
 		// TODO Auto-generated constructor stub
 	}
 
-	
+	public TextureRegion getTexture()
+	{
+		
+		return texture;
+		
+	}
 }

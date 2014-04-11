@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import core.shared.ConfigOptions;
 
 import gameCode.obj.*;
+import gameCode.obj.item.Item;
+import helpers.Hand;
 
 public class Mob extends Obj
 {
@@ -26,4 +28,11 @@ public class Mob extends Obj
 	}
 	protected TextureRegion texture = ConfigOptions.texture;
 	Boolean AIcontrolled = false; 
+
+	
+	public Item leftHand;
+	public Item rightHand;
+	
+	public Hand ActiveHand = Hand.LEFT; 
+	
 }
