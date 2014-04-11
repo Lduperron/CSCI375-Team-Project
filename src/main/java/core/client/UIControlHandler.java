@@ -76,6 +76,7 @@ public class UIControlHandler implements InputProcessor {
 	{
 		Vector2 screenCoords = new Vector2(screenX, screenY);
 		
+		
 		centralEngine.worldStage.screenToStageCoordinates(screenCoords);
 		
 		mouseEventCoords.x = (int) screenCoords.x;

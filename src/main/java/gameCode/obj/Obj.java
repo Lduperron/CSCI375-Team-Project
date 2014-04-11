@@ -183,7 +183,7 @@ public class Obj extends Actor
 				y = Math.abs(y - getWidth());
 				
 				int position = (int) ((int)y * getWidth() + x );
-
+				
 				if (!TransparentPixels.get(position)) 
 				{
 					return this;
