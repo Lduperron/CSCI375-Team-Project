@@ -92,12 +92,15 @@ public class NetServer extends Network {
 						gameServer.requestMove(P);
 						break;
 						
-					case MOUSEEVENTTOSERVER:
+					case MOUSEEVENTTOSERVERONOBJECT:
 						int MouseEventUID = (Integer) netMsg.obj;
 						gameServer.mouseEvent(MouseEventUID);
 						break;
 						
-
+					case MOUSEEVENTTOSERVERONTILE:
+						Position cell = (Position) netMsg.obj;
+						gameServer.mouseEvent(cell);
+						break;
 						
 						
 						

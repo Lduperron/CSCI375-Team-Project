@@ -1,6 +1,6 @@
 package gameCode.obj.mob.humans;
 
-public class EnemySoldier extends Humans
+public class EnemySoldier extends Human
 {
 
 	protected EnemySoldier(int x, int y)

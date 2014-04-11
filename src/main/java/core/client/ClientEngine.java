@@ -166,9 +166,14 @@ public class ClientEngine extends Game {
 
 	TweenManager tweenManager = new TweenManager();
 
-	List<Position> QueuedEvents = new LinkedList<Position>();
-
-	public static class Test {
+	
+	List<Position>  QueuedEvents = new LinkedList<Position>();
+	
+	
+	
+	
+	public static class ClientEngineReference
+	{
 		static ClientEngine Self;
 
 		public static void setSelf(ClientEngine e) {
@@ -186,11 +191,10 @@ public class ClientEngine extends Game {
 	}
 
 	@Override
-	public void create() {
 
-		Test.setSelf(this);
-		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
-		gameTextureManager = new AssetManager();
+	public void create() {		
+		
+		ClientEngineReference.setSelf(this);
 
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
@@ -222,6 +226,9 @@ public class ClientEngine extends Game {
 		worldStage = new Stage();
 
 		// backgrounds
+		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
+		gameTextureManager = new AssetManager();
+		
 		Backgrounds.put(Background.MENUSCREEN, new AssetDescriptor<Texture>(
 				"backgrounds/spacebg.png", Texture.class));
 
@@ -283,7 +290,6 @@ public class ClientEngine extends Game {
 			e.printStackTrace();
 		}
 
-		network.send(core.shared.Message.TEST);
 		network.send(Message.REQUESTSTATE);
 		network.send(core.shared.Message.SPAWN);
 
@@ -819,12 +825,14 @@ public class ClientEngine extends Game {
 
 		o.refreshTexture();
 
-		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
+		
+		if(o.tileXPosition >= 0)
+		{
+			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
+			worldStage.addActor(o);
+		}
+		
 		ObjectArrayByID.put(o.UID, o);
-
-		// System.out.println(o.UID);
-
-		worldStage.addActor(o);
 
 		recaculateVisibleTiles = true;
 
@@ -834,9 +842,13 @@ public class ClientEngine extends Game {
 		Obj o = ObjectArrayByID.get(UID);
 		o.remove();
 		ObjectArrayByID.remove(UID);
-		ObjectArray.get((int) o.getX() / TILE_SIZE)
-				.get((int) o.getY() / TILE_SIZE).remove(o);
 
+		
+		if(o.tileXPosition >= 0)
+		{
+			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+		}
+		
 		recaculateVisibleTiles = true;
 	}
 
@@ -896,8 +908,10 @@ public class ClientEngine extends Game {
 
 	public void mouseEvent(int mouseEventUID) {
 		Obj o = ObjectArrayByID.get(mouseEventUID);
-		o.onClick();
 
+
+		o.onClick(null);
+		
 	}
 
 	public void addToWorld(DistilledObject distilled) {
