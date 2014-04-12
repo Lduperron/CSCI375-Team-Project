@@ -323,21 +323,25 @@ public class ClientEngine extends Game {
 	public void handleKeyPresses() {
 
 		if (pressedKeys[Keys.UP] || pressedKeys[Keys.W]) {
+			P.UID = controlledObject.UID;
 			P.x = 0;
 			P.y = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.DOWN] || pressedKeys[Keys.S]) {
+			P.UID = controlledObject.UID;
 			P.x = 0;
 			P.y = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.RIGHT] || pressedKeys[Keys.D]) {
+			P.UID = controlledObject.UID;
 			P.y = 0;
 			P.x = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.LEFT] || pressedKeys[Keys.A]) {
+			P.UID = controlledObject.UID;
 			P.y = 0;
 			P.x = -1;
 			network.send(Message.REQUESTMOVE, P);

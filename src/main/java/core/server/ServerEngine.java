@@ -49,8 +49,7 @@ public class ServerEngine extends Thread
 	public Lock standby = new ReentrantLock();
 	
 	Obj onlyPlayer;
-	long lastMoveTime = System.currentTimeMillis();
-	long lastActionTime = System.currentTimeMillis();
+
 	
 	public ServerEngine() 
 	{
@@ -349,30 +348,25 @@ public class ServerEngine extends Thread
 	public void requestMove(Position p)
 	{
 		long currentTime = System.currentTimeMillis();
-
 		
-		int nextTileX = (int) (onlyPlayer.getX()/TILE_SIZE + p.x);
-		int nextTileY = (int) (onlyPlayer.getY()/TILE_SIZE + p.y);
+		Obj movingObject = ObjectArrayByID.get(p.UID);
+		
+		int nextTileX = (int) (movingObject.tileXPosition + p.x);
+		int nextTileY = (int) (movingObject.tileYPosition  + p.y);
 		
 		if(isCellPassable(nextTileX, nextTileY))
 		{
-		
-			
-			if(currentTime < lastMoveTime + ConfigOptions.moveDelay)
+			if(currentTime < movingObject.lastMoveTime + ConfigOptions.moveDelay)
 			{
 				return;
 				
 			}
 			else
 			{
-				lastMoveTime = currentTime;
+				movingObject.lastMoveTime = currentTime;
 				
 			}
 			
-			
-			
-			
-			p.UID = onlyPlayer.UID;
 			p.x = nextTileX;
 			p.y = nextTileY;
 			objectRelocate(p);
@@ -391,16 +385,17 @@ public class ServerEngine extends Thread
 	Position objectPosition = new Position();
 	public void mouseEvent(int mouseEventUID)
 	{
-		
+		Obj movingObject = onlyPlayer;
 		long currentTime = System.currentTimeMillis();
-		if(currentTime < lastActionTime + ConfigOptions.actionDelay)
+		
+		if(currentTime < movingObject.lastActionTime + ConfigOptions.actionDelay)
 		{
 			return;
 			
 		}
 		else
 		{
-			lastActionTime = currentTime;
+			movingObject.lastActionTime = currentTime;
 			
 		}
 		
@@ -436,15 +431,18 @@ public class ServerEngine extends Thread
 
 	public void mouseEvent(Position cell)
 	{
+		
+		Obj movingObject = onlyPlayer;
+		
 		long currentTime = System.currentTimeMillis();
-		if(currentTime < lastActionTime + ConfigOptions.actionDelay)
+		if(currentTime < movingObject.lastActionTime + ConfigOptions.actionDelay)
 		{
 			return;
 			
 		}
 		else
 		{
-			lastActionTime = currentTime;
+			movingObject.lastActionTime = currentTime;
 			
 		}
 		

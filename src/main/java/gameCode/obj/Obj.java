@@ -53,8 +53,8 @@ public class Obj extends Actor
 		// The serverside field is not sent and defaults to false for the objects.
 		this.ServerSide = true;
 
-		
-	    
+		lastMoveTime = System.currentTimeMillis();
+		lastActionTime = System.currentTimeMillis();
 //	    UniqueData.put("Name" , "Undefined Object");
 //	    UniqueData.put("Desc" , "Undefined Description");
 //	    UniqueData.put("Dense" , "false");
@@ -113,7 +113,7 @@ public class Obj extends Actor
 		
 	}
 	
-	public void move(int newX, int newY)
+	public void forceMove(int newX, int newY)
 	{
 		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
 		{
@@ -125,14 +125,34 @@ public class Obj extends Actor
 			ServerEngineReference.getSelf().objectRelocate(P);
 			
 		}
-		
-		
 	}
+	
+	public void move(int newX, int newY)
+	{
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			Position P = new Position();
+			P.UID = this.UID;
+			P.x = newX;
+			P.y = newY;
+			
+			ServerEngineReference.getSelf().requestMove(P);
+			
+		}
+	}
+	
+	
 	
 	public int tileXPosition;
 	public int tileYPosition;
-
 	
+	
+	@Optional(value = "Never")
+	public long lastMoveTime;
+	
+	
+	@Optional(value = "Never")
+	public long lastActionTime;
 	
 	public BitSet TransparentPixels = new BitSet(TILE_SIZE * TILE_SIZE);
 

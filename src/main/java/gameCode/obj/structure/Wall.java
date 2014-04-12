@@ -35,7 +35,7 @@ public class Wall extends Structure
 	public void onClick(Item attackedBy)
 	{
 		
-		this.move(this.tileXPosition+1, this.tileYPosition);
+		this.move(1, 0);
 		
 	}
 
