@@ -75,6 +75,7 @@ import core.client.PauseScreen;
 import core.client.ScreenEnumerations;
 import core.client.SettingsScreen;
 import core.client.MenuNinePatch;
+import core.shared.UidPair;
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
@@ -927,13 +928,13 @@ public class ClientEngine extends Game {
 		
 	}
 	
-	/*public void collisionEvent(UidPair uidPair)
+	public void collisionEvent(UidPair uidPair)
 	{
 		Obj o = ObjectArrayByID.get(uidPair.first);
 		
 		o.collide(uidPair.second);
 		
-	}*/
+	}
 
 	public void addToWorld(DistilledObject distilled) {
 		try {

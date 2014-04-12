@@ -43,6 +43,7 @@ import core.network.NetServer;
 import core.shared.ConfigOptions;
 import core.shared.Message;
 import core.shared.Position;
+import core.shared.UidPair;
 
 public class ServerEngine extends Thread
 {
@@ -442,7 +443,7 @@ public class ServerEngine extends Thread
 		{
 			
 			//System.out.println("Collided with " + collidedObjectUID.intValue());
-			/*Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
+			Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
 			
 			collidedObject.collide(p.UID);
 			
@@ -451,7 +452,7 @@ public class ServerEngine extends Thread
 			u.first = collidedObject.UID;
 			u.second = p.UID;
 
-			network.sendAll(Message.COLLISION, u);*/
+			network.sendAll(Message.COLLISION, u);
 		}
 		
 		
