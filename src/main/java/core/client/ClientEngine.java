@@ -465,7 +465,9 @@ public class ClientEngine extends Game {
 				(int) (Gdx.graphics.getWidth() * 0.37),
 				Gdx.graphics.getHeight());
 		drawSidePanel();
-
+		
+		chatTest testChat = new chatTest();
+		testChat.create();
 		//switchToNewScreen(ScreenEnumerations.MainMenu);
 
 	}
