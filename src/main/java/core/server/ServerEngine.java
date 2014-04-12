@@ -10,8 +10,10 @@ import gameCode.obj.getObjUID;
 import gameCode.obj.item.Item;
 import gameCode.obj.item.weapon.Weapon;
 import gameCode.obj.mob.Mob;
+import gameCode.obj.mob.humans.EnemySoldier;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
+import gameCode.ai.EnemyAI;
 import helpers.Hand;
 
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.primitives.MutableInteger;
 
+import com.badlogic.gdx.graphics.GLTexture;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
@@ -40,7 +43,6 @@ import core.network.NetServer;
 import core.shared.ConfigOptions;
 import core.shared.Message;
 import core.shared.Position;
-import core.shared.UidPair;
 
 public class ServerEngine extends Thread
 {
@@ -55,6 +57,7 @@ public class ServerEngine extends Thread
 	public Lock standby = new ReentrantLock();
 	
 	Obj onlyPlayer;
+	ArrayList<EnemyAI> enemies;
 	public TweenManager tweenManager;
 	
 	public ServerEngine() 
@@ -67,7 +70,7 @@ public class ServerEngine extends Thread
 		p.yUp = true;
 		p.convertObjectToTileSpace = true;
 		
-		Texture.setEnforcePotImages(false);
+		GLTexture.setEnforcePotImages(false);
 		map = new TmxMapLoader().load("maps/Map.tmx" , p );
 		
 		standby.lock();
@@ -98,6 +101,25 @@ public class ServerEngine extends Thread
 		
 	}
 	
+	public class Pair
+	{
+		
+		int x;
+		int y;
+		
+		Pair(int x, int y)
+		{
+			this.x = x;
+			this.y = y;
+		}
+		
+	}
+	
+	// INITIAL ENEMY POSITIONS
+	Pair[] enemyPositions = { new Pair(3, 10), new Pair(25, 10), new Pair(40, 29), new Pair(26, 26),
+							  new Pair(8, 58), new Pair(2, 91), new Pair(40, 114), new Pair(40, 118), new Pair(40, 116),
+							  new Pair(40, 119), new Pair(40, 117)};
+	
 	@Override
 	public void run() 
 	{
@@ -118,10 +140,14 @@ public class ServerEngine extends Thread
 			tweenManager.update(DeltaInSeconds);
 			
 			
-			
-			
-			
-			
+			// Perform AI actions
+			if (enemies != null)
+			{
+				for (EnemyAI e : enemies)
+				{
+					e.doAction(this);
+				}
+			}			
 			
 			masterLoopTime = System.currentTimeMillis();
 			
@@ -304,6 +330,21 @@ public class ServerEngine extends Thread
 		addToWorld(aGun);
 		addToWorld(onlyPlayer);
 		
+		// Create enemy objects/assign them to AI controllers
+		
+		enemies = new ArrayList<EnemyAI>();
+		
+		for (Pair p : enemyPositions)
+		{
+			enemies.add(new EnemyAI(new EnemySoldier(p.x, p.y), m));
+		}
+		
+		// Add enemy objects to the world
+		for (EnemyAI e : enemies)
+		{
+			addToWorld(e.getEnemyObject());
+		}
+		
 		
 		network.sendAll(Message.YOUCONTROL, onlyPlayer.UID);
 		
@@ -372,8 +413,8 @@ public class ServerEngine extends Thread
 		
 		Obj movingObject = ObjectArrayByID.get(p.UID);
 		
-		int nextTileX = (int) (movingObject.tileXPosition + p.x);
-		int nextTileY = (int) (movingObject.tileYPosition  + p.y);
+		int nextTileX = movingObject.tileXPosition + p.x;
+		int nextTileY = movingObject.tileYPosition  + p.y;
 		
 		if(currentTime < movingObject.lastMoveTime + ConfigOptions.moveDelay)
 		{
@@ -401,7 +442,7 @@ public class ServerEngine extends Thread
 		{
 			
 			//System.out.println("Collided with " + collidedObjectUID.intValue());
-			Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
+			/*Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
 			
 			collidedObject.collide(p.UID);
 			
@@ -410,7 +451,7 @@ public class ServerEngine extends Thread
 			u.first = collidedObject.UID;
 			u.second = p.UID;
 
-			network.sendAll(Message.COLLISION, u);
+			network.sendAll(Message.COLLISION, u);*/
 		}
 		
 		
@@ -560,6 +601,10 @@ public class ServerEngine extends Thread
 	}
 
 
+	public ArrayList<ArrayList<ArrayList<Obj>>> getObjects()
+	{
+		return ( this.ObjectArray );
+	}
 
 
 }

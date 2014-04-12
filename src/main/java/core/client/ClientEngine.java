@@ -30,13 +30,13 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GLTexture;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -60,9 +60,6 @@ import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.badlogic.gdx.utils.reflect.Constructor;
 import com.badlogic.gdx.Screen;
-
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-
 import core.network.NetClient;
 import core.server.ServerEngine;
 import core.shared.ConfigOptions;
@@ -70,7 +67,6 @@ import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
 import core.shared.Background;
-import core.shared.UidPair;
 import core.client.ConnectingScreen;
 import core.client.ErrorScreen;
 import core.client.HostingScreen;
@@ -84,7 +80,6 @@ import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
-
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X_EXTENDED;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y_EXTENDED;
 
@@ -207,7 +202,7 @@ public class ClientEngine extends Game {
 		p.yUp = true;
 		p.convertObjectToTileSpace = true;
 
-		Texture.setEnforcePotImages(false);
+		GLTexture.setEnforcePotImages(false);
 		map = new TmxMapLoader().load("maps/Map.tmx", p);
 
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
@@ -298,7 +293,7 @@ public class ClientEngine extends Game {
 
 
 		
-		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
+		worldStage.setViewport(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
 		
 		/*
 		 * camera = new OrthographicCamera(1, h/w); batch = new SpriteBatch();
@@ -349,7 +344,6 @@ public class ClientEngine extends Game {
 			P.x = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-
 	}
 
 	public void focusCameraOnControlled() {
@@ -494,7 +488,7 @@ public class ClientEngine extends Game {
 	@Override
 	public void resize(int width, int height) {
 		
-		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
+		worldStage.setViewport(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
 		
 		
 		camera.viewportHeight = VIEW_DISTANCE_X * TILE_SIZE;
@@ -933,13 +927,13 @@ public class ClientEngine extends Game {
 		
 	}
 	
-	public void collisionEvent(UidPair uidPair)
+	/*public void collisionEvent(UidPair uidPair)
 	{
 		Obj o = ObjectArrayByID.get(uidPair.first);
 		
 		o.collide(uidPair.second);
 		
-	}
+	}*/
 
 	public void addToWorld(DistilledObject distilled) {
 		try {
