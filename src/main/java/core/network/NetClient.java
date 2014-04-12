@@ -18,6 +18,7 @@ import core.client.ClientEngine;
 import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
+import core.shared.UidPair;
 
 /**
  * Client end for KryoNet network communications
@@ -118,10 +119,10 @@ public class NetClient extends Network {
 						gameClient.mouseEvent(MouseEvent);
 						break;
 						
-					/*case COLLISION:
+					case COLLISION:
 						UidPair uidPair = (UidPair) netMsg.obj;
 						gameClient.collisionEvent(uidPair);
-						break;*/
+						break;
 						
 						
 					default:
