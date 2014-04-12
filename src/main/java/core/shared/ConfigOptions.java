@@ -28,7 +28,7 @@ public class ConfigOptions
 	public static TextureRegion texture = new TextureRegion(texturereg);
 	
 //	public static Texture texture2reg = new Texture((Gdx.files.internal("tilesets/tmw_desert_spacing - Copy.png")));
-	public static Texture texture2reg = new Texture((Gdx.files.internal("tilesets/walls2.png")));
+	public static Texture texture2reg = new Texture((Gdx.files.internal("tilesets/wall.png")));
 	public static TextureRegion texture2 = new TextureRegion(texture2reg);
 
 
