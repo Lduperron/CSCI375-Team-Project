@@ -40,6 +40,7 @@ import core.network.NetServer;
 import core.shared.ConfigOptions;
 import core.shared.Message;
 import core.shared.Position;
+import core.shared.UidPair;
 
 public class ServerEngine extends Thread
 {
@@ -291,12 +292,16 @@ public class ServerEngine extends Thread
 		
 		Weapon aGun = new Weapon(-1, -1);
 		
-		addToWorld(aGun);
+		
+		
 		
 		Mob m = (Mob) onlyPlayer;
 		
+		aGun.containerUID = m.UID;
 		m.leftHand = aGun;
 		
+		
+		addToWorld(aGun);
 		addToWorld(onlyPlayer);
 		
 		
@@ -370,18 +375,22 @@ public class ServerEngine extends Thread
 		int nextTileX = (int) (movingObject.tileXPosition + p.x);
 		int nextTileY = (int) (movingObject.tileYPosition  + p.y);
 		
+		if(currentTime < movingObject.lastMoveTime + ConfigOptions.moveDelay)
+		{
+			return;
+			
+		}
+		else
+		{
+			movingObject.lastMoveTime = currentTime;
+			
+		}
+		
+		
+		
 		if(isCellPassable(nextTileX, nextTileY, collidedObjectUID))
 		{
-			if(currentTime < movingObject.lastMoveTime + ConfigOptions.moveDelay)
-			{
-				return;
-				
-			}
-			else
-			{
-				movingObject.lastMoveTime = currentTime;
-				
-			}
+
 			
 			p.x = nextTileX;
 			p.y = nextTileY;
@@ -396,7 +405,12 @@ public class ServerEngine extends Thread
 			
 			collidedObject.collide(p.UID);
 			
+			UidPair u = new UidPair();
 			
+			u.first = collidedObject.UID;
+			u.second = p.UID;
+
+			network.sendAll(Message.COLLISION, u);
 		}
 		
 		

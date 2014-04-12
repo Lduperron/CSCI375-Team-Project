@@ -70,6 +70,7 @@ import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
 import core.shared.Background;
+import core.shared.UidPair;
 import core.client.ConnectingScreen;
 import core.client.ErrorScreen;
 import core.client.HostingScreen;
@@ -931,6 +932,14 @@ public class ClientEngine extends Game {
 		o.onClick(null);
 		
 	}
+	
+	public void collisionEvent(UidPair uidPair)
+	{
+		Obj o = ObjectArrayByID.get(uidPair.first);
+		
+		o.collide(uidPair.second);
+		
+	}
 
 	public void addToWorld(DistilledObject distilled) {
 		try {
@@ -994,5 +1003,7 @@ public class ClientEngine extends Game {
 
 		new LwjglApplication(new ClientEngine(), cfg);
 	}
+
+
 
 }

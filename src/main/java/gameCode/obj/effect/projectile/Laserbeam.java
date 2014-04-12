@@ -1,5 +1,9 @@
 package gameCode.obj.effect.projectile;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+import core.shared.ConfigOptions;
+
 public class Laserbeam extends Projectile
 {
 
@@ -9,4 +13,13 @@ public class Laserbeam extends Projectile
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
+	public TextureRegion getTexture()
+	{
+		
+		return texture;
+		
+	}
+	
+	protected TextureRegion texture = ConfigOptions.cakeTexture;
 }

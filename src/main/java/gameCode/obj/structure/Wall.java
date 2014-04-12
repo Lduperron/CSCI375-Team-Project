@@ -20,7 +20,7 @@ public class Wall extends Structure
 		name = "Wall";
 	}
 	
-	protected static TextureRegion texture = ConfigOptions.texture2;
+	protected TextureRegion texture = ConfigOptions.texture2;
 	
 	
 	@Override

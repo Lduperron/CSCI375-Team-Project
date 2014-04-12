@@ -117,6 +117,31 @@ public class Obj extends Actor
 		
 	}
 	
+	public int getTileXPosition()
+	{
+		
+		Obj current = this;
+		
+//		while(current.containerUID != -1)
+//		{
+//			
+//			current = 
+//			
+//		}
+		
+		
+		
+		return 0;
+	}
+	public int getTileYPosition()
+	{
+		
+		
+		
+		return 0;
+	}
+	
+	
 	public void forceMove(int newX, int newY)
 	{
 		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
@@ -154,7 +179,7 @@ public class Obj extends Actor
 	
 	public int tileXPosition;
 	public int tileYPosition;
-	
+	public int containerUID = -1;
 	
 	@Optional(value = "Never")
 	public long lastMoveTime;

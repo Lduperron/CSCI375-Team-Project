@@ -2,6 +2,7 @@ package gameCode.obj.item.weapon;
 
 import core.shared.Position;
 import gameCode.obj.*;
+import gameCode.obj.effect.projectile.Laserbeam;
 import gameCode.obj.item.Item;
 
 public class Weapon extends Item
@@ -19,12 +20,18 @@ public class Weapon extends Item
 	public void rangedEvent(Position P)
 	{
 		
-		System.err.println("Bang");
-		
+		if(this.ServerSide)
+		{
+			
+			Laserbeam l = new Laserbeam(this.getTileXPosition(), this.getTileYPosition());			
+			
+		}
 		
 		return;
 		
 	}
-	
+
+
+
 
 }

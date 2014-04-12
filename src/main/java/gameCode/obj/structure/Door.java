@@ -86,7 +86,7 @@ public class Door extends Structure
 	@Override
 	public void collide(int colldier)
 	{
-		//this.onClick(null);
+		this.onClick(null);
 		return;
 	}
 	
@@ -94,7 +94,7 @@ public class Door extends Structure
 	public void onClick(Item attackedBy)
 	{
 		super.onClick(attackedBy);
-				
+		
 		if(this.locked)
 		{
 			this.animate("Denied", false);
