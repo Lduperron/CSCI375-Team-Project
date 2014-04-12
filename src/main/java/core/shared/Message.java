@@ -1,7 +1,5 @@
 package core.shared;
 
-import java.util.List;
-
 /**
  * Enumerated values for Message to be passed from client to server.
  */

@@ -2,8 +2,6 @@ package gameCode.obj.structure;
 
 import gameCode.obj.item.Item;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import core.shared.ConfigOptions;

@@ -1,7 +1,6 @@
 package gameCode.obj.item.weapon;
 
 import core.shared.Position;
-import gameCode.obj.*;
 import gameCode.obj.effect.projectile.Laserbeam;
 import gameCode.obj.item.Item;
 

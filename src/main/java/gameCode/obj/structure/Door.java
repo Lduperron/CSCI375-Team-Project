@@ -10,19 +10,13 @@ import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.TweenCallback;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.PixmapPacker;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import core.client.PixmapTextureAtlas;
-import core.client.ClientEngine.ClientEngineReference;
 
 public class Door extends Structure
 {
@@ -63,6 +57,7 @@ public class Door extends Structure
 	static Array<BitSet> start = p.createTransparencies("hightechsecurity_closed");
 	
 	
+	@Override
 	public HashMap<String, Animation> getAnimations()
 	{
 		

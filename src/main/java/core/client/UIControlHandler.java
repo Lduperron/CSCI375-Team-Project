@@ -2,14 +2,8 @@ package core.client;
 
 import gameCode.obj.Obj;
 
-import org.lwjgl.Sys;
-
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.Ray;
-
 import core.shared.Message;
 import core.shared.Position;
 import static core.shared.ConfigOptions.TILE_SIZE;
