@@ -34,6 +34,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -159,6 +160,9 @@ public class ClientEngine extends Game {
 	Table inventoryTextScrollingTable;
 	TextFieldStyle inputStyle;
 	ScrollPaneStyle scrollPaneStyle;
+
+	Texture gunItem;
+	TextureRegion gunItemRegion;
 
 	Stage uiStage;
 	Stage worldStage;
@@ -301,59 +305,36 @@ public class ClientEngine extends Game {
 
 		uiStage.setCamera(cameraSidePanel);
 
-		uiStage.setViewport((float)(Gdx.graphics.getWidth()*0.37), 
-				Gdx.graphics.getHeight(), 
-				true, 
-				0, //viewPortX
-				0, //viewPortY
-				(float)(Gdx.graphics.getWidth() * 0.37), //viewPortWidth
-				Gdx.graphics.getHeight() //viewPortHeight
-				);
-		
-//		uiStage.setViewport((float) (Gdx.graphics.getWidth() / 2),
-//				Gdx.graphics.getHeight(), true,
-//				(float) (Gdx.graphics.getWidth() * 0.63), 0,
-//				(float) (Gdx.graphics.getWidth() * 0.37),
-//				Gdx.graphics.getHeight());
+		uiStage.setViewport((float) (Gdx.graphics.getWidth() * 0.37),
+				Gdx.graphics.getHeight(), true, 0, // viewPortX
+				0, // viewPortY
+				(float) (Gdx.graphics.getWidth() * 0.37), // viewPortWidth
+				Gdx.graphics.getHeight() // viewPortHeight
+		);
 
 		rawTextStyle = new LabelStyle();
 		rawTextStyle.font = gameFont;
 		rawTextStyle.fontColor = Color.BLACK;
-		
+
 		Table table = new Table();
 		uiStage.addActor(table);
 		table.setPosition(200, 65);
 
 		table.debug();
 		table.align(Align.top | Align.center);
-		table.setPosition((float)(Gdx.graphics.getWidth()*0.08), (Gdx.graphics.getHeight()-125));
+		table.setPosition((float) (Gdx.graphics.getWidth() * 0.08),
+				(Gdx.graphics.getHeight() - 175));
+
 		Label inventoryLabel = new Label("Inventory", rawTextStyle);
 		inventoryLabel.setWrap(true);
 		inventoryLabel.setAlignment(Align.top | Align.center);
-		table.add(inventoryLabel).minWidth(200).minHeight(110).fill();
+		table.add(inventoryLabel).minWidth(200).minHeight(150).fill();
+
 		table.pack();
-		
-		
-//		table.debug();
-//		table.add(new Label("Inventory", rawTextStyle));
-//		table.row();
-//		table.add(new Label("This is regular text\nwith a newline.", rawTextStyle));
-//		table.row();
-//		Label label3 = new Label("This is regular text\n\nwith newlines,\naligned bottom, right.", rawTextStyle);
-//		label3.setAlignment(Align.bottom | Align.right);
-//		table.add(label3).minWidth(200).minHeight(110).fill();
-//		table.row();
-//		Label label4 = new Label("This is regular text with NO newlines, wrap enabled and aligned bottom, right.", rawTextStyle);
-//		label4.setWrap(true);
-//		label4.setAlignment(Align.bottom | Align.right);
-//		table.add(label4).minWidth(200).minHeight(110).fill();
-//		table.row();
-//		Label label5 = new Label("This is regular text with\n\nnewlines, wrap\nenabled and aligned bottom, right.", rawTextStyle);
-//		label5.setWrap(true);
-//		label5.setAlignment(Align.bottom | Align.right);
-//		table.add(label5).minWidth(200).minHeight(110).fill();
-//
-//		table.pack();
+
+		gunItem = new Texture(Gdx.files.internal("assets/tilesets/gun0.png"));
+
+		gunItemRegion = new TextureRegion(gunItem, 0, 0, 32, 32);
 	}
 
 	@Override
@@ -490,9 +471,16 @@ public class ClientEngine extends Game {
 				(int) (Gdx.graphics.getWidth() * 0.37),
 				Gdx.graphics.getHeight());
 		drawSidePanel();
-		
+
 		uiStage.draw();
 		Table.drawDebug(uiStage);
+
+		batchSidePanel.begin();
+		batchSidePanel.draw(gunItemRegion,
+				(float) (Gdx.graphics.getWidth() * 0.25),
+				(float) (Gdx.graphics.getWidth() * 0.5), 0, 0, 32, 32,
+				(float) 2.5, 1, 0);
+		batchSidePanel.end();
 
 	}
 
