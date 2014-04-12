@@ -25,7 +25,7 @@ public class Network {
 	public static final int tcpPort = 54555;
 	public static final int udpPort = 54777;
 
-	public static final int BUFFER_SIZE = 3200000;
+	public static final int BUFFER_SIZE = 32000000;
 
 	public Network() {
 		super();

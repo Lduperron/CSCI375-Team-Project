@@ -4,8 +4,14 @@ import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
+import gameCode.obj.item.Item;
+import helpers.HelperFunctions;
+
 import java.util.BitSet;
 import java.util.HashMap;
+
+import aurelienribon.tweenengine.BaseTween;
+import aurelienribon.tweenengine.TweenCallback;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -27,6 +33,7 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 import core.client.ClientEngine;
 import core.client.animatedAssets;
+import core.server.ServerEngine.ServerEngineReference;
 import core.shared.ConfigOptions;
 import core.shared.DistilledObject;
 import core.shared.Position;
@@ -49,21 +56,9 @@ public class Obj extends Actor
 		// Objects are initiated on the server and then sent to the clients
 		// The serverside field is not sent and defaults to false for the objects.
 		this.ServerSide = true;
-		
-	    this.addListener(new ClickListener() {
-	        @Override public void clicked(InputEvent event, float x, float y) {
-	            // When you click the button it will print this value you assign.
-	            // That way you will know 'which' button was clicked and can perform
-	            // the correct action based on it.
-	        	
-	        	Obj object = (Obj)event.getTarget();
-	        	
-	            object.onClick();
 
-	        };
-	    });
-		
-	    
+		lastMoveTime = System.currentTimeMillis();
+		lastActionTime = System.currentTimeMillis();
 //	    UniqueData.put("Name" , "Undefined Object");
 //	    UniqueData.put("Desc" , "Undefined Description");
 //	    UniqueData.put("Dense" , "false");
@@ -71,17 +66,35 @@ public class Obj extends Actor
 		
 	}
 	
+	
+	float xPositionOffset = 0;
+	float yPositionOffset = 0;
+	
+	public void setXOffset(float offset)
+	{
+		
+		xPositionOffset = offset;
+		
+	}
+	
+	public void setYOffset(float offset)
+	{
+		
+		yPositionOffset = offset;
+		
+	}
+	
 	public float getXOffset()
 	{
 		
-		return 0;  // not supported
+		return xPositionOffset;  // not supported
 	}
 	
 	
 	public float getYOffset()
 	{
 		
-		return 0;// not supported
+		return yPositionOffset;// not supported
 	}
 	
 	public float getXCameraOffset()
@@ -104,10 +117,76 @@ public class Obj extends Actor
 		
 	}
 	
+	public int getTileXPosition()
+	{
+		
+		Obj current = this;
+		
+//		while(current.containerUID != -1)
+//		{
+//			
+//			current = 
+//			
+//		}
+		
+		
+		
+		return 0;
+	}
+	public int getTileYPosition()
+	{
+		
+		
+		
+		return 0;
+	}
+	
+	
+	public void forceMove(int newX, int newY)
+	{
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			Position P = new Position();
+			P.UID = this.UID;
+			P.x = newX;
+			P.y = newY;
+			
+			ServerEngineReference.getSelf().objectRelocate(P);
+			
+		}
+	}
+	
+	public void move(int newX, int newY)
+	{
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			Position P = new Position();
+			P.UID = this.UID;
+			P.x = newX;
+			P.y = newY;
+			
+			ServerEngineReference.getSelf().requestMove(P);
+			
+		}
+	}
+	
+	public void collide(int colldier)
+	{
+		
+		return;
+	}
+	
+	
 	public int tileXPosition;
 	public int tileYPosition;
-
-
+	public int containerUID = -1;
+	
+	@Optional(value = "Never")
+	public long lastMoveTime;
+	
+	
+	@Optional(value = "Never")
+	public long lastActionTime;
 	
 	public BitSet TransparentPixels = new BitSet(TILE_SIZE * TILE_SIZE);
 
@@ -159,11 +238,41 @@ public class Obj extends Actor
 		
 	}
 	
-	public void onClick()
+	
+	
+	public void onClick(Item attackedBy)
 	{
+		final Obj o = this;
+		
+//		HelperFunctions.afterDelay(5, this, new TweenCallback()
+//		{
+//			
+//			@Override
+//			public void onEvent(int type, BaseTween<?> source)
+//			{
+//				System.out.println("After 5 second delay..." + o.ServerSide);
+//				
+//			}
+//		});
+		
+		if(this.ServerSide)
+		{
+			
+			//ServerEngineReference.getSelf().
+			
+		}
+		
+		//System.out.println(this.ServerSide);
 		
 		//System.out.println(UID);
 		//ClientEngine.Test.getSelf().removeFromWorld(UID);
+		
+	}
+	
+	public void rangedEvent(Position P)
+	{
+		
+		return;
 		
 	}
 	
@@ -183,7 +292,7 @@ public class Obj extends Actor
 				y = Math.abs(y - getWidth());
 				
 				int position = (int) ((int)y * getWidth() + x );
-
+				
 				if (!TransparentPixels.get(position)) 
 				{
 					return this;
@@ -230,14 +339,14 @@ public class Obj extends Actor
 
 		if(!animated)
 		{
-			batch.draw(currentFrame, getX(), getY(), getOriginX(), getOriginY(), 32 , 32 , getScaleX(), getScaleY(), getRotation());
+			batch.draw(currentFrame, getX() + getXOffset(), getY() + getYOffset(), getOriginX(), getOriginY(), 32 , 32 , getScaleX(), getScaleY(), getRotation());
 			//batch.draw(currentFrame, test.x, test.y, getOriginX(), getOriginY(), 32 , 32 , getScaleX(), getScaleY(), getRotation());
 		}
 		else
 		{
-			animatedTime += Gdx.graphics.getDeltaTime();           // #15
-			currentFrame = currentAnimation.getKeyFrame(animatedTime, LoopAnimation);  // #16
-	        batch.draw(currentFrame, getX(), getY(), 32, 32);           // #17
+			animatedTime += Gdx.graphics.getDeltaTime();
+			currentFrame = currentAnimation.getKeyFrame(animatedTime, LoopAnimation); 
+	        batch.draw(currentFrame, getX(), getY(), 32, 32);
 	        
 	        if(currentAnimation.isAnimationFinished(animatedTime) && LoopAnimation == false)
 	        {

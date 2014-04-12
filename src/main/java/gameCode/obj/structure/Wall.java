@@ -1,5 +1,7 @@
 package gameCode.obj.structure;
 
+import gameCode.obj.item.Item;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -18,7 +20,7 @@ public class Wall extends Structure
 		name = "Wall";
 	}
 	
-	protected static TextureRegion texture = ConfigOptions.texture2;
+	protected TextureRegion texture = ConfigOptions.texture2;
 	
 	
 	@Override
@@ -26,6 +28,14 @@ public class Wall extends Structure
 	{
 		
 		return texture;
+		
+	}
+	
+	@Override
+	public void onClick(Item attackedBy)
+	{
+		
+		this.move(1, 0);
 		
 	}
 

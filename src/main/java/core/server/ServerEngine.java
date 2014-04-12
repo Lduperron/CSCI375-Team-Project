@@ -7,9 +7,12 @@ import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 import gameCode.obj.Obj;
 import gameCode.obj.getObjUID;
+import gameCode.obj.item.Item;
+import gameCode.obj.item.weapon.Weapon;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
+import helpers.Hand;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +20,9 @@ import java.util.HashMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import aurelienribon.tweenengine.TweenManager;
+import aurelienribon.tweenengine.primitives.MutableInteger;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObjects;
@@ -29,24 +35,27 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.esotericsoftware.kryonet.Connection;
 
+import core.client.ClientEngine;
 import core.network.NetServer;
 import core.shared.ConfigOptions;
 import core.shared.Message;
 import core.shared.Position;
+import core.shared.UidPair;
 
 public class ServerEngine extends Thread
 {
 	
 	private NetServer network;
 	boolean masterLoop = true;
+	long masterLoopTime = System.currentTimeMillis();
+	
 	public TiledMap map;
 	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
 	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<Integer, Obj>();
 	public Lock standby = new ReentrantLock();
 	
-	Mob onlyPlayer;
-	long lastMoveTime = System.currentTimeMillis();
-	long lastActionTime = System.currentTimeMillis();
+	Obj onlyPlayer;
+	public TweenManager tweenManager;
 	
 	public ServerEngine() 
 	{
@@ -65,6 +74,28 @@ public class ServerEngine extends Thread
 		generateMapObjects();
 		standby.unlock();
 		
+		tweenManager = new TweenManager();
+		
+	}
+	
+	public static class ServerEngineReference
+	{
+		static ServerEngine Self;
+		
+		public static void setSelf(ServerEngine e)
+		{
+			
+			Self = e;
+			
+		}
+		
+		public static ServerEngine getSelf()
+		{
+			
+			return Self;
+			
+		}
+		
 	}
 	
 	@Override
@@ -74,20 +105,29 @@ public class ServerEngine extends Thread
 		// The network could not bind a port. Fatal error
 		try {
 			network = new NetServer(this);
+			ServerEngineReference.setSelf(this);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		
 		while(masterLoop) // Do AI, etc..
 		{
+			long masterLoopDelta = System.currentTimeMillis() - masterLoopTime;
+			float DeltaInSeconds = (float) (masterLoopDelta / 1000.0);
+	
+			tweenManager.update(DeltaInSeconds);
 			
 			
 			
 			
+			
+			
+			
+			masterLoopTime = System.currentTimeMillis();
 			
 			try
 			{
-				Thread.sleep(5000);
+				Thread.sleep(50);
 			}
 			catch (InterruptedException e)
 			{
@@ -202,7 +242,7 @@ public class ServerEngine extends Thread
 	}
 	
 	
-	public boolean isCellPassable(int x, int y)
+	public boolean isCellPassable(int x, int y, MutableInteger collidedObjectUID)
 	{
 
 		for(Obj obj : ObjectArray.get(x).get(y))
@@ -210,7 +250,7 @@ public class ServerEngine extends Thread
 			
 			if(obj.dense)
 			{
-				
+				collidedObjectUID.setValue(obj.UID);
 				return false;
 				
 			}
@@ -247,7 +287,23 @@ public class ServerEngine extends Thread
 	public void spawnMob()
 	{
 		onlyPlayer = new Mob(2,3);
+
+		
+		
+		Weapon aGun = new Weapon(-1, -1);
+		
+		
+		
+		
+		Mob m = (Mob) onlyPlayer;
+		
+		aGun.containerUID = m.UID;
+		m.leftHand = aGun;
+		
+		
+		addToWorld(aGun);
 		addToWorld(onlyPlayer);
+		
 		
 		network.sendAll(Message.YOUCONTROL, onlyPlayer.UID);
 		
@@ -255,7 +311,12 @@ public class ServerEngine extends Thread
 	
 	public void addToWorld(Obj o)
 	{
-		ObjectArray.get((int) o.getX()).get((int) o.getY()).add(o);
+		
+		if(o.tileXPosition > 0)
+		{
+			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
+		}
+
 		ObjectArrayByID.put(o.UID, o);
 		
 		notifyClientsOfNewObject(o);
@@ -289,85 +350,216 @@ public class ServerEngine extends Thread
 	{
 		Obj o = ObjectArrayByID.get(P.UID);
 		
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).remove(o);
+		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+	
+		o.tileXPosition = P.x;
+		o.tileYPosition = P.y;
+				
+		ObjectArray.get(P.x).get(P.y).add(o);
 		
-		
+
 		o.setX(P.x*TILE_SIZE);
 		o.setY(P.y*TILE_SIZE);
+
 		
-		ObjectArray.get((int) o.getX() / TILE_SIZE).get((int) o.getY() / TILE_SIZE).add(o);
+		network.sendAll(Message.OBJMOVE, P);
 	}
 
+	MutableInteger collidedObjectUID = new MutableInteger(-1);
 	public void requestMove(Position p)
 	{
 		long currentTime = System.currentTimeMillis();
-
 		
-		int nextTileX = (int) (onlyPlayer.getX()/TILE_SIZE + p.x);
-		int nextTileY = (int) (onlyPlayer.getY()/TILE_SIZE + p.y);
+		Obj movingObject = ObjectArrayByID.get(p.UID);
 		
-		if(isCellPassable(nextTileX, nextTileY))
-		{
+		int nextTileX = (int) (movingObject.tileXPosition + p.x);
+		int nextTileY = (int) (movingObject.tileYPosition  + p.y);
 		
-			
-			if(currentTime < lastMoveTime + ConfigOptions.moveDelay)
-			{
-				return;
-				
-			}
-			else
-			{
-				lastMoveTime = currentTime;
-				
-			}
-			
-			
-			
-			
-			p.UID = onlyPlayer.UID;
-			p.x = nextTileX;
-			p.y = nextTileY;
-			objectRelocate(p);
-			
-			
-			network.sendAll(Message.OBJMOVE, p);
-			
-		}
-		
-		else
-		{}
-		
-		
-		
-	}
-
-	public void mouseEvent(int mouseEventUID)
-	{
-		
-		long currentTime = System.currentTimeMillis();
-		if(currentTime < lastActionTime + ConfigOptions.actionDelay)
+		if(currentTime < movingObject.lastMoveTime + ConfigOptions.moveDelay)
 		{
 			return;
 			
 		}
 		else
 		{
-			lastActionTime = currentTime;
+			movingObject.lastMoveTime = currentTime;
 			
 		}
 		
-		Obj o = ObjectArrayByID.get(mouseEventUID);
 		
-		// Do checks that we can actually click it, etc, etc...
 		
-		// TODO:  Send what we actually clicked it with (empty hand, divine rapier, etc.)
-		o.onClick();
+		if(isCellPassable(nextTileX, nextTileY, collidedObjectUID))
+		{
+
+			
+			p.x = nextTileX;
+			p.y = nextTileY;
+			objectRelocate(p);
+		}
 		
-		network.sendAll(Message.MOUSEEVENTFROMSERVER, mouseEventUID);
+		else
+		{
+			
+			//System.out.println("Collided with " + collidedObjectUID.intValue());
+			Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
+			
+			collidedObject.collide(p.UID);
+			
+			UidPair u = new UidPair();
+			
+			u.first = collidedObject.UID;
+			u.second = p.UID;
+
+			network.sendAll(Message.COLLISION, u);
+		}
 		
 		
 		
 	}
+
+	
+	Position objectPosition = new Position();
+	public void mouseEvent(int mouseEventTargetUID)
+	{
+		Obj movingObject = onlyPlayer;
+		long currentTime = System.currentTimeMillis();
+		
+		if(currentTime < movingObject.lastActionTime + ConfigOptions.actionDelay)
+		{
+			return;
+			
+		}
+		else
+		{
+			movingObject.lastActionTime = currentTime;
+			
+		}
+		
+		Obj o = ObjectArrayByID.get(mouseEventTargetUID);
+		
+		// Do checks that we can actually click it, etc, etc...
+		Item inHand = getActiveHandItem();
+		// TODO:  Send what we actually clicked it with (empty hand, divine rapier, etc.)
+		
+		if(IsMapAdjacent(onlyPlayer, o))
+		{
+			o.onClick(inHand);
+		}
+		else
+		{
+			
+			if(inHand != null)
+			{
+				objectPosition.UID = mouseEventTargetUID;
+				objectPosition.x = o.tileXPosition;
+				objectPosition.y = o.tileYPosition;
+				inHand.rangedEvent(objectPosition);
+			}
+			
+		}
+		
+		network.sendAll(Message.MOUSEEVENTFROMSERVER, mouseEventTargetUID);
+		
+		
+		
+	}
+
+
+	public void mouseEvent(Position cell)
+	{
+		
+		Obj movingObject = onlyPlayer;
+		
+		long currentTime = System.currentTimeMillis();
+		if(currentTime < movingObject.lastActionTime + ConfigOptions.actionDelay)
+		{
+			return;
+			
+		}
+		else
+		{
+			movingObject.lastActionTime = currentTime;
+			
+		}
+		
+		
+		
+		
+
+		Item currentlyHeldItem = getActiveHandItem();
+		
+		if(IsMapAdjacent(onlyPlayer, cell))
+		{			
+			if(currentlyHeldItem == null)
+			{
+				return; // you stare intently at the empty tile with your empty hand
+			}
+			else
+			{
+				//currentlyHeldItem.
+			}
+		
+		}
+		else
+		{
+			
+			if(currentlyHeldItem == null)
+			{
+				return; // you stare intently at the empty tile with your empty hand
+			}
+			else
+			{
+				currentlyHeldItem.rangedEvent(cell);
+			}
+			
+		}
+	
+	}
+	
+	private boolean IsMapAdjacent(Obj A, Obj B)
+	{
+		//TODO: this.
+
+		return true;
+
+	}
+
+	private boolean IsMapAdjacent(Obj A, Position B)
+	{
+		//TODO: this.
+
+		return false;
+
+	}
+
+
+	private Item getActiveHandItem()
+	{
+		if(onlyPlayer.getClass().isAssignableFrom(Mob.class))
+		{
+			
+			Mob m = (Mob) onlyPlayer;
+			
+			if(m.ActiveHand == Hand.LEFT)
+			{
+				
+				return m.leftHand;
+				
+			}
+			else if(m.ActiveHand == Hand.RIGHT)
+			{
+				
+				return m.rightHand;
+				
+			}
+			
+			
+		}
+		
+		return null;
+	}
+
+
 
 
 }

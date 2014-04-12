@@ -1,7 +1,13 @@
 package gameCode.obj.structure;
 
+import gameCode.obj.item.Item;
+import helpers.HelperFunctions;
+
 import java.util.BitSet;
 import java.util.HashMap;
+
+import aurelienribon.tweenengine.BaseTween;
+import aurelienribon.tweenengine.TweenCallback;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -16,7 +22,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import core.client.PixmapTextureAtlas;
-import core.client.ClientEngine.Test;
+import core.client.ClientEngine.ClientEngineReference;
 
 public class Door extends Structure
 {
@@ -77,13 +83,18 @@ public class Door extends Structure
 	public boolean locked = true;
 	
 	
-	
+	@Override
+	public void collide(int colldier)
+	{
+		this.onClick(null);
+		return;
+	}
 	
 	@Override
-	public void onClick()
+	public void onClick(Item attackedBy)
 	{
-		super.onClick();
-				
+		super.onClick(attackedBy);
+		
 		if(this.locked)
 		{
 			this.animate("Denied", false);
@@ -93,19 +104,55 @@ public class Door extends Structure
 		{
 			if(this.dense)
 			{
-				this.dense = false;
-				this.opaque = false;
+				
+				final Door d = this;
+				HelperFunctions.afterDelay(.5, this, new TweenCallback()
+				{
+					
+					@Override
+					public void onEvent(int type, BaseTween<?> source)
+					{
+						d.dense = false;
+						d.opaque = false;
+						
+					}
+
+				});
+				
+				HelperFunctions.afterDelay(5, this, new TweenCallback()
+				{
+					
+					@Override
+					public void onEvent(int type, BaseTween<?> source)
+					{
+						d.onClick(null); // TODO:  Move the open/close things into their own functions and just call 'close'
+						
+					}
+
+				});
+
 				this.animate("Opening", false);
 				
 			}
 			else
 			{
-				this.dense = true;
-				this.opaque = true;
+				final Door d = this;
+				HelperFunctions.afterDelay(.5, this, new TweenCallback()
+				{
+					
+					@Override
+					public void onEvent(int type, BaseTween<?> source)
+					{
+						d.dense = true;
+						d.opaque = true;
+						
+					}
+
+				});
 				this.animate("Closing", false);
 			}
 			
-			Test.getSelf().calculateVisibleTiles();
+		
 		}
 				
 	}
