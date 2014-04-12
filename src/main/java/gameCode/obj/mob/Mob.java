@@ -17,7 +17,9 @@ public class Mob extends Obj
 	public Mob(int x, int y)
 	{
 		super(x, y);
-		// TODO Auto-generated constructor stub
+		
+		
+		dense = true;
 	}
 	
 	public TextureRegion getTexture()
@@ -29,6 +31,7 @@ public class Mob extends Obj
 	protected TextureRegion texture = ConfigOptions.texture;
 	Boolean AIcontrolled = false; 
 
+	
 	
 	public Item leftHand;
 	public Item rightHand;

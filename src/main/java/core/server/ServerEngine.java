@@ -21,6 +21,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import aurelienribon.tweenengine.TweenManager;
+import aurelienribon.tweenengine.primitives.MutableInteger;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
@@ -43,13 +46,15 @@ public class ServerEngine extends Thread
 	
 	private NetServer network;
 	boolean masterLoop = true;
+	long masterLoopTime = System.currentTimeMillis();
+	
 	public TiledMap map;
 	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
 	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<Integer, Obj>();
 	public Lock standby = new ReentrantLock();
 	
 	Obj onlyPlayer;
-
+	public TweenManager tweenManager;
 	
 	public ServerEngine() 
 	{
@@ -67,6 +72,8 @@ public class ServerEngine extends Thread
 		standby.lock();
 		generateMapObjects();
 		standby.unlock();
+		
+		tweenManager = new TweenManager();
 		
 	}
 	
@@ -104,14 +111,22 @@ public class ServerEngine extends Thread
 		
 		while(masterLoop) // Do AI, etc..
 		{
+			long masterLoopDelta = System.currentTimeMillis() - masterLoopTime;
+			float DeltaInSeconds = (float) (masterLoopDelta / 1000.0);
+	
+			tweenManager.update(DeltaInSeconds);
 			
 			
 			
 			
+			
+			
+			
+			masterLoopTime = System.currentTimeMillis();
 			
 			try
 			{
-				Thread.sleep(5000);
+				Thread.sleep(50);
 			}
 			catch (InterruptedException e)
 			{
@@ -226,7 +241,7 @@ public class ServerEngine extends Thread
 	}
 	
 	
-	public boolean isCellPassable(int x, int y)
+	public boolean isCellPassable(int x, int y, MutableInteger collidedObjectUID)
 	{
 
 		for(Obj obj : ObjectArray.get(x).get(y))
@@ -234,7 +249,7 @@ public class ServerEngine extends Thread
 			
 			if(obj.dense)
 			{
-				
+				collidedObjectUID.setValue(obj.UID);
 				return false;
 				
 			}
@@ -345,6 +360,7 @@ public class ServerEngine extends Thread
 		network.sendAll(Message.OBJMOVE, P);
 	}
 
+	MutableInteger collidedObjectUID = new MutableInteger(-1);
 	public void requestMove(Position p)
 	{
 		long currentTime = System.currentTimeMillis();
@@ -354,7 +370,7 @@ public class ServerEngine extends Thread
 		int nextTileX = (int) (movingObject.tileXPosition + p.x);
 		int nextTileY = (int) (movingObject.tileYPosition  + p.y);
 		
-		if(isCellPassable(nextTileX, nextTileY))
+		if(isCellPassable(nextTileX, nextTileY, collidedObjectUID))
 		{
 			if(currentTime < movingObject.lastMoveTime + ConfigOptions.moveDelay)
 			{
@@ -370,12 +386,18 @@ public class ServerEngine extends Thread
 			p.x = nextTileX;
 			p.y = nextTileY;
 			objectRelocate(p);
-			
-			
 		}
 		
 		else
-		{}
+		{
+			
+			//System.out.println("Collided with " + collidedObjectUID.intValue());
+			Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
+			
+			collidedObject.collide(p.UID);
+			
+			
+		}
 		
 		
 		
@@ -383,7 +405,7 @@ public class ServerEngine extends Thread
 
 	
 	Position objectPosition = new Position();
-	public void mouseEvent(int mouseEventUID)
+	public void mouseEvent(int mouseEventTargetUID)
 	{
 		Obj movingObject = onlyPlayer;
 		long currentTime = System.currentTimeMillis();
@@ -399,7 +421,7 @@ public class ServerEngine extends Thread
 			
 		}
 		
-		Obj o = ObjectArrayByID.get(mouseEventUID);
+		Obj o = ObjectArrayByID.get(mouseEventTargetUID);
 		
 		// Do checks that we can actually click it, etc, etc...
 		Item inHand = getActiveHandItem();
@@ -414,7 +436,7 @@ public class ServerEngine extends Thread
 			
 			if(inHand != null)
 			{
-				objectPosition.UID = mouseEventUID;
+				objectPosition.UID = mouseEventTargetUID;
 				objectPosition.x = o.tileXPosition;
 				objectPosition.y = o.tileYPosition;
 				inHand.rangedEvent(objectPosition);
@@ -422,7 +444,7 @@ public class ServerEngine extends Thread
 			
 		}
 		
-		network.sendAll(Message.MOUSEEVENTFROMSERVER, mouseEventUID);
+		network.sendAll(Message.MOUSEEVENTFROMSERVER, mouseEventTargetUID);
 		
 		
 		

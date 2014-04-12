@@ -12,7 +12,9 @@ import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
+import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenEquation;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Linear;
@@ -164,7 +166,7 @@ public class ClientEngine extends Game {
 
 	Rectangle cullingArea;
 
-	TweenManager tweenManager = new TweenManager();
+	public TweenManager tweenManager = new TweenManager();
 
 	
 	List<Position>  QueuedEvents = new LinkedList<Position>();
@@ -903,6 +905,10 @@ public class ClientEngine extends Game {
 		// o.setX(P.x*TILE_SIZE);
 		// o.setY(P.y*TILE_SIZE);
 
+		
+		
+		
+		
 		// tl;dr tweener bad?
 		Tween.to(o, ObjTweener.POSITION_XY,
 				(float) (ConfigOptions.moveDelay / 1000))
@@ -915,6 +921,8 @@ public class ClientEngine extends Game {
 
 		}
 	}
+	
+	
 
 	public void mouseEvent(int mouseEventUID) {
 		Obj o = ObjectArrayByID.get(mouseEventUID);

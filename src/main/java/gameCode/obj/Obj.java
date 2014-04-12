@@ -5,9 +5,13 @@ import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
 import gameCode.obj.item.Item;
+import helpers.HelperFunctions;
 
 import java.util.BitSet;
 import java.util.HashMap;
+
+import aurelienribon.tweenengine.BaseTween;
+import aurelienribon.tweenengine.TweenCallback;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -141,6 +145,11 @@ public class Obj extends Actor
 		}
 	}
 	
+	public void collide(int colldier)
+	{
+		
+		return;
+	}
 	
 	
 	public int tileXPosition;
@@ -208,6 +217,25 @@ public class Obj extends Actor
 	
 	public void onClick(Item attackedBy)
 	{
+		final Obj o = this;
+		
+//		HelperFunctions.afterDelay(5, this, new TweenCallback()
+//		{
+//			
+//			@Override
+//			public void onEvent(int type, BaseTween<?> source)
+//			{
+//				System.out.println("After 5 second delay..." + o.ServerSide);
+//				
+//			}
+//		});
+		
+		if(this.ServerSide)
+		{
+			
+			//ServerEngineReference.getSelf().
+			
+		}
 		
 		//System.out.println(this.ServerSide);
 		
