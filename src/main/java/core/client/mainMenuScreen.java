@@ -54,7 +54,7 @@ public class mainMenuScreen implements Screen{
 	    
 	 // Creates our buttons
 	    TextButton NewGame = new TextButton("New Game" , parentEngine.buttonStyle);
-	    NewGame.setPosition(800,700);
+	    NewGame.setPosition(800,500);
 	    mainMenuStage.addActor(NewGame);
 	    NewGame.addListener(new ClickListener() {
     		
@@ -69,7 +69,7 @@ public class mainMenuScreen implements Screen{
     	});
 	    
 	    TextButton Options = new TextButton("Options" , parentEngine.buttonStyle);
-	    Options.setPosition(800,662);
+	    Options.setPosition(800,450);
 	    mainMenuStage.addActor(Options);
 	    Options.addListener(new ClickListener() {
     		
@@ -83,7 +83,7 @@ public class mainMenuScreen implements Screen{
     		
     	});
 	    TextButton Quit = new TextButton("Quit" , parentEngine.buttonStyle);
-	    Quit.setPosition(800,625);
+	    Quit.setPosition(800,400);
 	    mainMenuStage.addActor(Quit);
 	    Quit.addListener(new ClickListener() {
     		

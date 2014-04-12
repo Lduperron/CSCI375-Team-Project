@@ -300,7 +300,7 @@ public class ClientEngine extends Game {
 		network.send(core.shared.Message.SPAWN);
 
 
-		screenRender = true;
+		screenRender = false;
 		switchToNewScreen(ScreenEnumerations.MainMenu);
 		
 		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
@@ -381,99 +381,101 @@ public class ClientEngine extends Game {
 	public void render() {
 
 		if(screenRender)
-		{
-			super.render();
-		} 
+		{			
 	
-		if (controlledObject == null) {
-			return; // ...whatever. Nothing to see here.
-		}
-
-		handleKeyPresses();
-
-		// Access seemingly must be done on the rendering thread (which makes
-		// sense)
-		// Synronizing access doesn't seem feasable - multiple accesses
-		while (!QueuedEvents.isEmpty()) {
-			TempPosition = QueuedEvents.get(0);
-			objectMove(TempPosition);
-			QueuedEvents.remove(0);
-
-		}
-
-		// if(refocusCamera)
-		if (controlledObject != null) {
-			focusCameraOnControlled();
-
-			xCameraOffset = controlledObject.getXCameraOffset();
-			yCameraOffset = controlledObject.getYCameraOffset();
-
-		}
-//
-//		
-//        int viewportX = (int)(Gdx.graphics.getWidth() - 800) / 2;
-//        int viewportY = (int)(Gdx.graphics.getHeight() - 800) / 2;
-//        int viewportWidth = (int)800;
-//        int viewportHeight = (int)800;
-//        Gdx.gl.glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
-//        worldStage.setViewport(800, 480, true, viewportX, viewportY, viewportWidth, viewportHeight);
-
-        
-		// left half of window***
+			if (controlledObject == null) {
+				return; // ...whatever. Nothing to see here.
+			}
+	
+			handleKeyPresses();
+	
+			// Access seemingly must be done on the rendering thread (which makes
+			// sense)
+			// Synronizing access doesn't seem feasable - multiple accesses
+			while (!QueuedEvents.isEmpty()) {
+				TempPosition = QueuedEvents.get(0);
+				objectMove(TempPosition);
+				QueuedEvents.remove(0);
+	
+			}
+	
+			// if(refocusCamera)
+			if (controlledObject != null) {
+				focusCameraOnControlled();
+	
+				xCameraOffset = controlledObject.getXCameraOffset();
+				yCameraOffset = controlledObject.getYCameraOffset();
+	
+			}
+	//
+	//		
+	//        int viewportX = (int)(Gdx.graphics.getWidth() - 800) / 2;
+	//        int viewportY = (int)(Gdx.graphics.getHeight() - 800) / 2;
+	//        int viewportWidth = (int)800;
+	//        int viewportHeight = (int)800;
+	//        Gdx.gl.glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+	//        worldStage.setViewport(800, 480, true, viewportX, viewportY, viewportWidth, viewportHeight);
+	
+	        
+			// left half of window***
+			
 		
-	
-		//camera.viewportWidth = Gdx.graphics.getWidth();
-		//camera.viewportHeight = Gdx.graphics.getHeight();
+			//camera.viewportWidth = Gdx.graphics.getWidth();
+			//camera.viewportHeight = Gdx.graphics.getHeight();
+			
+			//worldStage.setViewport(stageWidth, stageHeight, keepAspectRatio, viewportX, viewportY, viewportWidth, viewportHeight)
 		
-		//worldStage.setViewport(stageWidth, stageHeight, keepAspectRatio, viewportX, viewportY, viewportWidth, viewportHeight)
+			Gdx.gl.glViewport(
+					0,
+					0, (int) (Gdx.graphics.getWidth() * 0.63),
+					Gdx.graphics.getHeight());
 	
-		Gdx.gl.glViewport(
-				0,
-				0, (int) (Gdx.graphics.getWidth() * 0.63),
-				Gdx.graphics.getHeight());
-
-		mapRenderer.setView(camera);
-		mapRenderer.render();
-		worldStage.draw();
-
-		if (recaculateVisibleTiles) {
-			calculateVisibleTiles();
-		}
-
-		Vector3 test = new Vector3(cameraTileX * TILE_SIZE + 16, cameraTileY
-				* TILE_SIZE + 16, 1);
-
-		// Black out the tiles that are not in the line of sight
-		occulsionTileRenderer.begin(ShapeType.Filled);
-		occulsionTileRenderer.setColor(0, 0, 0, 1);
-		occulsionTileRenderer.setProjectionMatrix(camera.combined);
-		for (int column = 0; column < (VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED)
-				* camera.zoom; column++) {
-
-			for (int row = 0; row < (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
-					* camera.zoom; row++) {
-				if (OccluedTiles[row][column]) {
-					occulsionTileRenderer.rect(test.x
-							- (VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED)
-							* camera.zoom * TILE_SIZE / 2 + row * TILE_SIZE
-							+ xCameraOffset * TILE_SIZE, test.y
-							- (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
-							* camera.zoom * TILE_SIZE / 2 + column * TILE_SIZE
-							+ yCameraOffset * TILE_SIZE, 32, 32);
+			mapRenderer.setView(camera);
+			mapRenderer.render();
+			worldStage.draw();
+	
+			if (recaculateVisibleTiles) {
+				calculateVisibleTiles();
+			}
+	
+			Vector3 test = new Vector3(cameraTileX * TILE_SIZE + 16, cameraTileY
+					* TILE_SIZE + 16, 1);
+	
+			// Black out the tiles that are not in the line of sight
+			occulsionTileRenderer.begin(ShapeType.Filled);
+			occulsionTileRenderer.setColor(0, 0, 0, 1);
+			occulsionTileRenderer.setProjectionMatrix(camera.combined);
+			for (int column = 0; column < (VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED)
+					* camera.zoom; column++) {
+	
+				for (int row = 0; row < (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
+						* camera.zoom; row++) {
+					if (OccluedTiles[row][column]) {
+						occulsionTileRenderer.rect(test.x
+								- (VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED)
+								* camera.zoom * TILE_SIZE / 2 + row * TILE_SIZE
+								+ xCameraOffset * TILE_SIZE, test.y
+								- (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
+								* camera.zoom * TILE_SIZE / 2 + column * TILE_SIZE
+								+ yCameraOffset * TILE_SIZE, 32, 32);
+					}
 				}
 			}
-		}
-		occulsionTileRenderer.end();
-
-		tweenManager.update(Gdx.graphics.getDeltaTime());
-
-		// right half of window***
-		Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * 0.63), 0,
-				(int) (Gdx.graphics.getWidth() * 0.37),
-				Gdx.graphics.getHeight());
-		drawSidePanel();
-		
+			occulsionTileRenderer.end();
 	
+			tweenManager.update(Gdx.graphics.getDeltaTime());
+	
+			// right half of window***
+			Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * 0.63), 0,
+					(int) (Gdx.graphics.getWidth() * 0.37),
+					Gdx.graphics.getHeight());
+			drawSidePanel();
+		
+		}
+		else
+		{
+			super.render();
+		}
 	}
 
 	private void drawSidePanel() {
