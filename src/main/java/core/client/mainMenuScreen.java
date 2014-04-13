@@ -3,6 +3,7 @@ package core.client;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,9 +19,10 @@ import core.client.ScreenEnumerations;
  * Main menu screen. 
  * @author the
  */
+
 public class mainMenuScreen implements Screen{
 	
-	ClientEngine parentEngine;
+	final ClientEngine parentEngine;
 	Texture backgroundImage;
 	SpriteBatch batch;
 	Stage mainMenuStage;
@@ -51,7 +53,8 @@ public class mainMenuScreen implements Screen{
 	    multiplexer.addProcessor(mainMenuStage);
 	    
 	 // Creates our buttons
-	    TextButton NewGame = new TextButton("Connect" , parentEngine.buttonStyle);
+	    TextButton NewGame = new TextButton("New Game" , parentEngine.buttonStyle);
+	    NewGame.setPosition(800,500);
 	    mainMenuStage.addActor(NewGame);
 	    NewGame.addListener(new ClickListener() {
     		
@@ -59,8 +62,37 @@ public class mainMenuScreen implements Screen{
     	    @Override
     	    public void clicked(InputEvent event, float x, float y) 
     	    {
-    	    	parentEngine.switchToNewScreen(ScreenEnumerations.MainMenu);
+    	    	parentEngine.screenRender=true;
+    	    	Gdx.input.setInputProcessor(parentEngine.multiplexer);
     	    	
+    	    };
+    		
+    	});
+	    
+	    TextButton Options = new TextButton("Options" , parentEngine.buttonStyle);
+	    Options.setPosition(800,450);
+	    mainMenuStage.addActor(Options);
+	    Options.addListener(new ClickListener() {
+    		
+    		
+    	    @Override
+    	    public void clicked(InputEvent event, float x, float y) 
+    	    {
+    	    	
+    	    	
+    	    };
+    		
+    	});
+	    TextButton Quit = new TextButton("Quit" , parentEngine.buttonStyle);
+	    Quit.setPosition(800,400);
+	    mainMenuStage.addActor(Quit);
+	    Quit.addListener(new ClickListener() {
+    		
+    		
+    	    @Override
+    	    public void clicked(InputEvent event, float x, float y) 
+    	    {
+    	    	Gdx.app.exit();
     	    };
     		
     	});
@@ -68,8 +100,22 @@ public class mainMenuScreen implements Screen{
 
 	@Override
 	public void render(float delta) {
-		// TODO Auto-generated method stub
 		
+		Gdx.graphics.getGL20().glClearColor( 0, 0, 0, 1 );
+		Gdx.graphics.getGL20().glClear( GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT );
+		
+		//camera = new OrthographicCamera();
+		camera.update();
+		batch.setProjectionMatrix(camera.combined);
+		batch.begin();
+		batch.disableBlending();
+		
+		batch.draw(backgroundImage , 0 ,0 , Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		batch.enableBlending();
+		batch.end();
+		
+		mainMenuStage.act();
+		mainMenuStage.draw();
 	}
 
 	@Override
@@ -81,12 +127,14 @@ public class mainMenuScreen implements Screen{
 	@Override
 	public void show() {
 		// TODO Auto-generated method stub
+		Gdx.input.setInputProcessor(multiplexer);
 		
 	}
 
 	@Override
 	public void hide() {
 		// TODO Auto-generated method stub
+		Gdx.input.setInputProcessor(null);
 		
 	}
 

@@ -174,7 +174,8 @@ public class ClientEngine extends Game {
 	boolean recaculateVisibleTiles = false;
 	boolean refocusCamera = false;
 	boolean[][] OccluedTiles;
-
+	boolean screenRender;
+	
 	boolean[] pressedKeys = new boolean[256];
 
 	// Handles first-chance keyboard presses
@@ -188,7 +189,7 @@ public class ClientEngine extends Game {
 
 	List<Position> QueuedEvents = new LinkedList<Position>();
 
-	// fbackground music
+	// background music
 	Music music;
 	
 	int playerHealth;
@@ -209,7 +210,9 @@ public class ClientEngine extends Game {
 
 	@Override
 	public void create() {
-
+		
+		primarySpriteBatch = new SpriteBatch();
+		
 		ClientEngineReference.setSelf(this);
 
 		float w = Gdx.graphics.getWidth();
@@ -298,12 +301,15 @@ public class ClientEngine extends Game {
 		network.send(Message.REQUESTSTATE);
 		network.send(core.shared.Message.SPAWN);
 
+		screenRender = false;
+		switchToNewScreen(ScreenEnumerations.MainMenu);
+		
 		worldStage.setViewport((float) (Gdx.graphics.getWidth() / 2),
 				Gdx.graphics.getHeight(), true, 0, 0,
 				(float) (Gdx.graphics.getWidth() * 0.63),
 				Gdx.graphics.getHeight());
 
-
+		
 		
 		/*
 		 * camera = new OrthographicCamera(1, h/w); batch = new SpriteBatch();
@@ -433,91 +439,100 @@ public class ClientEngine extends Game {
 	@Override
 	public void render() {
 
-		if (controlledObject == null) {
-			return; // ...whatever. Nothing to see here.
-		}
+		if(screenRender)
+		{			
+	
+			if (controlledObject == null) {
+				return; // ...whatever. Nothing to see here.
+			}
+	
+			// Clear the screen
+			Gdx.gl.glClearColor(0, 0, 1, 0);
+			Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+	
+			super.render();
+	
+			handleKeyPresses();
+	
+			// Access seemingly must be done on the rendering thread (which makes
+			// sense)
+			// Synronizing access doesn't seem feasable - multiple accesses
+			while (!QueuedEvents.isEmpty()) {
+				TempPosition = QueuedEvents.get(0);
+				objectMove(TempPosition);
+				QueuedEvents.remove(0);
+	
+			}
+	
+			// if(refocusCamera)
+			if (controlledObject != null) {
+				focusCameraOnControlled();
+	
+				xCameraOffset = controlledObject.getXCameraOffset();
+				yCameraOffset = controlledObject.getYCameraOffset();
+	
+			}
+	
+			Gdx.gl.glViewport(0, 0, (int) (Gdx.graphics.getWidth() * 0.63),
+					Gdx.graphics.getHeight());
+	
+			mapRenderer.setView(camera);
+			mapRenderer.render();
+			worldStage.draw();
+	
+			if (recaculateVisibleTiles) {
+				calculateVisibleTiles();
+			}
+	
+			Vector3 test = new Vector3(cameraTileX * TILE_SIZE + 16, cameraTileY
+					* TILE_SIZE + 16, 1);
+	
+			// Black out the tiles that are not in the line of sight
+			occulsionTileRenderer.begin(ShapeType.Filled);
+			occulsionTileRenderer.setColor(0, 0, 0, 1);
+			occulsionTileRenderer.setProjectionMatrix(camera.combined);
+			for (int column = 0; column < (VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED)
+					* camera.zoom; column++) {
+	
+				for (int row = 0; row < (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
+						* camera.zoom; row++) {
+					if (OccluedTiles[row][column]) {
+						occulsionTileRenderer.rect(test.x
+								- (VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED)
+								* camera.zoom * TILE_SIZE / 2 + row * TILE_SIZE
+								+ xCameraOffset * TILE_SIZE, test.y
+								- (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
+								* camera.zoom * TILE_SIZE / 2 + column * TILE_SIZE
+								+ yCameraOffset * TILE_SIZE, 32, 32);
 
-		// Clear the screen
-		Gdx.gl.glClearColor(0, 0, 1, 0);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-
-		super.render();
-
-		handleKeyPresses();
-
-		// Access seemingly must be done on the rendering thread (which makes
-		// sense)
-		// Synronizing access doesn't seem feasable - multiple accesses
-		while (!QueuedEvents.isEmpty()) {
-			TempPosition = QueuedEvents.get(0);
-			objectMove(TempPosition);
-			QueuedEvents.remove(0);
-
-		}
-
-		// if(refocusCamera)
-		if (controlledObject != null) {
-			focusCameraOnControlled();
-
-			xCameraOffset = controlledObject.getXCameraOffset();
-			yCameraOffset = controlledObject.getYCameraOffset();
-
-		}
-
-		Gdx.gl.glViewport(0, 0, (int) (Gdx.graphics.getWidth() * 0.63),
-				Gdx.graphics.getHeight());
-
-		mapRenderer.setView(camera);
-		mapRenderer.render();
-		worldStage.draw();
-
-		if (recaculateVisibleTiles) {
-			calculateVisibleTiles();
-		}
-
-		Vector3 test = new Vector3(cameraTileX * TILE_SIZE + 16, cameraTileY
-				* TILE_SIZE + 16, 1);
-
-		// Black out the tiles that are not in the line of sight
-		occulsionTileRenderer.begin(ShapeType.Filled);
-		occulsionTileRenderer.setColor(0, 0, 0, 1);
-		occulsionTileRenderer.setProjectionMatrix(camera.combined);
-		for (int column = 0; column < (VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED)
-				* camera.zoom; column++) {
-
-			for (int row = 0; row < (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
-					* camera.zoom; row++) {
-				if (OccluedTiles[row][column]) {
-					occulsionTileRenderer.rect(test.x
-							- (VIEW_DISTANCE_X + VIEW_DISTANCE_X_EXTENDED)
-							* camera.zoom * TILE_SIZE / 2 + row * TILE_SIZE
-							+ xCameraOffset * TILE_SIZE, test.y
-							- (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
-							* camera.zoom * TILE_SIZE / 2 + column * TILE_SIZE
-							+ yCameraOffset * TILE_SIZE, 32, 32);
+					}
 				}
 			}
+			occulsionTileRenderer.end();
+	
+			tweenManager.update(Gdx.graphics.getDeltaTime());
+	
+			// ***SidePanel
+			Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * 0.63), 0,
+					(int) (Gdx.graphics.getWidth() * 0.37),
+					Gdx.graphics.getHeight());
+			drawSidePanel();
+	
+			uiStage.draw();
+			Table.drawDebug(uiStage);
+	
+			batchSidePanel.begin();
+			batchSidePanel.draw(gunItemRegion,
+					(float) (Gdx.graphics.getWidth() * 0.25),
+					(float) (Gdx.graphics.getWidth() * 0.5), 0, 0, 32, 32,
+					(float) 2.5, 1, 0);
+			batchSidePanel.end();
+	
 		}
-		occulsionTileRenderer.end();
-
-		tweenManager.update(Gdx.graphics.getDeltaTime());
-
-		// ***SidePanel
-		Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * 0.63), 0,
-				(int) (Gdx.graphics.getWidth() * 0.37),
-				Gdx.graphics.getHeight());
-		drawSidePanel();
-
-		uiStage.draw();
-		Table.drawDebug(uiStage);
-
-		batchSidePanel.begin();
-		batchSidePanel.draw(gunItemRegion,
-				(float) (Gdx.graphics.getWidth() * 0.25),
-				(float) (Gdx.graphics.getWidth() * 0.5), 0, 0, 32, 32,
-				(float) 2.5, 1, 0);
-		batchSidePanel.end();
-
+		else
+		{
+			super.render();
+		}
 	}
 
 	// ***SidePanel
@@ -530,6 +545,7 @@ public class ClientEngine extends Game {
 		shapeRenderer.rect(-Gdx.graphics.getWidth(), -Gdx.graphics.getHeight(),
 				Gdx.graphics.getWidth() * 2, Gdx.graphics.getHeight() * 3);
 		shapeRenderer.end();
+
 	}
 
 	@Override
