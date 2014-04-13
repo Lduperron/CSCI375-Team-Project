@@ -298,6 +298,7 @@ public class Obj extends Actor
 	@Optional(value = "Never")
 	protected TextureRegion texture = ConfigOptions.texture;
 	
+	
 //	HashMap<String, String> UniqueData = new HashMap<>();
 	
 	

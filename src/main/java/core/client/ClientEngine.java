@@ -64,6 +64,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
@@ -228,6 +229,7 @@ public class ClientEngine extends Game {
 
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
+		cameraSidePanel = new OrthographicCamera((float) (w*.37), h);
 
 		Tween.registerAccessor(Obj.class, new ObjTweener());
 
@@ -271,7 +273,9 @@ public class ClientEngine extends Game {
 		camera.position.y = cameraTileY * TILE_SIZE + 16;
 
 		worldStage.setCamera(camera);
-
+		uiStage.setCamera(cameraSidePanel);
+		
+		
 		cullingArea = new Rectangle((cameraTileX - VIEW_DISTANCE_X / 2)
 				* TILE_SIZE, (cameraTileY - VIEW_DISTANCE_Y / 2) * TILE_SIZE,
 				VIEW_DISTANCE_X * TILE_SIZE, VIEW_DISTANCE_Y * TILE_SIZE);
@@ -304,10 +308,14 @@ public class ClientEngine extends Game {
 		screenRender = false;
 		switchToNewScreen(ScreenEnumerations.MainMenu);
 		
-		worldStage.setViewport((float) (Gdx.graphics.getWidth() / 2),
-				Gdx.graphics.getHeight(), true, 0, 0,
+		worldStage.setViewport((float) (Gdx.graphics.getWidth()),
+				Gdx.graphics.getHeight(), 
+				true, 
+				0, 
+				0,
 				(float) (Gdx.graphics.getWidth() * 0.63),
-				Gdx.graphics.getHeight());
+				Gdx.graphics.getHeight()
+				);
 
 		
 		
@@ -326,26 +334,18 @@ public class ClientEngine extends Game {
 		 */
 
 		// ***SidePanel
-		cameraSidePanel = new OrthographicCamera(w, h);
+
 
 		shapeRenderer = new ShapeRenderer();
 		batchSidePanel = new SpriteBatch();
-		
-		uiStage.setCamera(cameraSidePanel);
 
-		uiStage.setViewport((float) (Gdx.graphics.getWidth() * 0.37),
-				Gdx.graphics.getHeight(), true, 0, // viewPortX
-				0, // viewPortY
-				(float) (Gdx.graphics.getWidth() * 0.37), // viewPortWidth
-				Gdx.graphics.getHeight() // viewPortHeight
-		);
 
 		rawTextStyle = new LabelStyle();
 		rawTextStyle.font = gameFont;
 		rawTextStyle.fontColor = Color.BLACK;
 
 		Table table = new Table();
-		uiStage.addActor(table);
+		
 		table.setPosition(200, 65);
 
 		table.debug();
@@ -363,13 +363,33 @@ public class ClientEngine extends Game {
 		TextFieldStyle textStyle = new TextFieldStyle();
 		textStyle.font = gameFont;
 		textStyle.fontColor = Color.BLACK;
-		TextField text = new TextField("", textStyle);
+		final TextField text = new TextField("", textStyle);
 		text.setText("Test");
 		text.setMessageText("Type here!");
 		table.add(text).minWidth(200).minHeight(150).fill();
 
-		table.pack();
+	
+		
+		text.setTextFieldListener(new TextFieldListener() 
+	    {
+            public void keyTyped (TextField textField, char key) {
+            	
+                if(key == '\n' || key == '\r')
+                {
+                	
+                	System.out.println(text.getMessageText());
 
+                	
+                }
+                
+            }
+        });
+		
+		table.pack();
+	
+		uiStage.addActor(table);
+		uiStage.addActor(text);
+		
 		gunItem = new Texture(Gdx.files.internal("assets/tilesets/gun0.png"));
 
 		gunItemRegion = new TextureRegion(gunItem, 0, 0, 32, 32);
@@ -551,11 +571,21 @@ public class ClientEngine extends Game {
 	@Override
 	public void resize(int width, int height) {
 
-		worldStage.setViewport((float) (Gdx.graphics.getWidth() / 2),
+		worldStage.setViewport((float) (Gdx.graphics.getWidth()),
 				Gdx.graphics.getHeight(), true, 0, 0,
 				(float) (Gdx.graphics.getWidth() * 0.63),
 				Gdx.graphics.getHeight());
 
+		
+		
+
+		uiStage.setViewport((float) (Gdx.graphics.getWidth() * 0.37),
+				Gdx.graphics.getHeight(), true, 
+				(float) (Gdx.graphics.getWidth() * 0.67), // viewPortX
+				0, // viewPortY
+				(float) (Gdx.graphics.getWidth() * 0.37), // viewPortWidth
+				Gdx.graphics.getHeight() // viewPortHeight
+		);
 
 		camera.viewportHeight = VIEW_DISTANCE_X * TILE_SIZE;
 		camera.viewportWidth = VIEW_DISTANCE_Y * TILE_SIZE;
@@ -871,23 +901,28 @@ public class ClientEngine extends Game {
 
 		Obj o = ObjectArrayByID.get(P.UID);
 
-		ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
-
-		o.tileXPosition = P.x;
-		o.tileYPosition = P.y;
-
-		ObjectArray.get(P.x).get(P.y).add(o);
-
-
-		// tl;dr tweener bad?
-		Tween.to(o, ObjTweener.POSITION_XY,
-				(float) (o.moveDelay / 1000.0))
-				.target(P.x * TILE_SIZE, P.y * TILE_SIZE).ease(Linear.INOUT)
-				.start(tweenManager);
-
-		if (P.UID == controlledObject.UID) {
-			refocusCamera = true;
-
+		if(o != null)
+		{
+			
+			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+	
+			o.tileXPosition = P.x;
+			o.tileYPosition = P.y;
+	
+			ObjectArray.get(P.x).get(P.y).add(o);
+	
+	
+			// tl;dr tweener bad?
+			Tween.to(o, ObjTweener.POSITION_XY,
+					(float) (o.moveDelay / 1000.0))
+					.target(P.x * TILE_SIZE, P.y * TILE_SIZE).ease(Linear.INOUT)
+					.start(tweenManager);
+	
+			if (P.UID == controlledObject.UID) {
+				refocusCamera = true;
+	
+			}
+		
 		}
 	}
 	
