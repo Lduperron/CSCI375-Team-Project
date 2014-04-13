@@ -18,6 +18,7 @@ public class Mob extends Obj
 	{
 		super(x, y);
 		// TODO Auto-generated constructor stub
+		this.dense = true;
 	}
 	
 	public TextureRegion getTexture()
@@ -27,12 +28,29 @@ public class Mob extends Obj
 		
 	}
 	protected TextureRegion texture = ConfigOptions.texture;
-	Boolean AIcontrolled = false; 
+	protected Boolean AIcontrolled = false; 
 
+	//@Override
+	//public void bulletImpact(int bulletUID) {};
 	
 	public Item leftHand;
 	public Item rightHand;
 	
 	public Hand ActiveHand = Hand.LEFT; 
+	
+	public void setAIcontrolled(Boolean ai)
+	{
+		this.AIcontrolled = ai;
+	}
+	
+	public void setTexture(TextureRegion tr)
+	{
+		this.texture = tr;
+	}
+	
+	public Boolean isAIcontrolled()
+	{
+		return this.AIcontrolled;
+	}
 	
 }

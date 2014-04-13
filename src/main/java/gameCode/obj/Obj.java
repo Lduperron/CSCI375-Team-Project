@@ -1,34 +1,28 @@
 package gameCode.obj;
 
 import static core.shared.ConfigOptions.TILE_SIZE;
+
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
+import gameCode.obj.effect.projectile.Projectile;
 import gameCode.obj.item.Item;
-
 import java.util.BitSet;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 import core.client.ClientEngine;
+import core.client.ClientEngine.ClientEngineReference;
 import core.client.animatedAssets;
+
 import core.server.ServerEngine.ServerEngineReference;
 import core.shared.ConfigOptions;
 import core.shared.DistilledObject;
@@ -53,8 +47,9 @@ public class Obj extends Actor
 		// The serverside field is not sent and defaults to false for the objects.
 		this.ServerSide = true;
 
+		lastMoveTime = 0;
+		lastActionTime = 0;
 		
-	    
 //	    UniqueData.put("Name" , "Undefined Object");
 //	    UniqueData.put("Desc" , "Undefined Description");
 //	    UniqueData.put("Dense" , "false");
@@ -113,7 +108,103 @@ public class Obj extends Actor
 		
 	}
 	
-	public void move(int newX, int newY)
+	public int getTileXPosition()
+	{
+		
+		Obj current = this;
+		
+		if(this.ServerSide)
+		{	
+			
+		
+			while(current.containerUID != -1)
+			{
+				
+				current = ServerEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+		}
+		else
+		{
+			
+			while(current.containerUID != -1)
+			{
+				
+				current = ClientEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+			
+		}
+		
+		
+		return current.tileXPosition; 
+	}
+	public int getTileYPosition()
+	{
+		
+		Obj current = this;
+		
+		if(this.ServerSide)
+		{	
+			
+		
+			while(current.containerUID != -1)
+			{
+				
+				current = ServerEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+		}
+		else
+		{
+			
+			while(current.containerUID != -1)
+			{
+				
+				current = ClientEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+			
+			
+		}
+		
+		return current.tileYPosition;
+	}
+	
+	public int getTopLevelContainer()
+	{
+		
+		Obj current = this;
+		
+		if(this.ServerSide)
+		{	
+			
+		
+			while(current.containerUID != -1)
+			{
+				
+				current = ServerEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+		}
+		else
+		{
+			
+			while(current.containerUID != -1)
+			{
+				
+				current = ClientEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+			
+			
+		}
+		
+		return current.UID;
+	}
+	
+	
+	public void forceMove(int newX, int newY)
 	{
 		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
 		{
@@ -125,14 +216,82 @@ public class Obj extends Actor
 			ServerEngineReference.getSelf().objectRelocate(P);
 			
 		}
+	}
+	
+	public void move(int newX, int newY)
+	{
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			Position P = new Position();
+			P.UID = this.UID;
+			P.x = newX;
+			P.y = newY;
+			
+			ServerEngineReference.getSelf().requestMove(P);
+			
+		}
+	}
+	
+	public void collide(int colldierUID)
+	{
+		
+		
+		
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			Obj collider = ServerEngineReference.getSelf().ObjectArrayByID.get(colldierUID);
+
+			if(Projectile.class.isAssignableFrom(collider.getClass()))
+			{
+				this.bulletImpact(colldierUID);
+			}
+			
+		}		
+		
+		
+		return;
+	}
+	
+	public void bulletImpact(int bulletUID)
+	{
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			Projectile bullet = (Projectile) ServerEngineReference.getSelf().ObjectArrayByID.get(bulletUID);
+			
+			if(bullet.ownerUID == this.UID)
+			{
+				
+				return; // no friendly fire.
+				
+			}
+			
+			ServerEngineReference.getSelf().removeObject(this.UID);
+			ServerEngineReference.getSelf().removeObject(bulletUID);
+		}	
+		
 		
 		
 	}
 	
+	public void process()
+	{
+		
+		return;
+	}
+	
+	public int moveDelay = 200;
+	public int actionDelay = 500;
+	
 	public int tileXPosition;
 	public int tileYPosition;
-
+	public int containerUID = -1;
 	
+	@Optional(value = "Never")
+	public long lastMoveTime;
+	
+	
+	@Optional(value = "Never")
+	public long lastActionTime;
 	
 	public BitSet TransparentPixels = new BitSet(TILE_SIZE * TILE_SIZE);
 
@@ -188,6 +347,25 @@ public class Obj extends Actor
 	
 	public void onClick(Item attackedBy)
 	{
+		final Obj o = this;
+		
+//		HelperFunctions.afterDelay(5, this, new TweenCallback()
+//		{
+//			
+//			@Override
+//			public void onEvent(int type, BaseTween<?> source)
+//			{
+//				System.out.println("After 5 second delay..." + o.ServerSide);
+//				
+//			}
+//		});
+		
+		if(this.ServerSide)
+		{
+			
+			//ServerEngineReference.getSelf().
+			
+		}
 		
 		//System.out.println(this.ServerSide);
 		

@@ -1,7 +1,8 @@
 package core.network;
 
+import gameCode.obj.mob.humans.Human;
+
 import java.io.IOException;
-import java.util.HashMap;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
@@ -64,6 +65,7 @@ public class NetServer extends Network {
 			 * Override received method of Listener to specify game specific
 			 * management of received objects
 			 */
+			@Override
 			public void received(Connection connection, Object object) {
 
 				if (object instanceof NetMessage) {
@@ -116,6 +118,7 @@ public class NetServer extends Network {
 			 * accidental disconnects, cause client won't be able to tell us
 			 * that it disconnected
 			 */
+			@Override
 			public void disconnected(Connection connection) {
 
 			}

@@ -1,24 +1,22 @@
 package gameCode.obj.structure;
 
 import gameCode.obj.item.Item;
+import helpers.HelperFunctions;
 
 import java.util.BitSet;
 import java.util.HashMap;
 
+import aurelienribon.tweenengine.BaseTween;
+import aurelienribon.tweenengine.TweenCallback;
+
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.PixmapPacker;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 
 import core.client.PixmapTextureAtlas;
-import core.client.ClientEngine.ClientEngineReference;
 
 public class Door extends Structure
 {
@@ -59,6 +57,7 @@ public class Door extends Structure
 	static Array<BitSet> start = p.createTransparencies("hightechsecurity_closed");
 	
 	
+	@Override
 	public HashMap<String, Animation> getAnimations()
 	{
 		
@@ -79,13 +78,77 @@ public class Door extends Structure
 	public boolean locked = true;
 	
 	
+	@Override
+	public void collide(int colldier)
+	{
+		super.collide(colldier);
+		
+		this.onClick(null);
+		return;
+	}
 	
+	public void Open()
+	{
+		
+		if(!this.dense)
+		{
+			
+			return; // already open
+			
+		}
+		
+		
+		final Door d = this;
+		HelperFunctions.afterDelay(.5, this, new TweenCallback()
+		{
+			
+			@Override
+			public void onEvent(int type, BaseTween<?> source)
+			{
+				d.dense = false;
+				d.opaque = false;
+				
+			}
+
+		});
+		
+
+		this.animate("Opening", false);
+		
+		
+	}
+	public void Close()
+	{
+		
+		if(this.dense)
+		{
+			
+			return; // already closed
+			
+		}
+		
+		final Door d = this;
+		HelperFunctions.afterDelay(.5, this, new TweenCallback()
+		{
+			
+			@Override
+			public void onEvent(int type, BaseTween<?> source)
+			{
+				d.dense = true;
+				d.opaque = true;
+				
+			}
+
+		});
+		this.animate("Closing", false);
+		
+	}
 	
 	@Override
 	public void onClick(Item attackedBy)
 	{
 		super.onClick(attackedBy);
-				
+		
 		if(this.locked)
 		{
 			this.animate("Denied", false);
@@ -95,23 +158,30 @@ public class Door extends Structure
 		{
 			if(this.dense)
 			{
-				this.dense = false;
-				this.opaque = false;
-				this.animate("Opening", false);
+
+				this.Open();
+								
+				final Door d = this;
+				HelperFunctions.afterDelay(5, this, new TweenCallback()
+				{
+					
+					@Override
+					public void onEvent(int type, BaseTween<?> source)
+					{
+						d.Close();
+						
+					}
+
+				});
+
 				
 			}
 			else
 			{
-				this.dense = true;
-				this.opaque = true;
-				this.animate("Closing", false);
+				this.Close();
 			}
 			
-			
-			if(!this.ServerSide)
-			{
-				ClientEngineReference.getSelf().calculateVisibleTiles();
-			}
+		
 		}
 				
 	}

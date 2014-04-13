@@ -12,12 +12,15 @@ import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
+import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenEquation;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Linear;
 import aurelienribon.tweenengine.equations.Quad;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -28,13 +31,15 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GLTexture;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -51,16 +56,22 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.badlogic.gdx.utils.reflect.Constructor;
 import com.badlogic.gdx.Screen;
-
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-
 import core.network.NetClient;
 import core.server.ServerEngine;
 import core.shared.ConfigOptions;
@@ -76,12 +87,12 @@ import core.client.PauseScreen;
 import core.client.ScreenEnumerations;
 import core.client.SettingsScreen;
 import core.client.MenuNinePatch;
+import core.shared.UidPair;
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
-
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X_EXTENDED;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y_EXTENDED;
 
@@ -136,13 +147,22 @@ public class ClientEngine extends Game {
 	float xCameraOffset;
 	float yCameraOffset;
 
-	// SidePanel
+	// ***SidePanel
 	private OrthographicCamera cameraSidePanel;
 	private SpriteBatch batchSidePanel;
-	// **********
-
-	// ***
 	ShapeRenderer shapeRenderer;
+
+	// ***Inventory
+	Stage inventoryStage;
+	TextField inventoryTextBox;
+	ScrollPane inventoryTextScroller;
+	Table inventoryTextLabelContainingTable;
+	Table inventoryTextScrollingTable;
+	TextFieldStyle inputStyle;
+	ScrollPaneStyle scrollPaneStyle;
+
+	Texture gunItem;
+	TextureRegion gunItemRegion;
 
 	Stage uiStage;
 	Stage worldStage;
@@ -165,41 +185,34 @@ public class ClientEngine extends Game {
 
 	Rectangle cullingArea;
 
-	TweenManager tweenManager = new TweenManager();
+	public TweenManager tweenManager = new TweenManager();
 
+	List<Position> QueuedEvents = new LinkedList<Position>();
+
+	// background music
+	Music music;
 	
-	List<Position>  QueuedEvents = new LinkedList<Position>();
-	
-	
-	
-	
-	public static class ClientEngineReference
-	{
+	int playerHealth;
+
+
+	public static class ClientEngineReference {
 		static ClientEngine Self;
 
 		public static void setSelf(ClientEngine e) {
-
 			Self = e;
-
 		}
 
 		public static ClientEngine getSelf() {
-
 			return Self;
-
 		}
 
 	}
 
 	@Override
-
-	public void create() {		
+	public void create() {
 		
-
-		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
-		gameTextureManager = new AssetManager();
 		primarySpriteBatch = new SpriteBatch();
-
+		
 		ClientEngineReference.setSelf(this);
 
 		float w = Gdx.graphics.getWidth();
@@ -210,23 +223,15 @@ public class ClientEngine extends Game {
 		p.yUp = true;
 		p.convertObjectToTileSpace = true;
 
-		Texture.setEnforcePotImages(false);
+		GLTexture.setEnforcePotImages(false);
 		map = new TmxMapLoader().load("maps/Map.tmx", p);
 
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
 
-		// StagePanel
-		cameraSidePanel = new OrthographicCamera(w, h);
-		// ***
-
 		Tween.registerAccessor(Obj.class, new ObjTweener());
 
 		occulsionTileRenderer = new ShapeRenderer();
-
-		// *** shape renderer and spritebatch for side panel
-		shapeRenderer = new ShapeRenderer();
-		batchSidePanel = new SpriteBatch();
 
 		uiStage = new Stage();
 		worldStage = new Stage();
@@ -234,7 +239,7 @@ public class ClientEngine extends Game {
 		// backgrounds
 		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
 		gameTextureManager = new AssetManager();
-		
+
 		Backgrounds.put(Background.MENUSCREEN, new AssetDescriptor<Texture>(
 				"backgrounds/spacebg.png", Texture.class));
 
@@ -267,9 +272,6 @@ public class ClientEngine extends Game {
 
 		worldStage.setCamera(camera);
 
-		// ***
-		// worldStage.setCamera(cameraSidePanel);
-
 		cullingArea = new Rectangle((cameraTileX - VIEW_DISTANCE_X / 2)
 				* TILE_SIZE, (cameraTileY - VIEW_DISTANCE_Y / 2) * TILE_SIZE,
 				VIEW_DISTANCE_X * TILE_SIZE, VIEW_DISTANCE_Y * TILE_SIZE);
@@ -299,11 +301,15 @@ public class ClientEngine extends Game {
 		network.send(Message.REQUESTSTATE);
 		network.send(core.shared.Message.SPAWN);
 
-
 		screenRender = false;
 		switchToNewScreen(ScreenEnumerations.MainMenu);
 		
-		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
+		worldStage.setViewport((float) (Gdx.graphics.getWidth() / 2),
+				Gdx.graphics.getHeight(), true, 0, 0,
+				(float) (Gdx.graphics.getWidth() * 0.63),
+				Gdx.graphics.getHeight());
+
+		
 		
 		/*
 		 * camera = new OrthographicCamera(1, h/w); batch = new SpriteBatch();
@@ -318,6 +324,56 @@ public class ClientEngine extends Game {
 		 * sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
 		 * sprite.setPosition(-sprite.getWidth()/2, -sprite.getHeight()/2);
 		 */
+
+		// ***SidePanel
+		cameraSidePanel = new OrthographicCamera(w, h);
+
+		shapeRenderer = new ShapeRenderer();
+		batchSidePanel = new SpriteBatch();
+		
+		uiStage.setCamera(cameraSidePanel);
+
+		uiStage.setViewport((float) (Gdx.graphics.getWidth() * 0.37),
+				Gdx.graphics.getHeight(), true, 0, // viewPortX
+				0, // viewPortY
+				(float) (Gdx.graphics.getWidth() * 0.37), // viewPortWidth
+				Gdx.graphics.getHeight() // viewPortHeight
+		);
+
+		rawTextStyle = new LabelStyle();
+		rawTextStyle.font = gameFont;
+		rawTextStyle.fontColor = Color.BLACK;
+
+		Table table = new Table();
+		uiStage.addActor(table);
+		table.setPosition(200, 65);
+
+		table.debug();
+		table.align(Align.top | Align.center);
+		table.setPosition((float) (Gdx.graphics.getWidth() * 0.08),
+				(Gdx.graphics.getHeight() - 325));
+
+		Label inventoryLabel = new Label("Inventory", rawTextStyle);
+		inventoryLabel.setWrap(true); 
+		inventoryLabel.setAlignment(Align.top | Align.center);
+		table.add(inventoryLabel).minWidth(200).minHeight(150).fill();
+		
+		table.row();
+		
+		TextFieldStyle textStyle = new TextFieldStyle();
+		textStyle.font = gameFont;
+		textStyle.fontColor = Color.BLACK;
+		TextField text = new TextField("", textStyle);
+		text.setText("Test");
+		text.setMessageText("Type here!");
+		table.add(text).minWidth(200).minHeight(150).fill();
+
+		table.pack();
+
+		gunItem = new Texture(Gdx.files.internal("assets/tilesets/gun0.png"));
+
+		gunItemRegion = new TextureRegion(gunItem, 0, 0, 32, 32);
+		
 	}
 
 	@Override
@@ -331,26 +387,29 @@ public class ClientEngine extends Game {
 	public void handleKeyPresses() {
 
 		if (pressedKeys[Keys.UP] || pressedKeys[Keys.W]) {
+			P.UID = controlledObject.UID;
 			P.x = 0;
 			P.y = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.DOWN] || pressedKeys[Keys.S]) {
+			P.UID = controlledObject.UID;
 			P.x = 0;
 			P.y = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.RIGHT] || pressedKeys[Keys.D]) {
+			P.UID = controlledObject.UID;
 			P.y = 0;
 			P.x = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.LEFT] || pressedKeys[Keys.A]) {
+			P.UID = controlledObject.UID;
 			P.y = 0;
 			P.x = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-
 	}
 
 	public void focusCameraOnControlled() {
@@ -387,6 +446,12 @@ public class ClientEngine extends Game {
 				return; // ...whatever. Nothing to see here.
 			}
 	
+			// Clear the screen
+			Gdx.gl.glClearColor(0, 0, 1, 0);
+			Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+	
+			super.render();
+	
 			handleKeyPresses();
 	
 			// Access seemingly must be done on the rendering thread (which makes
@@ -407,27 +472,8 @@ public class ClientEngine extends Game {
 				yCameraOffset = controlledObject.getYCameraOffset();
 	
 			}
-	//
-	//		
-	//        int viewportX = (int)(Gdx.graphics.getWidth() - 800) / 2;
-	//        int viewportY = (int)(Gdx.graphics.getHeight() - 800) / 2;
-	//        int viewportWidth = (int)800;
-	//        int viewportHeight = (int)800;
-	//        Gdx.gl.glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
-	//        worldStage.setViewport(800, 480, true, viewportX, viewportY, viewportWidth, viewportHeight);
 	
-	        
-			// left half of window***
-			
-		
-			//camera.viewportWidth = Gdx.graphics.getWidth();
-			//camera.viewportHeight = Gdx.graphics.getHeight();
-			
-			//worldStage.setViewport(stageWidth, stageHeight, keepAspectRatio, viewportX, viewportY, viewportWidth, viewportHeight)
-		
-			Gdx.gl.glViewport(
-					0,
-					0, (int) (Gdx.graphics.getWidth() * 0.63),
+			Gdx.gl.glViewport(0, 0, (int) (Gdx.graphics.getWidth() * 0.63),
 					Gdx.graphics.getHeight());
 	
 			mapRenderer.setView(camera);
@@ -458,6 +504,7 @@ public class ClientEngine extends Game {
 								- (VIEW_DISTANCE_Y + VIEW_DISTANCE_Y_EXTENDED)
 								* camera.zoom * TILE_SIZE / 2 + column * TILE_SIZE
 								+ yCameraOffset * TILE_SIZE, 32, 32);
+
 					}
 				}
 			}
@@ -465,12 +512,22 @@ public class ClientEngine extends Game {
 	
 			tweenManager.update(Gdx.graphics.getDeltaTime());
 	
-			// right half of window***
+			// ***SidePanel
 			Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * 0.63), 0,
 					(int) (Gdx.graphics.getWidth() * 0.37),
 					Gdx.graphics.getHeight());
 			drawSidePanel();
-		
+	
+			uiStage.draw();
+			Table.drawDebug(uiStage);
+	
+			batchSidePanel.begin();
+			batchSidePanel.draw(gunItemRegion,
+					(float) (Gdx.graphics.getWidth() * 0.25),
+					(float) (Gdx.graphics.getWidth() * 0.5), 0, 0, 32, 32,
+					(float) 2.5, 1, 0);
+			batchSidePanel.end();
+	
 		}
 		else
 		{
@@ -478,116 +535,76 @@ public class ClientEngine extends Game {
 		}
 	}
 
+	// ***SidePanel
 	private void drawSidePanel() {
 		shapeRenderer.setProjectionMatrix(cameraSidePanel.combined);
 		shapeRenderer.begin(ShapeType.Filled);
-		shapeRenderer.setColor(255, 0, 0, 0);
+		// Note: the setColor is on a [0-1] scale
+		shapeRenderer.setColor((float) 0.75, (float) 0.75, (float) 0.75,
+				(float) 0);
 		shapeRenderer.rect(-Gdx.graphics.getWidth(), -Gdx.graphics.getHeight(),
-				Gdx.graphics.getWidth() * 2, Gdx.graphics.getHeight() * 2);
-		// shapeRenderer.rect((int) (Gdx.graphics.getWidth() * 0.63), 0,
-		// (int) (Gdx.graphics.getWidth() * 0.37),
-		// Gdx.graphics.getHeight());
+				Gdx.graphics.getWidth() * 2, Gdx.graphics.getHeight() * 3);
 		shapeRenderer.end();
-		
+
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		
-		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
-		
-		
+
+		worldStage.setViewport((float) (Gdx.graphics.getWidth() / 2),
+				Gdx.graphics.getHeight(), true, 0, 0,
+				(float) (Gdx.graphics.getWidth() * 0.63),
+				Gdx.graphics.getHeight());
+
+
 		camera.viewportHeight = VIEW_DISTANCE_X * TILE_SIZE;
 		camera.viewportWidth = VIEW_DISTANCE_Y * TILE_SIZE;
 
-		
-		
 		camera.update();
 
 	}
 
 	@Override
 	public void pause() {
+		if (music != null)
+			music.pause();
 	}
 
 	@Override
 	public void resume() {
+		if (music != null)
+			music.play();
 	}
 
 	public void MoveCameraRelative(int x, int y) {
-		//
-		// int nextTileX = cameraTileX + x;
-		// int nextTileY = cameraTileY + y;
-		//
-		// if(isCellPassable(nextTileX, nextTileY))
-		// {
-		//
-		// cameraTileX += x;
-		// cameraTileY += y;
-		//
-		//
-		//
-		// camera.position.x = cameraTileX*TILE_SIZE+TILE_SIZE/2;
-		// camera.position.y = cameraTileY*TILE_SIZE+TILE_SIZE/2;
-		//
-		// camera.update();
-		//
-		// cullingArea.set(
-		// (cameraTileX-VIEW_DISTANCE_X/2)*TILE_SIZE,
-		// (cameraTileY-VIEW_DISTANCE_Y/2)*TILE_SIZE,
-		// VIEW_DISTANCE_X*TILE_SIZE ,
-		// VIEW_DISTANCE_Y*TILE_SIZE
-		// );
-		//
-		// recaculateVisibleTiles = true;
-
-		//
-		// }
-		//
-		// else
-		// {}
 
 	}
 
 	public boolean isCellPassable(int x, int y) {
-
 		for (Obj obj : ObjectArray.get(x).get(y)) {
-
 			if (obj.dense) {
-
 				return false;
-
 			}
-
 		}
-
 		return true;
 	}
 
 	public boolean isCellOpaque(int tileX, int tileY) {
 		if (tileX < 0 || tileX > MAP_SIZE_X || tileY < 0 || tileY > MAP_SIZE_Y) {
 			return true;
-
 		}
 
 		for (Obj obj : ObjectArray.get(tileX).get(tileY)) {
-
 			if (obj.opaque) {
-
 				return true;
-
 			}
-
 		}
-
 		return false;
 	}
 
 	public void mouseEvent(int tileX, int tileY) {
-
 		if (tileX < 0 || tileX > MAP_SIZE_X || tileY < 0 || tileY > MAP_SIZE_Y) {
 			return;
-
 		}
 
 	}
@@ -620,7 +637,6 @@ public class ClientEngine extends Game {
 	}
 
 	public int returnSign(double x) {
-
 		return ((x < 0) ? -1 : 1);
 
 	}
@@ -672,43 +688,6 @@ public class ClientEngine extends Game {
 		}
 
 	}
-
-	// MapObjects DoorControls =
-	// map.getLayers().get("DoorControls").getObjects();
-	//
-	//
-	// for(int i = 0; i < DoorControls.getCount(); i++)
-	// {
-	//
-	// Object o = DoorControls.get(i);
-	//
-	// if(o.getClass() == RectangleMapObject.class)
-	// {
-	//
-	// RectangleMapObject area = (RectangleMapObject) o;
-	//
-	// int x = (int) area.getRectangle().x;
-	// int y = (int) area.getRectangle().y;
-	//
-	// MapProperties properties = area.getProperties();
-	//
-	// if(properties.containsKey("locked"))
-	// {
-	// for(Obj door : ObjectArray.get(x).get(y))
-	// {
-	// if(Door.class.isAssignableFrom(door.getClass()))
-	// {
-	// Door d = (Door)ObjectArrayByID.get(door.UID);
-	// d.locked =Boolean.valueOf((String) properties.get("locked"));
-	// }
-	// }
-	//
-	// }
-	// }
-	//
-	// }
-	//
-	//
 
 	public void switchToNewScreen(ScreenEnumerations newLevel) {
 		switch (newLevel) {
@@ -838,13 +817,11 @@ public class ClientEngine extends Game {
 
 		o.refreshTexture();
 
-		
-		if(o.tileXPosition >= 0)
-		{
+		if (o.tileXPosition >= 0) {
 			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
 			worldStage.addActor(o);
 		}
-		
+
 		ObjectArrayByID.put(o.UID, o);
 
 		recaculateVisibleTiles = true;
@@ -856,12 +833,10 @@ public class ClientEngine extends Game {
 		o.remove();
 		ObjectArrayByID.remove(UID);
 
-		
-		if(o.tileXPosition >= 0)
-		{
+		if (o.tileXPosition >= 0) {
 			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
 		}
-		
+
 		recaculateVisibleTiles = true;
 	}
 
@@ -903,27 +878,35 @@ public class ClientEngine extends Game {
 
 		ObjectArray.get(P.x).get(P.y).add(o);
 
-		// o.setX(P.x*TILE_SIZE);
-		// o.setY(P.y*TILE_SIZE);
 
 		// tl;dr tweener bad?
 		Tween.to(o, ObjTweener.POSITION_XY,
-				(float) (ConfigOptions.moveDelay / 1000))
+				(float) (o.moveDelay / 1000.0))
 				.target(P.x * TILE_SIZE, P.y * TILE_SIZE).ease(Linear.INOUT)
 				.start(tweenManager);
 
 		if (P.UID == controlledObject.UID) {
-
 			refocusCamera = true;
 
 		}
 	}
+	
+	
 
 	public void mouseEvent(int mouseEventUID) {
 		Obj o = ObjectArrayByID.get(mouseEventUID);
 
-
 		o.onClick(null);
+
+	}
+	
+	public void collisionEvent(UidPair uidPair)
+	{
+		Obj o = ObjectArrayByID.get(uidPair.first);
+		if(o != null)
+		{
+			o.collide(uidPair.second);
+		}
 		
 	}
 
@@ -965,6 +948,9 @@ public class ClientEngine extends Game {
 
 	public void assignControl(int UID) {
 		controlledObject = ObjectArrayByID.get(UID);
+		
+		// this is the last stage of loading -- initialize the music player
+		initMusic();
 	}
 
 	public static void main(String[] args) {
@@ -972,10 +958,10 @@ public class ClientEngine extends Game {
 		cfg.title = "CSCI-375-Project";
 		cfg.useGL20 = true;
 		cfg.width = VIEW_DISTANCE_X * TILE_SIZE * 2;
-//		 cfg.height = VIEW_DISTANCE_Y * TILE_SIZE * 2;
+		// cfg.height = VIEW_DISTANCE_Y * TILE_SIZE * 2;
 		cfg.height = 10 * 64;
 
-		//cfg.resizable = false;
+		// cfg.resizable = false;
 		cfg.vSyncEnabled = true;
 
 		cfg.foregroundFPS = 60;
@@ -989,5 +975,22 @@ public class ClientEngine extends Game {
 
 		new LwjglApplication(new ClientEngine(), cfg);
 	}
+	
+	public void initMusic()
+	{
+		// setup looping background music
+		music=Gdx.audio.newMusic(Gdx.files.internal("assets/music/bgmusic.mp3"));
+		music.setLooping(true);
+		music.setVolume(1.0f);
+		music.play();
+	}
+	
+	public void changeHealth(Integer hp)
+	{
+		playerHealth = hp;
+		System.out.println("Life at "+hp+"%");
+	}
+
+
 
 }
