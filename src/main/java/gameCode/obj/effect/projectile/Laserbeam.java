@@ -11,6 +11,9 @@ public class Laserbeam extends Projectile
 	{
 		super(x, y);
 		// TODO Auto-generated constructor stub
+		
+		name = "Laserbeam!";
+		moveDelay = 50;
 	}
 
 	@Override
@@ -20,6 +23,15 @@ public class Laserbeam extends Projectile
 		return texture;
 		
 	}
+	
+	@Override
+	public void process()
+	{
+		super.process();
+		
+	}
+	
+
 	
 	protected TextureRegion texture = ConfigOptions.cakeTexture;
 }

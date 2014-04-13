@@ -4,6 +4,7 @@ import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
+import gameCode.obj.effect.projectile.Projectile;
 import gameCode.obj.item.Item;
 import helpers.HelperFunctions;
 
@@ -32,6 +33,7 @@ import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 import core.client.ClientEngine;
+import core.client.ClientEngine.ClientEngineReference;
 import core.client.animatedAssets;
 import core.server.ServerEngine.ServerEngineReference;
 import core.shared.ConfigOptions;
@@ -57,8 +59,9 @@ public class Obj extends Actor
 		// The serverside field is not sent and defaults to false for the objects.
 		this.ServerSide = true;
 
-		lastMoveTime = System.currentTimeMillis();
-		lastActionTime = System.currentTimeMillis();
+		lastMoveTime = 0;
+		lastActionTime = 0;
+		
 //	    UniqueData.put("Name" , "Undefined Object");
 //	    UniqueData.put("Desc" , "Undefined Description");
 //	    UniqueData.put("Dense" , "false");
@@ -122,23 +125,63 @@ public class Obj extends Actor
 		
 		Obj current = this;
 		
-//		while(current.containerUID != -1)
-//		{
-//			
-//			current = 
-//			
-//		}
+		if(this.ServerSide)
+		{	
+			
+		
+			while(current.containerUID != -1)
+			{
+				
+				current = ServerEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+		}
+		else
+		{
+			
+			while(current.containerUID != -1)
+			{
+				
+				current = ClientEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+			
+			
+		}
 		
 		
-		
-		return 0;
+		return current.tileXPosition;
 	}
 	public int getTileYPosition()
 	{
 		
+		Obj current = this;
 		
+		if(this.ServerSide)
+		{	
+			
 		
-		return 0;
+			while(current.containerUID != -1)
+			{
+				
+				current = ServerEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+		}
+		else
+		{
+			
+			while(current.containerUID != -1)
+			{
+				
+				current = ClientEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+			
+			
+		}
+		
+		return current.tileYPosition;
 	}
 	
 	
@@ -170,12 +213,46 @@ public class Obj extends Actor
 		}
 	}
 	
-	public void collide(int colldier)
+	public void collide(int colldierUID)
+	{
+		
+		
+		
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			Obj collider = ServerEngineReference.getSelf().ObjectArrayByID.get(colldierUID);
+
+			if(Projectile.class.isAssignableFrom(collider.getClass()))
+			{
+				this.bulletImpact(colldierUID);
+			}
+			
+		}		
+		
+		
+		return;
+	}
+	
+	public void bulletImpact(int bulletUID)
+	{
+		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
+		{
+			ServerEngineReference.getSelf().removeObject(this.UID);
+			ServerEngineReference.getSelf().removeObject(bulletUID);
+		}	
+		
+		
+		
+	}
+	
+	public void process()
 	{
 		
 		return;
 	}
 	
+	public int moveDelay = 200;
+	public int actionDelay = 500;
 	
 	public int tileXPosition;
 	public int tileYPosition;

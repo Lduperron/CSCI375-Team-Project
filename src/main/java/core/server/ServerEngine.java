@@ -17,6 +17,8 @@ import helpers.Hand;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -50,9 +52,10 @@ public class ServerEngine extends Thread
 	long masterLoopTime = System.currentTimeMillis();
 	
 	public TiledMap map;
-	ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
-	HashMap<Integer, Obj> ObjectArrayByID = new HashMap<Integer, Obj>();
+	public ArrayList<ArrayList<ArrayList<Obj>>> ObjectArray = new ArrayList<ArrayList<ArrayList<Obj>>>();
+	public HashMap<Integer, Obj> ObjectArrayByID = new HashMap<Integer, Obj>();
 	public Lock standby = new ReentrantLock();
+	public LinkedList<Obj> ProcessingObjects = new LinkedList<Obj>();
 	
 	Obj onlyPlayer;
 	public TweenManager tweenManager;
@@ -117,7 +120,12 @@ public class ServerEngine extends Thread
 	
 			tweenManager.update(DeltaInSeconds);
 			
-			
+			for(int i = 0; i < ProcessingObjects.size(); i++)
+			{
+
+				ProcessingObjects.get(i).process();
+				
+			}
 			
 			
 			
@@ -245,6 +253,12 @@ public class ServerEngine extends Thread
 	public boolean isCellPassable(int x, int y, MutableInteger collidedObjectUID)
 	{
 
+		if( x < 0 || x > MAP_SIZE_X || y < 0 || y > MAP_SIZE_Y)
+		{
+			return false;
+			
+		}
+		
 		for(Obj obj : ObjectArray.get(x).get(y))
 		{
 			
@@ -345,6 +359,23 @@ public class ServerEngine extends Thread
 		
 	}
 	
+	public void removeObject(int objectUID)
+	{
+		Obj o = ObjectArrayByID.get(objectUID);
+		ObjectArrayByID.remove(objectUID);
+		
+		ProcessingObjects.remove(o);
+
+		if(o.tileXPosition >= 0)
+		{
+			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+		}
+		
+
+		network.sendAll(Message.REMOVEOBJECT, objectUID);
+		
+	}
+	
 	
 	public void objectRelocate(Position P)
 	{
@@ -372,10 +403,19 @@ public class ServerEngine extends Thread
 		
 		Obj movingObject = ObjectArrayByID.get(p.UID);
 		
+		if(movingObject == null)
+		{
+			
+			return;
+			
+		}
+		
 		int nextTileX = (int) (movingObject.tileXPosition + p.x);
 		int nextTileY = (int) (movingObject.tileYPosition  + p.y);
 		
-		if(currentTime < movingObject.lastMoveTime + ConfigOptions.moveDelay)
+		
+		
+		if(currentTime < movingObject.lastMoveTime + movingObject.moveDelay)
 		{
 			return;
 			
@@ -387,7 +427,7 @@ public class ServerEngine extends Thread
 		}
 		
 		
-		
+		collidedObjectUID.setValue(-1);
 		if(isCellPassable(nextTileX, nextTileY, collidedObjectUID))
 		{
 
@@ -397,7 +437,7 @@ public class ServerEngine extends Thread
 			objectRelocate(p);
 		}
 		
-		else
+		else if(collidedObjectUID.intValue() >= 0)
 		{
 			
 			//System.out.println("Collided with " + collidedObjectUID.intValue());
@@ -412,6 +452,7 @@ public class ServerEngine extends Thread
 
 			network.sendAll(Message.COLLISION, u);
 		}
+		else{}
 		
 		
 		
@@ -424,7 +465,7 @@ public class ServerEngine extends Thread
 		Obj movingObject = onlyPlayer;
 		long currentTime = System.currentTimeMillis();
 		
-		if(currentTime < movingObject.lastActionTime + ConfigOptions.actionDelay)
+		if(currentTime < movingObject.lastActionTime + movingObject.actionDelay)
 		{
 			return;
 			
@@ -471,7 +512,7 @@ public class ServerEngine extends Thread
 		Obj movingObject = onlyPlayer;
 		
 		long currentTime = System.currentTimeMillis();
-		if(currentTime < movingObject.lastActionTime + ConfigOptions.actionDelay)
+		if(currentTime < movingObject.lastActionTime + movingObject.actionDelay)
 		{
 			return;
 			
@@ -518,24 +559,56 @@ public class ServerEngine extends Thread
 	
 	private boolean IsMapAdjacent(Obj A, Obj B)
 	{
-		//TODO: this.
-
-		return true;
+		int AX = A.getTileXPosition();
+		int AY = A.getTileYPosition();
+		
+		int BX = B.getTileXPosition();
+		int BY = B.getTileYPosition();
+		
+		int distX = Math.abs(AX - BX);
+		int distY = Math.abs(AY - BY);
+		
+		if(distX > 1 || distY > 1)
+		{
+			return false;
+			
+		}
+		else
+		{
+			return true;
+		}
 
 	}
 
 	private boolean IsMapAdjacent(Obj A, Position B)
 	{
-		//TODO: this.
+		int AX = A.getTileXPosition();
+		int AY = A.getTileYPosition();
+		
+		int BX = B.x;
+		int BY = B.y;
+		
+		int distX = Math.abs(AX - BX);
+		int distY = Math.abs(AY - BY);
+		
+		if(distX > 1 || distY > 1)
+		{
+			return false;
+			
+		}
+		else
+		{
+			return true;
+		}
 
-		return false;
+		
 
 	}
 
 
 	private Item getActiveHandItem()
 	{
-		if(onlyPlayer.getClass().isAssignableFrom(Mob.class))
+		if(Mob.class.isAssignableFrom(onlyPlayer.getClass()))
 		{
 			
 			Mob m = (Mob) onlyPlayer;
