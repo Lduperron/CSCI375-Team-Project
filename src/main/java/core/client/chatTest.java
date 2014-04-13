@@ -6,6 +6,7 @@ import com.badlogic.gdx.Net.Protocol;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.net.ServerSocket;
 import com.badlogic.gdx.net.ServerSocketHints;
 import com.badlogic.gdx.net.Socket;
@@ -43,15 +44,15 @@ public class chatTest implements ApplicationListener {
     private TextArea textMessage;
     
     // Pick a resolution that is 16:9 but not unreadibly small
-    public final static float VIRTUAL_SCREEN_HEIGHT = 960;
-    public final static float VIRTUAL_SCREEN_WIDTH = 540;
+    public final static float VIRTUAL_SCREEN_HEIGHT = 400;
+    public final static float VIRTUAL_SCREEN_WIDTH = 200;
     
     
     @Override
     public void create() {        
         camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         batch = new SpriteBatch();
-        
+
         // Load our UI skin from file.  Once again, I used the files included in the tests.
         // Make sure default.fnt, default.png, uiskin.[atlas/json/png] are all added to your assets
         skin = new Skin(Gdx.files.internal("data/uiskin.json"));
@@ -91,6 +92,7 @@ public class chatTest implements ApplicationListener {
         // Vertical group groups contents vertically.  I suppose that was probably pretty obvious
         VerticalGroup vg = new VerticalGroup();
         vg.setSpacing(3);//.space(2).pad(5).fill();//.space(3).reverse().fill();
+        vg.layout();
         // Set the bounds of the group to the entire virtual display
         vg.setBounds(0, 0, VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT);
         
@@ -128,7 +130,7 @@ public class chatTest implements ApplicationListener {
                 // Create the socket server using TCP protocol and listening on 9021
                 // Only one app can listen to a port at a time, keep in mind many ports are reserved
                 // especially in the lower numbers ( like 21, 80, etc )
-                ServerSocket serverSocket = Gdx.net.newServerSocket(Protocol.TCP, 9021, serverSocketHint);
+                ServerSocket serverSocket = Gdx.net.newServerSocket(Protocol.TCP, 8001, serverSocketHint);
                 
                 // Loop forever
                 while(true){

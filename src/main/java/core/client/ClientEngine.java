@@ -128,6 +128,9 @@ public class ClientEngine extends Game {
 	SettingsScreen settingsScreen;
 	ConnectingScreen connectingScreen;
 	ErrorScreen errorScreen;
+	
+	// Declare chat box
+	chatTest chatBox;
 
 	// Used for assets that will not be interacted with by the user
 	static AssetManager gameTextureManager;
@@ -292,8 +295,10 @@ public class ClientEngine extends Game {
 
 		network.send(Message.REQUESTSTATE);
 		network.send(core.shared.Message.SPAWN);
-
-
+		
+		
+		chatBox = new chatTest();
+		chatBox.create();
 		
 		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
 		
@@ -465,23 +470,23 @@ public class ClientEngine extends Game {
 				(int) (Gdx.graphics.getWidth() * 0.37),
 				Gdx.graphics.getHeight());
 		drawSidePanel();
-		
-		chatTest testChat = new chatTest();
-		testChat.create();
-		//switchToNewScreen(ScreenEnumerations.MainMenu);
 
+		//switchToNewScreen(ScreenEnumerations.MainMenu);
+		chatBox.render();
 	}
 
 	private void drawSidePanel() {
 		shapeRenderer.setProjectionMatrix(cameraSidePanel.combined);
 		shapeRenderer.begin(ShapeType.Filled);
 		shapeRenderer.setColor(255, 0, 0, 0);
-		shapeRenderer.rect(-Gdx.graphics.getWidth(), -Gdx.graphics.getHeight(),
+		shapeRenderer.rect(-Gdx.graphics.getWidth(), -Gdx.graphics.getHeight(),		
 				Gdx.graphics.getWidth() * 2, Gdx.graphics.getHeight() * 2);
 		// shapeRenderer.rect((int) (Gdx.graphics.getWidth() * 0.63), 0,
 		// (int) (Gdx.graphics.getWidth() * 0.37),
 		// Gdx.graphics.getHeight());
-		shapeRenderer.end();
+		
+		//render the chatbox
+	shapeRenderer.end();
 		
 		
 	}
