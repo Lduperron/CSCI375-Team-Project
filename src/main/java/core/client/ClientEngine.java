@@ -10,6 +10,7 @@ import java.util.List;
 import gameCode.obj.Obj;
 import gameCode.obj.getObjUID;
 import gameCode.obj.mob.Mob;
+import gameCode.obj.mob.Direction;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
 import aurelienribon.tweenengine.BaseTween;
@@ -379,31 +380,36 @@ public class ClientEngine extends Game {
 	Position P = new Position();
 
 	public void handleKeyPresses() {
-
+		Mob o = (Mob) ObjectArrayByID.get(controlledObject.UID);
 		if (pressedKeys[Keys.UP] || pressedKeys[Keys.W]) {
 			P.UID = controlledObject.UID;
 			P.x = 0;
 			P.y = 1;
 			network.send(Message.REQUESTMOVE, P);
+			o.setDirection(Direction.UP);
 		}
 		if (pressedKeys[Keys.DOWN] || pressedKeys[Keys.S]) {
 			P.UID = controlledObject.UID;
 			P.x = 0;
 			P.y = -1;
 			network.send(Message.REQUESTMOVE, P);
+			o.setDirection(Direction.DOWN);
 		}
 		if (pressedKeys[Keys.RIGHT] || pressedKeys[Keys.D]) {
 			P.UID = controlledObject.UID;
 			P.y = 0;
 			P.x = 1;
 			network.send(Message.REQUESTMOVE, P);
+			o.setDirection(Direction.RIGHT);
 		}
 		if (pressedKeys[Keys.LEFT] || pressedKeys[Keys.A]) {
 			P.UID = controlledObject.UID;
 			P.y = 0;
 			P.x = -1;
 			network.send(Message.REQUESTMOVE, P);
+			o.setDirection(Direction.LEFT);
 		}
+		System.out.println(o.getTexture());
 	}
 
 	public void focusCameraOnControlled() {
@@ -974,7 +980,5 @@ public class ClientEngine extends Game {
 		playerHealth = hp;
 		System.out.println("Life at "+hp+"%");
 	}
-
-
 
 }

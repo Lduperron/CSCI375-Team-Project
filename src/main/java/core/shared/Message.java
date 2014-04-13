@@ -24,5 +24,10 @@ public enum Message {
 	/**
 	 * Health change
 	 */
-	CHANGEHEALTH
+	CHANGEHEALTH,
+	
+	/*
+	 * Updates player object (new texture)
+	 */
+	UPDATEPLAYEROBJECT
 }

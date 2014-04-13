@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import core.shared.ConfigOptions;
+import core.server.ServerEngine.ServerEngineReference;
 
 import gameCode.obj.*;
 import gameCode.obj.item.Item;
@@ -53,4 +54,37 @@ public class Mob extends Obj
 		return this.AIcontrolled;
 	}
 	
+<<<<<<< Updated upstream
+=======
+	public void setTextures(TextureRegion u, TextureRegion r, TextureRegion d, TextureRegion l)
+	{
+		this.upTexture = u;
+		this.rightTexture = r;
+		this.downTexture = d;
+		this.leftTexture = l;
+	}
+	
+	public void setDirection(Direction d)
+	{
+		switch (d)
+		{
+			case UP:
+				this.texture = this.upTexture;
+				break;
+			
+			case RIGHT:
+				this.texture = this.rightTexture;
+				break;
+				
+			case DOWN:
+				this.texture = this.downTexture;
+				break;
+			
+			case LEFT:
+			default:
+				this.texture = this.leftTexture;
+				break;
+		}
+	}
+>>>>>>> Stashed changes
 }

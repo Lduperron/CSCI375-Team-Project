@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
@@ -19,6 +20,7 @@ import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
 import core.shared.UidPair;
+
 
 /**
  * Client end for KryoNet network communications
@@ -132,7 +134,7 @@ public class NetClient extends Network {
 					case CHANGEHEALTH:
 						int healthValue = (Integer) netMsg.obj;
 						gameClient.changeHealth(healthValue);
-						
+						break;
 						
 					default:
 						// invalid messages are simply ignored

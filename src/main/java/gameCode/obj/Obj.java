@@ -426,6 +426,11 @@ public class Obj extends Actor
 		
 	}
 	
+	public void setTexture(TextureRegion newTexture)
+	{
+		this.texture = newTexture;
+	}
+	
 	
 	public void animate(String animationID, boolean Loop)
 	{
