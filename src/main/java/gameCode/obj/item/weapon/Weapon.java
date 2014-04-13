@@ -2,6 +2,8 @@ package gameCode.obj.item.weapon;
 
 import core.server.ServerEngine.ServerEngineReference;
 import core.shared.Position;
+import core.shared.SoundEffect;
+import core.shared.SoundManager;
 import gameCode.obj.effect.projectile.Laserbeam;
 import gameCode.obj.item.Item;
 
@@ -30,6 +32,9 @@ public class Weapon extends Item
 			
 			ServerEngineReference.getSelf().addToWorld(l);
 			ServerEngineReference.getSelf().ProcessingObjects.add(l);
+			
+			// Play laser sound
+			ServerEngineReference.getSelf().soundManager.playSound(SoundEffect.LASER);
 			
 			
 		}

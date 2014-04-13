@@ -5,6 +5,9 @@ import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
+
+import core.shared.SoundManager;
+
 import gameCode.obj.Obj;
 import gameCode.obj.getObjUID;
 import gameCode.obj.effect.projectile.Projectile;
@@ -65,6 +68,8 @@ public class ServerEngine extends Thread
 	ArrayList<EnemyAI> enemies;
 	public TweenManager tweenManager;
 	
+	public SoundManager soundManager;
+	
 	public ServerEngine() 
 	{
 		
@@ -83,6 +88,7 @@ public class ServerEngine extends Thread
 		standby.unlock();
 		
 		tweenManager = new TweenManager();
+		soundManager = new SoundManager();
 		
 	}
 	

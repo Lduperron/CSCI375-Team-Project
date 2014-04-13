@@ -20,6 +20,7 @@ import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Linear;
 import aurelienribon.tweenengine.equations.Quad;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -187,6 +188,10 @@ public class ClientEngine extends Game {
 
 	List<Position> QueuedEvents = new LinkedList<Position>();
 
+	// fbackground music
+	Music music;
+
+
 	public static class ClientEngineReference {
 		static ClientEngine Self;
 
@@ -350,7 +355,7 @@ public class ClientEngine extends Game {
 		gunItem = new Texture(Gdx.files.internal("assets/tilesets/gun0.png"));
 
 		gunItemRegion = new TextureRegion(gunItem, 0, 0, 32, 32);
-
+		
 	}
 
 	@Override
@@ -533,10 +538,14 @@ public class ClientEngine extends Game {
 
 	@Override
 	public void pause() {
+		if (music != null)
+			music.pause();
 	}
 
 	@Override
 	public void resume() {
+		if (music != null)
+			music.play();
 	}
 
 	public void MoveCameraRelative(int x, int y) {
@@ -911,6 +920,9 @@ public class ClientEngine extends Game {
 
 	public void assignControl(int UID) {
 		controlledObject = ObjectArrayByID.get(UID);
+		
+		// this is the last stage of loading -- initialize the music player
+		initMusic();
 	}
 
 	public static void main(String[] args) {
@@ -934,6 +946,15 @@ public class ClientEngine extends Game {
 				"assets/AutopackingTiles/Door/", "PackedDoor");
 
 		new LwjglApplication(new ClientEngine(), cfg);
+	}
+	
+	public void initMusic()
+	{
+		// setup looping background music
+		music=Gdx.audio.newMusic(Gdx.files.internal("assets/music/bgmusic.mp3"));
+		music.setLooping(true);
+		music.setVolume(0.2f);
+		music.play();
 	}
 
 
