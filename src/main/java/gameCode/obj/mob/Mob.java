@@ -28,6 +28,7 @@ public class Mob extends Obj
 		
 	}
 	protected TextureRegion texture = ConfigOptions.texture;
+	protected TextureRegion upTexture, rightTexture, downTexture, leftTexture;
 	protected Boolean AIcontrolled = false; 
 
 	//@Override
@@ -53,4 +54,35 @@ public class Mob extends Obj
 		return this.AIcontrolled;
 	}
 	
+	public void setTextures(TextureRegion u, TextureRegion r, TextureRegion d, TextureRegion l)
+	{
+		this.upTexture = u;
+		this.rightTexture = r;
+		this.downTexture = d;
+		this.leftTexture = l;
+	}
+	
+	public void setDirection(Direction d)
+	{
+		System.out.println(d);
+		switch (d)
+		{
+			case UP:
+				this.texture = this.upTexture;
+				break;
+			
+			case RIGHT:
+				this.texture = this.rightTexture;
+				break;
+				
+			case DOWN:
+				this.texture = this.downTexture;
+				break;
+			
+			case LEFT:
+			default:
+				this.texture = this.leftTexture;
+				break;
+		}
+	}
 }

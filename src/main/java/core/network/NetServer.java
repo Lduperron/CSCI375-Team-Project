@@ -92,6 +92,7 @@ public class NetServer extends Network {
 					case REQUESTMOVE: // TODO: ... to most of these, send the connection in particular that asked for it.
 						Position P = (Position) netMsg.obj;
 						gameServer.requestMove(P);
+						gameServer.changeCharDirection(P);
 						break;
 						
 					case MOUSEEVENTTOSERVERONOBJECT:
