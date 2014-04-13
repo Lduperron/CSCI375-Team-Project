@@ -63,6 +63,7 @@ public class mainMenuScreen implements Screen{
     	    public void clicked(InputEvent event, float x, float y) 
     	    {
     	    	parentEngine.screenRender=true;
+    	    	Gdx.input.setInputProcessor(parentEngine.multiplexer);
     	    	
     	    };
     		
