@@ -8,9 +8,6 @@ public class ConfigOptions
 {
 	
 	
-	public static double moveDelay = 200; // In miliseconds.
-	public static double actionDelay = 500;
-	
 	public static final int TILE_SIZE = 32;
 	public static final int VIEW_DISTANCE_X = 15;
 	public static final int VIEW_DISTANCE_Y = 15;

@@ -828,9 +828,10 @@ public class ClientEngine extends Game {
 
 		ObjectArray.get(P.x).get(P.y).add(o);
 
+
 		// tl;dr tweener bad?
 		Tween.to(o, ObjTweener.POSITION_XY,
-				(float) (ConfigOptions.moveDelay / 1000))
+				(float) (o.moveDelay / 1000.0))
 				.target(P.x * TILE_SIZE, P.y * TILE_SIZE).ease(Linear.INOUT)
 				.start(tweenManager);
 
@@ -852,8 +853,10 @@ public class ClientEngine extends Game {
 	public void collisionEvent(UidPair uidPair)
 	{
 		Obj o = ObjectArrayByID.get(uidPair.first);
-		
-		o.collide(uidPair.second);
+		if(o != null)
+		{
+			o.collide(uidPair.second);
+		}
 		
 	}
 

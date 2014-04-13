@@ -86,6 +86,8 @@ public class Door extends Structure
 	@Override
 	public void collide(int colldier)
 	{
+		super.collide(colldier);
+		
 		this.onClick(null);
 		return;
 	}
