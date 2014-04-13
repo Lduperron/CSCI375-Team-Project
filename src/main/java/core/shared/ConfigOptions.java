@@ -24,7 +24,8 @@ public class ConfigOptions
 	public static Texture texturereg = new Texture((Gdx.files.internal("data/libgdx.png")));
 	public static TextureRegion texture = new TextureRegion(texturereg);
 	
-	public static Texture cakeTex = new Texture((Gdx.files.internal("tilesets/cake.png")));
+	public static Texture cakeTex = new Texture((Gdx.files.internal("tilesets/laser.png")));
+//	public static Texture cakeTex = new Texture((Gdx.files.internal("tilesets/cake.png")));
 	public static TextureRegion cakeTexture = new TextureRegion(cakeTex);
 	
 	
