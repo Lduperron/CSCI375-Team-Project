@@ -99,6 +99,11 @@ public class NetClient extends Network {
 						gameClient.addToWorld(o);
 						break;
 						
+					case REMOVEOBJECT:
+						int removeUID = (Integer) netMsg.obj;
+						gameClient.removeFromWorld(removeUID);
+						break;
+						
 					case YOUCONTROL:
 						int UID = (Integer) netMsg.obj;
 						gameClient.assignControl(UID);

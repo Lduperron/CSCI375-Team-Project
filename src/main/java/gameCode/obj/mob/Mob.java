@@ -29,6 +29,8 @@ public class Mob extends Obj
 	protected TextureRegion texture = ConfigOptions.texture;
 	protected Boolean AIcontrolled = false; 
 
+	//@Override
+	//public void bulletImpact(int bulletUID) {};
 	
 	public Item leftHand;
 	public Item rightHand;

@@ -81,8 +81,67 @@ public class Door extends Structure
 	@Override
 	public void collide(int colldier)
 	{
+		super.collide(colldier);
+		
 		this.onClick(null);
 		return;
+	}
+	
+	public void Open()
+	{
+		
+		if(!this.dense)
+		{
+			
+			return; // already open
+			
+		}
+		
+		
+		final Door d = this;
+		HelperFunctions.afterDelay(.5, this, new TweenCallback()
+		{
+			
+			@Override
+			public void onEvent(int type, BaseTween<?> source)
+			{
+				d.dense = false;
+				d.opaque = false;
+				
+			}
+
+		});
+		
+
+		this.animate("Opening", false);
+		
+		
+	}
+	public void Close()
+	{
+		
+		if(this.dense)
+		{
+			
+			return; // already closed
+			
+		}
+		
+		final Door d = this;
+		HelperFunctions.afterDelay(.5, this, new TweenCallback()
+		{
+			
+			@Override
+			public void onEvent(int type, BaseTween<?> source)
+			{
+				d.dense = true;
+				d.opaque = true;
+				
+			}
+
+		});
+		this.animate("Closing", false);
+		
 	}
 	
 	@Override
@@ -99,52 +158,27 @@ public class Door extends Structure
 		{
 			if(this.dense)
 			{
-				
-				final Door d = this;
-				HelperFunctions.afterDelay(.5, this, new TweenCallback()
-				{
-					
-					@Override
-					public void onEvent(int type, BaseTween<?> source)
-					{
-						d.dense = false;
-						d.opaque = false;
-						
-					}
 
-				});
-				
+				this.Open();
+								
+				final Door d = this;
 				HelperFunctions.afterDelay(5, this, new TweenCallback()
 				{
 					
 					@Override
 					public void onEvent(int type, BaseTween<?> source)
 					{
-						d.onClick(null); // TODO:  Move the open/close things into their own functions and just call 'close'
+						d.Close();
 						
 					}
 
 				});
 
-				this.animate("Opening", false);
 				
 			}
 			else
 			{
-				final Door d = this;
-				HelperFunctions.afterDelay(.5, this, new TweenCallback()
-				{
-					
-					@Override
-					public void onEvent(int type, BaseTween<?> source)
-					{
-						d.dense = true;
-						d.opaque = true;
-						
-					}
-
-				});
-				this.animate("Closing", false);
+				this.Close();
 			}
 			
 		
