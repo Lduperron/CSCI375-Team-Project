@@ -149,7 +149,7 @@ public class ServerEngine extends Thread
 			{
 				for (EnemyAI e : enemies)
 				{
-					e.doAction(this);
+					e.doAction();
 				}
 			}			
 
@@ -354,7 +354,7 @@ public class ServerEngine extends Thread
 		
 		for (Pair p : enemyPositions)
 		{
-			enemies.add(new EnemyAI(new EnemySoldier(p.x, p.y), m));
+			enemies.add(new EnemyAI(new EnemySoldier(p.x, p.y), m, this));
 		}
 		
 		// Add enemy objects to the world
@@ -537,7 +537,6 @@ public class ServerEngine extends Thread
 		// Do checks that we can actually click it, etc, etc...
 		Item inHand = getActiveHandItem();
 		// TODO:  Send what we actually clicked it with (empty hand, divine rapier, etc.)
-
 		
 		
 		if(IsMapAdjacent(onlyPlayer, o))
