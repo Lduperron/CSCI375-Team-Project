@@ -953,7 +953,7 @@ public class ClientEngine extends Game {
 		// setup looping background music
 		music=Gdx.audio.newMusic(Gdx.files.internal("assets/music/bgmusic.mp3"));
 		music.setLooping(true);
-		music.setVolume(0.2f);
+		music.setVolume(1.0f);
 		music.play();
 	}
 
