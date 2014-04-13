@@ -32,9 +32,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -53,8 +55,17 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
@@ -139,13 +150,22 @@ public class ClientEngine extends Game {
 	float xCameraOffset;
 	float yCameraOffset;
 
-	// SidePanel
+	// ***SidePanel
 	private OrthographicCamera cameraSidePanel;
 	private SpriteBatch batchSidePanel;
-	// **********
-
-	// ***
 	ShapeRenderer shapeRenderer;
+
+	// ***Inventory
+	Stage inventoryStage;
+	TextField inventoryTextBox;
+	ScrollPane inventoryTextScroller;
+	Table inventoryTextLabelContainingTable;
+	Table inventoryTextScrollingTable;
+	TextFieldStyle inputStyle;
+	ScrollPaneStyle scrollPaneStyle;
+
+	Texture gunItem;
+	TextureRegion gunItemRegion;
 
 	Stage uiStage;
 	Stage worldStage;
@@ -169,34 +189,24 @@ public class ClientEngine extends Game {
 
 	public TweenManager tweenManager = new TweenManager();
 
-	
-	List<Position>  QueuedEvents = new LinkedList<Position>();
-	
-	
-	
-	
-	public static class ClientEngineReference
-	{
+	List<Position> QueuedEvents = new LinkedList<Position>();
+
+	public static class ClientEngineReference {
 		static ClientEngine Self;
 
 		public static void setSelf(ClientEngine e) {
-
 			Self = e;
-
 		}
 
 		public static ClientEngine getSelf() {
-
 			return Self;
-
 		}
 
 	}
 
 	@Override
+	public void create() {
 
-	public void create() {		
-		
 		ClientEngineReference.setSelf(this);
 
 		float w = Gdx.graphics.getWidth();
@@ -213,17 +223,9 @@ public class ClientEngine extends Game {
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
 		camera = new OrthographicCamera();
 
-		// StagePanel
-		cameraSidePanel = new OrthographicCamera(w, h);
-		// ***
-
 		Tween.registerAccessor(Obj.class, new ObjTweener());
 
 		occulsionTileRenderer = new ShapeRenderer();
-
-		// *** shape renderer and spritebatch for side panel
-		shapeRenderer = new ShapeRenderer();
-		batchSidePanel = new SpriteBatch();
 
 		uiStage = new Stage();
 		worldStage = new Stage();
@@ -231,7 +233,7 @@ public class ClientEngine extends Game {
 		// backgrounds
 		Backgrounds = new HashMap<Background, AssetDescriptor<Texture>>();
 		gameTextureManager = new AssetManager();
-		
+
 		Backgrounds.put(Background.MENUSCREEN, new AssetDescriptor<Texture>(
 				"backgrounds/spacebg.png", Texture.class));
 
@@ -264,9 +266,6 @@ public class ClientEngine extends Game {
 
 		worldStage.setCamera(camera);
 
-		// ***
-		// worldStage.setCamera(cameraSidePanel);
-
 		cullingArea = new Rectangle((cameraTileX - VIEW_DISTANCE_X / 2)
 				* TILE_SIZE, (cameraTileY - VIEW_DISTANCE_Y / 2) * TILE_SIZE,
 				VIEW_DISTANCE_X * TILE_SIZE, VIEW_DISTANCE_Y * TILE_SIZE);
@@ -296,23 +295,49 @@ public class ClientEngine extends Game {
 		network.send(Message.REQUESTSTATE);
 		network.send(core.shared.Message.SPAWN);
 
+		worldStage.setViewport((float) (Gdx.graphics.getWidth() / 2),
+				Gdx.graphics.getHeight(), true, 0, 0,
+				(float) (Gdx.graphics.getWidth() * 0.63),
+				Gdx.graphics.getHeight());
 
-		
-		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
-		
-		/*
-		 * camera = new OrthographicCamera(1, h/w); batch = new SpriteBatch();
-		 * 
-		 * texture = new Texture(Gdx.files.internal("data/libgdx.png"));
-		 * texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		 * 
-		 * TextureRegion region = new TextureRegion(texture, 0, 0, 512, 275);
-		 * 
-		 * sprite = new Sprite(region); sprite.setSize(0.9f, 0.9f *
-		 * sprite.getHeight() / sprite.getWidth());
-		 * sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
-		 * sprite.setPosition(-sprite.getWidth()/2, -sprite.getHeight()/2);
-		 */
+		// ***SidePanel
+		cameraSidePanel = new OrthographicCamera(w, h);
+
+		shapeRenderer = new ShapeRenderer();
+		batchSidePanel = new SpriteBatch();
+
+		uiStage.setCamera(cameraSidePanel);
+
+		uiStage.setViewport((float) (Gdx.graphics.getWidth() * 0.37),
+				Gdx.graphics.getHeight(), true, 0, // viewPortX
+				0, // viewPortY
+				(float) (Gdx.graphics.getWidth() * 0.37), // viewPortWidth
+				Gdx.graphics.getHeight() // viewPortHeight
+		);
+
+		rawTextStyle = new LabelStyle();
+		rawTextStyle.font = gameFont;
+		rawTextStyle.fontColor = Color.BLACK;
+
+		Table table = new Table();
+		uiStage.addActor(table);
+		table.setPosition(200, 65);
+
+		table.debug();
+		table.align(Align.top | Align.center);
+		table.setPosition((float) (Gdx.graphics.getWidth() * 0.08),
+				(Gdx.graphics.getHeight() - 175));
+
+		Label inventoryLabel = new Label("Inventory", rawTextStyle);
+		inventoryLabel.setWrap(true);
+		inventoryLabel.setAlignment(Align.top | Align.center);
+		table.add(inventoryLabel).minWidth(200).minHeight(150).fill();
+
+		table.pack();
+
+		gunItem = new Texture(Gdx.files.internal("assets/tilesets/gun0.png"));
+
+		gunItemRegion = new TextureRegion(gunItem, 0, 0, 32, 32);
 	}
 
 	@Override
@@ -409,27 +434,8 @@ public class ClientEngine extends Game {
 			yCameraOffset = controlledObject.getYCameraOffset();
 
 		}
-//
-//		
-//        int viewportX = (int)(Gdx.graphics.getWidth() - 800) / 2;
-//        int viewportY = (int)(Gdx.graphics.getHeight() - 800) / 2;
-//        int viewportWidth = (int)800;
-//        int viewportHeight = (int)800;
-//        Gdx.gl.glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
-//        worldStage.setViewport(800, 480, true, viewportX, viewportY, viewportWidth, viewportHeight);
 
-        
-		// left half of window***
-		
-	
-		//camera.viewportWidth = Gdx.graphics.getWidth();
-		//camera.viewportHeight = Gdx.graphics.getHeight();
-		
-		//worldStage.setViewport(stageWidth, stageHeight, keepAspectRatio, viewportX, viewportY, viewportWidth, viewportHeight)
-	
-		Gdx.gl.glViewport(
-				0,
-				0, (int) (Gdx.graphics.getWidth() * 0.63),
+		Gdx.gl.glViewport(0, 0, (int) (Gdx.graphics.getWidth() * 0.63),
 				Gdx.graphics.getHeight());
 
 		mapRenderer.setView(camera);
@@ -467,41 +473,47 @@ public class ClientEngine extends Game {
 
 		tweenManager.update(Gdx.graphics.getDeltaTime());
 
-		// right half of window***
+		// ***SidePanel
 		Gdx.gl.glViewport((int) (Gdx.graphics.getWidth() * 0.63), 0,
 				(int) (Gdx.graphics.getWidth() * 0.37),
 				Gdx.graphics.getHeight());
 		drawSidePanel();
 
-		//switchToNewScreen(ScreenEnumerations.MainMenu);
+		uiStage.draw();
+		Table.drawDebug(uiStage);
+
+		batchSidePanel.begin();
+		batchSidePanel.draw(gunItemRegion,
+				(float) (Gdx.graphics.getWidth() * 0.25),
+				(float) (Gdx.graphics.getWidth() * 0.5), 0, 0, 32, 32,
+				(float) 2.5, 1, 0);
+		batchSidePanel.end();
 
 	}
 
+	// ***SidePanel
 	private void drawSidePanel() {
 		shapeRenderer.setProjectionMatrix(cameraSidePanel.combined);
 		shapeRenderer.begin(ShapeType.Filled);
-		shapeRenderer.setColor(255, 0, 0, 0);
+		// Note: the setColor is on a [0-1] scale
+		shapeRenderer.setColor((float) 0.75, (float) 0.75, (float) 0.75,
+				(float) 0);
 		shapeRenderer.rect(-Gdx.graphics.getWidth(), -Gdx.graphics.getHeight(),
 				Gdx.graphics.getWidth() * 2, Gdx.graphics.getHeight() * 2);
-		// shapeRenderer.rect((int) (Gdx.graphics.getWidth() * 0.63), 0,
-		// (int) (Gdx.graphics.getWidth() * 0.37),
-		// Gdx.graphics.getHeight());
 		shapeRenderer.end();
-		
-		
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		
-		worldStage.setViewport((float) (Gdx.graphics.getWidth()/2), Gdx.graphics.getHeight(), true , 0, 0, (float) (Gdx.graphics.getWidth() * 0.63), Gdx.graphics.getHeight());
-		
-		
+
+		worldStage.setViewport((float) (Gdx.graphics.getWidth() / 2),
+				Gdx.graphics.getHeight(), true, 0, 0,
+				(float) (Gdx.graphics.getWidth() * 0.63),
+				Gdx.graphics.getHeight());
+
 		camera.viewportHeight = VIEW_DISTANCE_X * TILE_SIZE;
 		camera.viewportWidth = VIEW_DISTANCE_Y * TILE_SIZE;
 
-		
-		
 		camera.update();
 
 	}
@@ -515,79 +527,34 @@ public class ClientEngine extends Game {
 	}
 
 	public void MoveCameraRelative(int x, int y) {
-		//
-		// int nextTileX = cameraTileX + x;
-		// int nextTileY = cameraTileY + y;
-		//
-		// if(isCellPassable(nextTileX, nextTileY))
-		// {
-		//
-		// cameraTileX += x;
-		// cameraTileY += y;
-		//
-		//
-		//
-		// camera.position.x = cameraTileX*TILE_SIZE+TILE_SIZE/2;
-		// camera.position.y = cameraTileY*TILE_SIZE+TILE_SIZE/2;
-		//
-		// camera.update();
-		//
-		// cullingArea.set(
-		// (cameraTileX-VIEW_DISTANCE_X/2)*TILE_SIZE,
-		// (cameraTileY-VIEW_DISTANCE_Y/2)*TILE_SIZE,
-		// VIEW_DISTANCE_X*TILE_SIZE ,
-		// VIEW_DISTANCE_Y*TILE_SIZE
-		// );
-		//
-		// recaculateVisibleTiles = true;
-
-		//
-		// }
-		//
-		// else
-		// {}
 
 	}
 
 	public boolean isCellPassable(int x, int y) {
-
 		for (Obj obj : ObjectArray.get(x).get(y)) {
-
 			if (obj.dense) {
-
 				return false;
-
 			}
-
 		}
-
 		return true;
 	}
 
 	public boolean isCellOpaque(int tileX, int tileY) {
 		if (tileX < 0 || tileX > MAP_SIZE_X || tileY < 0 || tileY > MAP_SIZE_Y) {
 			return true;
-
 		}
 
 		for (Obj obj : ObjectArray.get(tileX).get(tileY)) {
-
 			if (obj.opaque) {
-
 				return true;
-
 			}
-
 		}
-
 		return false;
 	}
 
 	public void mouseEvent(int tileX, int tileY) {
-
 		if (tileX < 0 || tileX > MAP_SIZE_X || tileY < 0 || tileY > MAP_SIZE_Y) {
 			return;
-
 		}
 
 	}
@@ -620,7 +587,6 @@ public class ClientEngine extends Game {
 	}
 
 	public int returnSign(double x) {
-
 		return ((x < 0) ? -1 : 1);
 
 	}
@@ -672,43 +638,6 @@ public class ClientEngine extends Game {
 		}
 
 	}
-
-	// MapObjects DoorControls =
-	// map.getLayers().get("DoorControls").getObjects();
-	//
-	//
-	// for(int i = 0; i < DoorControls.getCount(); i++)
-	// {
-	//
-	// Object o = DoorControls.get(i);
-	//
-	// if(o.getClass() == RectangleMapObject.class)
-	// {
-	//
-	// RectangleMapObject area = (RectangleMapObject) o;
-	//
-	// int x = (int) area.getRectangle().x;
-	// int y = (int) area.getRectangle().y;
-	//
-	// MapProperties properties = area.getProperties();
-	//
-	// if(properties.containsKey("locked"))
-	// {
-	// for(Obj door : ObjectArray.get(x).get(y))
-	// {
-	// if(Door.class.isAssignableFrom(door.getClass()))
-	// {
-	// Door d = (Door)ObjectArrayByID.get(door.UID);
-	// d.locked =Boolean.valueOf((String) properties.get("locked"));
-	// }
-	// }
-	//
-	// }
-	// }
-	//
-	// }
-	//
-	//
 
 	public void switchToNewScreen(ScreenEnumerations newLevel) {
 		switch (newLevel) {
@@ -838,13 +767,11 @@ public class ClientEngine extends Game {
 
 		o.refreshTexture();
 
-		
-		if(o.tileXPosition >= 0)
-		{
+		if (o.tileXPosition >= 0) {
 			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).add(o);
 			worldStage.addActor(o);
 		}
-		
+
 		ObjectArrayByID.put(o.UID, o);
 
 		recaculateVisibleTiles = true;
@@ -856,12 +783,10 @@ public class ClientEngine extends Game {
 		o.remove();
 		ObjectArrayByID.remove(UID);
 
-		
-		if(o.tileXPosition >= 0)
-		{
+		if (o.tileXPosition >= 0) {
 			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
 		}
-		
+
 		recaculateVisibleTiles = true;
 	}
 
@@ -903,13 +828,6 @@ public class ClientEngine extends Game {
 
 		ObjectArray.get(P.x).get(P.y).add(o);
 
-		// o.setX(P.x*TILE_SIZE);
-		// o.setY(P.y*TILE_SIZE);
-
-		
-		
-		
-		
 		// tl;dr tweener bad?
 		Tween.to(o, ObjTweener.POSITION_XY,
 				(float) (ConfigOptions.moveDelay / 1000))
@@ -917,7 +835,6 @@ public class ClientEngine extends Game {
 				.start(tweenManager);
 
 		if (P.UID == controlledObject.UID) {
-
 			refocusCamera = true;
 
 		}
@@ -928,9 +845,8 @@ public class ClientEngine extends Game {
 	public void mouseEvent(int mouseEventUID) {
 		Obj o = ObjectArrayByID.get(mouseEventUID);
 
-
 		o.onClick(null);
-		
+
 	}
 	
 	public void collisionEvent(UidPair uidPair)
@@ -986,10 +902,10 @@ public class ClientEngine extends Game {
 		cfg.title = "CSCI-375-Project";
 		cfg.useGL20 = true;
 		cfg.width = VIEW_DISTANCE_X * TILE_SIZE * 2;
-//		 cfg.height = VIEW_DISTANCE_Y * TILE_SIZE * 2;
+		// cfg.height = VIEW_DISTANCE_Y * TILE_SIZE * 2;
 		cfg.height = 10 * 64;
 
-		//cfg.resizable = false;
+		// cfg.resizable = false;
 		cfg.vSyncEnabled = true;
 
 		cfg.foregroundFPS = 60;
