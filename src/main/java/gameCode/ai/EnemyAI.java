@@ -18,6 +18,9 @@ public class EnemyAI {
 	// determines how close the player must be for the AI to take action
 	private int rangeDistance  = 8;
 	
+	// time until next AI move
+	private int timeTillAction = 7;
+	
 	public EnemyAI(EnemySoldier s, Mob p)
 	{
 		this.enemyObject = s;
@@ -36,50 +39,62 @@ public class EnemyAI {
 	 */
 	public void doAction(ServerEngine server)
 	{
-		// Calculate if the player is in range of the AI object
-		this.playerInRange = this.playerInSight(server.getObjects());
-		
-		if (playerInRange)
+		if (timeTillAction == 0)
 		{
-			// Player is in range, do some AI action
+			// Calculate if the player is in range of the AI object
+			this.playerInRange = this.playerInSight(server.getObjects());
 			
-			// Move in a random direction
-			int random = (int) (Math.random() * 4);
+			if (playerInRange)
+			{
+				// Player is in range, do some AI action
+				
+				// Move in a random direction
+				int random = (int) (Math.random() * 4);
+				
+				Position p = new Position();
+				p.UID = this.enemyObject.UID;
+				
+				if (random == 0)
+				{
+					p.x = 0;
+					p.y = 1;
+					System.out.println(enemyObject.UID+" is moving up.");
+				}
+				else if (random == 1)
+				{
+					p.x = 0;
+					p.y = -1;	
+					System.out.println(enemyObject.UID+" is moving down.");
+				}
+				else if (random == 2)
+				{
+					p.x = 1;
+					p.y = 0;
+					System.out.println(enemyObject.UID+" is moving right.");
+				}
+				else if (random == 3)
+				{
+					p.x = -1;
+					p.y = 0;	
+					System.out.println(enemyObject.UID+" is moving left.");
+				}
+				server.requestMove(p);
+			}
 			
-			Position p = new Position();
-			p.UID = this.enemyObject.UID;
-			
-			if (random == 0)
-			{
-				p.x = 0;
-				p.y = 1;
-			}
-			else if (random == 1)
-			{
-				p.x = 0;
-				p.y = -1;	
-			}
-			else if (random == 2)
-			{
-				p.x = 1;
-				p.y = 0;
-			}
-			else if (random == 3)
-			{
-				p.x = -1;
-				p.y = 0;	
-			}
-			server.requestMove(p);
+			this.timeTillAction = 7;
+		}
+		else
+		{
+			this.timeTillAction--;
 		}
 	}
 	
 	/*
-	 *  Right now, enemy will always be able to see the player, and will thus always
-	 *  be moving. If there is time, it may use an A* search to determine if the player can be seen
+	 *  The enemy AI will perform actions only if the player is in sight (slightly out of character's FOV).
 	 */
 	public boolean playerInSight(ArrayList<ArrayList<ArrayList<Obj>>> world)
 	{
-		return true;
+		return ( (distanceXToPlayer() < this.rangeDistance) && (distanceYToPlayer() < this.rangeDistance) );
 	}
 	
 	public int distanceXToPlayer()
