@@ -12,7 +12,7 @@ import core.shared.Position;
 
 public class EnemyAI {
 
-	private EnemySoldier enemyObject;
+	private Obj enemyObject;
 	private Mob playerObject;
 	private boolean playerInRange;
 	
@@ -24,20 +24,16 @@ public class EnemyAI {
 	
 	private ServerEngine server;
 	
-	public EnemyAI(EnemySoldier s, Mob p, ServerEngine server)
+	public EnemyAI(Mob s, Mob p, ServerEngine server)
 	{
 		this.enemyObject = s;
 		this.playerObject = p;
 		this.playerInRange = false;
 		this.server = server;
 		
-		Weapon enemyGun = new Weapon(-1, -1);
-		enemyGun.containerUID = this.enemyObject.UID;
-		server.addToWorld(enemyGun);
-		this.enemyObject.leftHand = enemyGun;
 	}
 	
-	public EnemySoldier getEnemyObject()
+	public Obj getEnemyObject()
 	{
 		return (this.enemyObject);
 	}
@@ -105,7 +101,8 @@ public class EnemyAI {
 						shootingAt.UID = -1;
 					shootingAt.x = this.enemyObject.tileXPosition+2;
 					shootingAt.y = this.enemyObject.tileYPosition;
-					this.enemyObject.leftHand.rangedEvent(shootingAt);
+					Mob eObj = (Mob) this.enemyObject;
+					eObj.leftHand.rangedEvent(shootingAt);
 				}
 				this.server.requestMove(p);
 			}

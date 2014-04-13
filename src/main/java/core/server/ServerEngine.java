@@ -354,13 +354,21 @@ public class ServerEngine extends Thread
 		
 		for (Pair p : enemyPositions)
 		{
-			enemies.add(new EnemyAI(new EnemySoldier(p.x, p.y), m, this));
-		}
-		
-		// Add enemy objects to the world
-		for (EnemyAI e : enemies)
-		{
-			addToWorld(e.getEnemyObject());
+			Mob enemyMob = new Mob(p.x, p.y);
+
+			enemyMob.setAIcontrolled(true);
+			enemyMob.setTexture(ConfigOptions.enemyTexture);
+			
+			Weapon enemyGun = new Weapon(-1, -1);
+			
+			
+			enemyGun.containerUID = enemyMob.UID;
+			enemyMob.leftHand = enemyGun;
+			EnemyAI enemy = new EnemyAI(enemyMob, m, this);
+			enemies.add(enemy);
+			
+			addToWorld(enemyGun);
+			addToWorld(enemy.getEnemyObject());		
 		}
 		
 		

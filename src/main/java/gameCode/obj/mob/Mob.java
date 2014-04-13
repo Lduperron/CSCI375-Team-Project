@@ -37,4 +37,14 @@ public class Mob extends Obj
 	
 	public Hand ActiveHand = Hand.LEFT; 
 	
+	public void setAIcontrolled(Boolean ai)
+	{
+		this.AIcontrolled = ai;
+	}
+	
+	public void setTexture(TextureRegion tr)
+	{
+		this.texture = tr;
+	}
+	
 }
