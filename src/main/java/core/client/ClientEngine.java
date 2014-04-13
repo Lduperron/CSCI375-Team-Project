@@ -499,7 +499,7 @@ public class ClientEngine extends Game {
 		shapeRenderer.setColor((float) 0.75, (float) 0.75, (float) 0.75,
 				(float) 0);
 		shapeRenderer.rect(-Gdx.graphics.getWidth(), -Gdx.graphics.getHeight(),
-				Gdx.graphics.getWidth() * 2, Gdx.graphics.getHeight() * 2);
+				Gdx.graphics.getWidth() * 2, Gdx.graphics.getHeight() * 3);
 		shapeRenderer.end();
 	}
 
