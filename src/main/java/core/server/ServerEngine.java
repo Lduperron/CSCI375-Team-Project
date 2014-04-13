@@ -70,6 +70,8 @@ public class ServerEngine extends Thread
 	
 	public SoundManager soundManager;
 	
+	int playerHealth = 100;
+	
 	public ServerEngine() 
 	{
 		
@@ -371,7 +373,17 @@ public class ServerEngine extends Thread
 			
 			enemyGun.containerUID = enemyMob.UID;
 			enemyMob.leftHand = enemyGun;
-			EnemyAI enemy = new EnemyAI(enemyMob, m, this);
+			
+			/*
+			 * Passes server engine into enemyAI so it can refer to objects.
+			 * Was not aware of ServerEngineReference at this time. Should probably
+			 * update this eventually.
+			 * 
+			 * 100 is starting HP for enemy, but should probably be changed to be
+			 * derived from some constant, or if we make different enemy types or something.
+			 */
+			EnemyAI enemy = new EnemyAI(enemyMob, m, this, 100);
+			
 			enemies.add(enemy);
 			
 			addToWorld(enemyGun);
@@ -380,6 +392,7 @@ public class ServerEngine extends Thread
 		
 		
 		network.sendAll(Message.YOUCONTROL, onlyPlayer.UID);
+		network.sendAll(Message.CHANGEHEALTH, playerHealth);
 		
 	}
 	
@@ -422,7 +435,6 @@ public class ServerEngine extends Thread
 	public void removeObject(int objectUID)
 	{
 		Obj o = ObjectArrayByID.get(objectUID);
-		ObjectArrayByID.remove(objectUID);
 		
 		
 		// If the object to be removed is an enemy, kill the AI as well
@@ -430,24 +442,60 @@ public class ServerEngine extends Thread
 		{
 			if (((Mob) o).isAIcontrolled())
 			{
+				// an enemy was hit!
 				for (EnemyAI e : enemies)
 				{
 					if (e.getEnemyObject().UID == objectUID)
 					{
-						enemies.remove(e);
+						/*
+						 * Hit enemy for 100 damage -- this should probably be dependent on weapon, so
+						 * should change later.
+						 */
+						e.getHit(100);
+						System.out.println("Enemy at "+e.getHealth()+"% HP");
+						
+						if (e.getHealth() <= 0)
+						{
+							enemies.remove(e);
+							if(o.tileXPosition >= 0)
+							{
+								ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+								ObjectArrayByID.remove(objectUID);
+								network.sendAll(Message.REMOVEOBJECT, objectUID);
+							}
+						}
 						break; // break or else for each loop will die terribly
 					}
 				}
 			}
+			else
+			{
+				// player was hit!
+				playerHealth -= 25;
+				network.sendAll(Message.CHANGEHEALTH, playerHealth);
+				
+				if (playerHealth == 0)
+				{
+					if(o.tileXPosition >= 0)
+					{
+						System.out.println("Kill player");
+						ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+						ObjectArrayByID.remove(objectUID);
+						network.sendAll(Message.REMOVEOBJECT, objectUID);
+					}
+				}
+			}
 		}
-		ProcessingObjects.remove(o);
-		if(o.tileXPosition >= 0)
-		{
-			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+		else {
+			ProcessingObjects.remove(o);
+			if(o.tileXPosition >= 0)
+			{
+				ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+				ObjectArrayByID.remove(objectUID);
+			}
+			
+			network.sendAll(Message.REMOVEOBJECT, objectUID);
 		}
-		
-		network.sendAll(Message.REMOVEOBJECT, objectUID);
-		
 	}
 	
 	

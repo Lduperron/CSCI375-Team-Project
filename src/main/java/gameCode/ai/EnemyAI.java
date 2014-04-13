@@ -24,12 +24,15 @@ public class EnemyAI {
 	
 	private ServerEngine server;
 	
-	public EnemyAI(Mob s, Mob p, ServerEngine server)
+	private int enemyHealth;
+	
+	public EnemyAI(Mob s, Mob p, ServerEngine server, int startHP)
 	{
 		this.enemyObject = s;
 		this.playerObject = p;
 		this.playerInRange = false;
 		this.server = server;
+		this.enemyHealth = startHP;
 		
 	}
 	
@@ -140,5 +143,15 @@ public class EnemyAI {
 	public int distanceYToPlayer()
 	{
 		return ( this.enemyObject.tileYPosition - this.playerObject.tileYPosition );
+	}
+	
+	public void getHit(int damage)
+	{
+		this.enemyHealth -= damage;
+	}
+	
+	public int getHealth()
+	{
+		return this.enemyHealth;
 	}
 }

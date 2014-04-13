@@ -190,6 +190,8 @@ public class ClientEngine extends Game {
 
 	// fbackground music
 	Music music;
+	
+	int playerHealth;
 
 
 	public static class ClientEngineReference {
@@ -955,6 +957,12 @@ public class ClientEngine extends Game {
 		music.setLooping(true);
 		music.setVolume(1.0f);
 		music.play();
+	}
+	
+	public void changeHealth(Integer hp)
+	{
+		playerHealth = hp;
+		System.out.println("Life at "+hp+"%");
 	}
 
 

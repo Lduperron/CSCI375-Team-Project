@@ -129,6 +129,10 @@ public class NetClient extends Network {
 						gameClient.collisionEvent(uidPair);
 						break;
 						
+					case CHANGEHEALTH:
+						int healthValue = (Integer) netMsg.obj;
+						gameClient.changeHealth(healthValue);
+						
 						
 					default:
 						// invalid messages are simply ignored
