@@ -409,7 +409,15 @@ public class ClientEngine extends Game {
 			network.send(Message.REQUESTMOVE, P);
 			o.setDirection(Direction.LEFT);
 		}
-		System.out.println(o.getTexture());
+		ArrayList<Obj> oList = ObjectArray.get(o.tileXPosition).get(o.tileYPosition);
+		
+		for (Obj x : oList)
+		{
+			if (x.UID == o.UID)
+			{
+				x.setTexture(o.getTexture());
+			}
+		}
 	}
 
 	public void focusCameraOnControlled() {

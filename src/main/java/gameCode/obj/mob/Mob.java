@@ -29,6 +29,7 @@ public class Mob extends Obj
 		
 	}
 	protected TextureRegion texture = ConfigOptions.texture;
+	protected TextureRegion leftTexture, downTexture, upTexture, rightTexture;
 	protected Boolean AIcontrolled = false; 
 
 	//@Override
@@ -53,9 +54,6 @@ public class Mob extends Obj
 	{
 		return this.AIcontrolled;
 	}
-	
-<<<<<<< Updated upstream
-=======
 	public void setTextures(TextureRegion u, TextureRegion r, TextureRegion d, TextureRegion l)
 	{
 		this.upTexture = u;
@@ -86,5 +84,4 @@ public class Mob extends Obj
 				break;
 		}
 	}
->>>>>>> Stashed changes
 }
