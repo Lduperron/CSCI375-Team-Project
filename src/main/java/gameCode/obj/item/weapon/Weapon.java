@@ -27,6 +27,8 @@ public class Weapon extends Item
 			
 			l.setTarget(P.x,  P.y);
 			
+			l.ownerUID = this.getTopLevelContainer();
+			
 			ServerEngineReference.getSelf().addToWorld(l);
 			ServerEngineReference.getSelf().ProcessingObjects.add(l);
 			

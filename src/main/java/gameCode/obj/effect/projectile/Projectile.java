@@ -2,6 +2,7 @@ package gameCode.obj.effect.projectile;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import gameCode.obj.Obj;
 import gameCode.obj.effect.Effect;
 
 
@@ -94,6 +95,8 @@ public class Projectile extends Effect
 	public double targetAngle;
 	public double xComponent;
 	public double yComponent;
+	
+	public int ownerUID;
 	
 
 }

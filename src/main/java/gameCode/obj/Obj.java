@@ -184,6 +184,38 @@ public class Obj extends Actor
 		return current.tileYPosition;
 	}
 	
+	public int getTopLevelContainer()
+	{
+		
+		Obj current = this;
+		
+		if(this.ServerSide)
+		{	
+			
+		
+			while(current.containerUID != -1)
+			{
+				
+				current = ServerEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+		}
+		else
+		{
+			
+			while(current.containerUID != -1)
+			{
+				
+				current = ClientEngineReference.getSelf().ObjectArrayByID.get(current.containerUID);
+				
+			}
+			
+			
+		}
+		
+		return current.UID;
+	}
+	
 	
 	public void forceMove(int newX, int newY)
 	{
@@ -237,6 +269,15 @@ public class Obj extends Actor
 	{
 		if(this.ServerSide) // only handle moving on the server, movement events are propagated to clients.
 		{
+			Projectile bullet = (Projectile) ServerEngineReference.getSelf().ObjectArrayByID.get(bulletUID);
+			
+			if(bullet.ownerUID == this.UID)
+			{
+				
+				return; // no friendly fire.
+				
+			}
+			
 			ServerEngineReference.getSelf().removeObject(this.UID);
 			ServerEngineReference.getSelf().removeObject(bulletUID);
 		}	
