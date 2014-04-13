@@ -24,6 +24,16 @@ public class ConfigOptions
 	public static Texture texturereg = new Texture((Gdx.files.internal("data/libgdx.png")));
 	public static TextureRegion texture = new TextureRegion(texturereg);
 	
+	/*
+	 * Character textures -- one for up, right, left, down
+	 */
+	public static Texture charReg = new Texture((Gdx.files.internal("tilesets/characters.png")));
+	
+	public static TextureRegion charUp = new TextureRegion(charReg, 96, 96, 32, 32);
+	public static TextureRegion charRight = new TextureRegion(charReg, 160, 64, 32, 32);
+	public static TextureRegion charDown = new TextureRegion(charReg, 160, 32, 32, 32);
+	public static TextureRegion charLeft = new TextureRegion(charReg, 96, 0, 32, 32);
+	
 	public static Texture enemyreg = new Texture((Gdx.files.internal("data/enemyTemp.png")));
 	public static TextureRegion enemyTexture = new TextureRegion(enemyreg);
 	

@@ -14,6 +14,7 @@ import gameCode.obj.effect.projectile.Projectile;
 import gameCode.obj.item.Item;
 import gameCode.obj.item.weapon.Weapon;
 import gameCode.obj.mob.Mob;
+import gameCode.obj.mob.Direction;
 import gameCode.obj.mob.humans.EnemySoldier;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
@@ -32,6 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.primitives.MutableInteger;
 
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GLTexture;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObjects;
@@ -344,11 +346,13 @@ public class ServerEngine extends Thread
 		
 		
 		Weapon aGun = new Weapon(-1, -1);
-		
-		
-		
+
 		
 		Mob m = (Mob) onlyPlayer;
+		m.setTextures(ConfigOptions.charUp, ConfigOptions.charRight, 
+				      ConfigOptions.charDown, ConfigOptions.charLeft);
+		
+		m.setDirection(Direction.RIGHT);
 		
 		aGun.containerUID = m.UID;
 		m.leftHand = aGun;
@@ -533,12 +537,7 @@ public class ServerEngine extends Thread
 		}
 		
 		int nextTileX = (int) (movingObject.tileXPosition + p.x);
-		int nextTileY = (int) (movingObject.tileYPosition  + p.y);
-		
-		
-		
-	
-		
+		int nextTileY = (int) (movingObject.tileYPosition  + p.y);		
 		
 		collidedObjectUID.setValue(-1);
 		if(isCellPassable(nextTileX, nextTileY, collidedObjectUID))
@@ -771,6 +770,28 @@ public class ServerEngine extends Thread
 	public ArrayList<ArrayList<ArrayList<Obj>>> getObjects()
 	{
 		return ( this.ObjectArray );
+	}
+	
+	public void changeCharDirection(Position p)
+	{
+		// switch character direction based on movement
+		Mob m = (Mob) onlyPlayer;
+		if (p.x == 0 && p.y == 1)
+		{
+			m.setDirection(Direction.UP);
+		}
+		else if (p.x == 0 && p.y == -1)
+		{
+			m.setDirection(Direction.DOWN);
+		}
+		else if (p.x == 1 && p.y == 0)
+		{
+			m.setDirection(Direction.RIGHT);
+		}
+		else if (p.x == -1 && p.y == 0)
+		{
+			m.setDirection(Direction.LEFT);
+		}
 	}
 
 

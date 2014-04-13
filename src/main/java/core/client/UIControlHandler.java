@@ -44,7 +44,7 @@ public class UIControlHandler implements InputProcessor {
 //			centralEngine.MoveCameraRelative(1, 0);
 //		}
 	
-		return true;
+		return false;
 	
 	}
 
@@ -53,7 +53,7 @@ public class UIControlHandler implements InputProcessor {
 		
 		centralEngine.pressedKeys[keycode] = false;
 		
-		return true;
+		return false;
 	}
 
 	@Override
@@ -93,6 +93,7 @@ public class UIControlHandler implements InputProcessor {
 			}
 			return true;
 		}
+		
 		return false;
 	}
 

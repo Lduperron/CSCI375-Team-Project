@@ -29,6 +29,7 @@ public class Mob extends Obj
 		
 	}
 	protected TextureRegion texture = ConfigOptions.texture;
+
 	protected TextureRegion leftTexture, downTexture, upTexture, rightTexture;
 	protected Boolean AIcontrolled = false; 
 
@@ -54,6 +55,7 @@ public class Mob extends Obj
 	{
 		return this.AIcontrolled;
 	}
+	
 	public void setTextures(TextureRegion u, TextureRegion r, TextureRegion d, TextureRegion l)
 	{
 		this.upTexture = u;
