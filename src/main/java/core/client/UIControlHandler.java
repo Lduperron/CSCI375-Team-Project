@@ -2,6 +2,7 @@ package core.client;
 
 import gameCode.obj.Obj;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import core.shared.Message;
@@ -70,27 +71,29 @@ public class UIControlHandler implements InputProcessor {
 	{
 		Vector2 screenCoords = new Vector2(screenX, screenY);
 		
-		
-		centralEngine.worldStage.screenToStageCoordinates(screenCoords);
-		
-		mouseEventCoords.UID = -1;
-		mouseEventCoords.x = (int) (screenCoords.x / TILE_SIZE);
-		mouseEventCoords.y = (int) (screenCoords.y / TILE_SIZE);
-				
-		Obj o = (Obj) centralEngine.worldStage.hit(screenCoords.x, screenCoords.y, true);
-		
-		if(o != null) // Clicked on an object in the world
+		if (screenX < Gdx.graphics.getWidth() * 0.67)
 		{
-			ClientEngine.network.send(Message.MOUSEEVENTTOSERVERONOBJECT, o.UID);	
-		}
-		else
-		{ // Clicked on an empty tile
+			centralEngine.worldStage.screenToStageCoordinates(screenCoords);
 			
-			ClientEngine.network.send(Message.MOUSEEVENTTOSERVERONTILE, mouseEventCoords);	
+			mouseEventCoords.UID = -1;
+			mouseEventCoords.x = (int) (screenCoords.x / TILE_SIZE);
+			mouseEventCoords.y = (int) (screenCoords.y / TILE_SIZE);
+					
+			Obj o = (Obj) centralEngine.worldStage.hit(screenCoords.x, screenCoords.y, true);
 			
+			if(o != null) // Clicked on an object in the world
+			{
+				ClientEngine.network.send(Message.MOUSEEVENTTOSERVERONOBJECT, o.UID);	
+			}
+			else
+			{ // Clicked on an empty tile
+				
+				ClientEngine.network.send(Message.MOUSEEVENTTOSERVERONTILE, mouseEventCoords);	
+				
+			}
+			return true;
 		}
-		
-		return true;
+		return false;
 	}
 
 	@Override

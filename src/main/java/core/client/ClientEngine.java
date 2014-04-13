@@ -324,7 +324,7 @@ public class ClientEngine extends Game {
 
 		shapeRenderer = new ShapeRenderer();
 		batchSidePanel = new SpriteBatch();
-
+		
 		uiStage.setCamera(cameraSidePanel);
 
 		uiStage.setViewport((float) (Gdx.graphics.getWidth() * 0.37),
@@ -345,12 +345,22 @@ public class ClientEngine extends Game {
 		table.debug();
 		table.align(Align.top | Align.center);
 		table.setPosition((float) (Gdx.graphics.getWidth() * 0.08),
-				(Gdx.graphics.getHeight() - 175));
+				(Gdx.graphics.getHeight() - 325));
 
 		Label inventoryLabel = new Label("Inventory", rawTextStyle);
-		inventoryLabel.setWrap(true);
+		inventoryLabel.setWrap(true); 
 		inventoryLabel.setAlignment(Align.top | Align.center);
 		table.add(inventoryLabel).minWidth(200).minHeight(150).fill();
+		
+		table.row();
+		
+		TextFieldStyle textStyle = new TextFieldStyle();
+		textStyle.font = gameFont;
+		textStyle.fontColor = Color.BLACK;
+		TextField text = new TextField("", textStyle);
+		text.setText("Test");
+		text.setMessageText("Type here!");
+		table.add(text).minWidth(200).minHeight(150).fill();
 
 		table.pack();
 

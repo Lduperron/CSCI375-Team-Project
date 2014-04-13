@@ -134,11 +134,10 @@ public class Obj extends Actor
 				
 			}
 			
-			
 		}
 		
 		
-		return current.tileXPosition;
+		return current.tileXPosition; 
 	}
 	public int getTileYPosition()
 	{
