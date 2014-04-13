@@ -54,57 +54,66 @@ public class EnemyAI {
 				// Player is in range, do some AI action
 				
 				// Move in a random direction
-				int random = (int) (Math.random() * 6);
+				int random = (int) (Math.random() * 5);
 				
 				Position p = new Position();
 				p.UID = this.enemyObject.UID;
-				
-				if (random == 0)
+				if (this.enemyObject.tileYPosition == this.playerObject.tileYPosition)
 				{
-					p.x = 0;
-					p.y = 1;
-					System.out.println(enemyObject.UID+" is moving up.");
-				}
-				else if (random == 1)
-				{
-					p.x = 0;
-					p.y = -1;	
-					System.out.println(enemyObject.UID+" is moving down.");
-				}
-				else if (random == 2)
-				{
-					p.x = 1;
-					p.y = 0;
-					System.out.println(enemyObject.UID+" is moving right.");
-				}
-				else if (random == 3)
-				{
-					p.x = -1;
-					p.y = 0;	
-					System.out.println(enemyObject.UID+" is moving left.");
-				}
-				else if (random == 4)
-				{
-					p.x = 0;
-					p.y = 0;	
-					System.out.println(enemyObject.UID+" stays put.");
-				}
-				else if (random == 5)
-				{
-					p.x = 0;
-					p.y = 0;	
+					// shoot at the player!
 					System.out.println(enemyObject.UID+" shoots it up.");
 					Position shootingAt = new Position();
-					if (this.server.ObjectArray.get(this.enemyObject.tileXPosition+2).get(this.enemyObject.tileYPosition).size() > 0)
-						shootingAt.UID = this.server.ObjectArray.get(this.enemyObject.tileXPosition+2).get(this.enemyObject.tileYPosition).get(0).UID;
-					else
-						shootingAt.UID = -1;
-					shootingAt.x = this.enemyObject.tileXPosition+2;
+					shootingAt.UID = -1;
+					shootingAt.x = this.enemyObject.tileXPosition - this.distanceXToPlayer();
 					shootingAt.y = this.enemyObject.tileYPosition;
 					Mob eObj = (Mob) this.enemyObject;
 					eObj.leftHand.rangedEvent(shootingAt);
 				}
-				this.server.requestMove(p);
+				else if (this.enemyObject.tileXPosition == this.playerObject.tileXPosition)
+				{
+					// shoot at the player!
+					System.out.println(enemyObject.UID+" shoots it up.");
+					Position shootingAt = new Position();
+					shootingAt.UID = -1;
+					shootingAt.x = this.enemyObject.tileXPosition;
+					shootingAt.y = this.enemyObject.tileYPosition - this.distanceYToPlayer();
+					Mob eObj = (Mob) this.enemyObject;
+					eObj.leftHand.rangedEvent(shootingAt);
+				}
+				else 
+				{
+					if (random == 0)
+					{
+						p.x = 0;
+						p.y = 1;
+						System.out.println(enemyObject.UID+" is moving up.");
+					}
+					else if (random == 1)
+					{
+						p.x = 0;
+						p.y = -1;	
+						System.out.println(enemyObject.UID+" is moving down.");
+					}
+					else if (random == 2)
+					{
+						p.x = 1;
+						p.y = 0;
+						System.out.println(enemyObject.UID+" is moving right.");
+					}
+					else if (random == 3)
+					{
+						p.x = -1;
+						p.y = 0;	
+						System.out.println(enemyObject.UID+" is moving left.");
+					}
+					else if (random == 4)
+					{
+						p.x = 0;
+						p.y = 0;	
+						System.out.println(enemyObject.UID+" stays put.");
+					}
+					this.server.requestMove(p);
+				}
 			}
 			
 			this.timeTillAction = 7;
@@ -120,16 +129,16 @@ public class EnemyAI {
 	 */
 	public boolean playerInSight(ArrayList<ArrayList<ArrayList<Obj>>> world)
 	{
-		return ( (distanceXToPlayer() < this.rangeDistance) && (distanceYToPlayer() < this.rangeDistance) );
+		return ( (Math.abs(distanceXToPlayer()) < this.rangeDistance) && (Math.abs(distanceYToPlayer()) < this.rangeDistance) );
 	}
 	
 	public int distanceXToPlayer()
 	{
-		return ( Math.abs( this.enemyObject.tileXPosition - this.playerObject.tileXPosition ) );
+		return ( this.enemyObject.tileXPosition - this.playerObject.tileXPosition );
 	}
 	
 	public int distanceYToPlayer()
 	{
-		return ( Math.abs( this.enemyObject.tileYPosition - this.playerObject.tileYPosition ) );
+		return ( this.enemyObject.tileYPosition - this.playerObject.tileYPosition );
 	}
 }

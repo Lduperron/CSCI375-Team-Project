@@ -7,6 +7,7 @@ import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 import gameCode.obj.Obj;
 import gameCode.obj.getObjUID;
+import gameCode.obj.effect.projectile.Projectile;
 import gameCode.obj.item.Item;
 import gameCode.obj.item.weapon.Weapon;
 import gameCode.obj.mob.Mob;
@@ -120,7 +121,7 @@ public class ServerEngine extends Thread
 	}
 	
 	// INITIAL ENEMY POSITIONS
-	Pair[] enemyPositions = { new Pair(3, 10), new Pair(25, 10), new Pair(40, 29), new Pair(26, 26),
+	Pair[] enemyPositions = { new Pair(25, 10), new Pair(40, 29), new Pair(26, 26),
 							  new Pair(8, 58), new Pair(2, 91), new Pair(40, 114), new Pair(40, 118), new Pair(40, 116),
 							  new Pair(40, 119), new Pair(40, 117)};
 	
@@ -417,8 +418,23 @@ public class ServerEngine extends Thread
 		Obj o = ObjectArrayByID.get(objectUID);
 		ObjectArrayByID.remove(objectUID);
 		
+		
+		// If the object to be removed is an enemy, kill the AI as well
+		if (Mob.class.isAssignableFrom(o.getClass()))
+		{
+			if (((Mob) o).isAIcontrolled())
+			{
+				for (EnemyAI e : enemies)
+				{
+					if (e.getEnemyObject().UID == objectUID)
+					{
+						enemies.remove(e);
+						break; // break or else for each loop will die terribly
+					}
+				}
+			}
+		}
 		ProcessingObjects.remove(o);
-
 		if(o.tileXPosition >= 0)
 		{
 			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
@@ -506,7 +522,7 @@ public class ServerEngine extends Thread
 			
 			//System.out.println("Collided with " + collidedObjectUID.intValue());
 			Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
-			
+
 			collidedObject.collide(p.UID);
 			
 			UidPair u = new UidPair();

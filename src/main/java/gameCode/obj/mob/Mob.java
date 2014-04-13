@@ -18,6 +18,7 @@ public class Mob extends Obj
 	{
 		super(x, y);
 		// TODO Auto-generated constructor stub
+		this.dense = true;
 	}
 	
 	public TextureRegion getTexture()
@@ -45,6 +46,11 @@ public class Mob extends Obj
 	public void setTexture(TextureRegion tr)
 	{
 		this.texture = tr;
+	}
+	
+	public Boolean isAIcontrolled()
+	{
+		return this.AIcontrolled;
 	}
 	
 }
