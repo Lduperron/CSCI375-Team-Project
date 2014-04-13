@@ -11,7 +11,6 @@ import com.esotericsoftware.kryonet.EndPoint;
 
 
 import core.shared.Message;
-import de.javakaffee.kryoserializers.FieldAnnotationAwareSerializer;
 
 
 /**

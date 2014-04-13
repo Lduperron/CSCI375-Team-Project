@@ -81,6 +81,7 @@ public class NetClient extends Network {
 			 */
 			Position newPos ;
 			
+			@Override
 			public void received(Connection connection, Object object) {
 				if (object instanceof NetMessage) {
 					final NetMessage netMsg = (NetMessage) object;
@@ -128,6 +129,10 @@ public class NetClient extends Network {
 						gameClient.collisionEvent(uidPair);
 						break;
 						
+					case CHANGEHEALTH:
+						int healthValue = (Integer) netMsg.obj;
+						gameClient.changeHealth(healthValue);
+						
 						
 					default:
 						// invalid messages are simply ignored
@@ -141,6 +146,7 @@ public class NetClient extends Network {
 			 * accidental disconnects cause server won't be able to tell us that
 			 * it disconnected
 			 */
+			@Override
 			public void disconnected(Connection connection) {
 
 			}

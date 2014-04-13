@@ -1,40 +1,28 @@
 package gameCode.obj;
 
 import static core.shared.ConfigOptions.TILE_SIZE;
+
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
 
 import gameCode.obj.effect.projectile.Projectile;
 import gameCode.obj.item.Item;
-import helpers.HelperFunctions;
-
 import java.util.BitSet;
 import java.util.HashMap;
 
-import aurelienribon.tweenengine.BaseTween;
-import aurelienribon.tweenengine.TweenCallback;
-
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 import core.client.ClientEngine;
 import core.client.ClientEngine.ClientEngineReference;
 import core.client.animatedAssets;
+
 import core.server.ServerEngine.ServerEngineReference;
 import core.shared.ConfigOptions;
 import core.shared.DistilledObject;
@@ -146,11 +134,10 @@ public class Obj extends Actor
 				
 			}
 			
-			
 		}
 		
 		
-		return current.tileXPosition;
+		return current.tileXPosition; 
 	}
 	public int getTileYPosition()
 	{

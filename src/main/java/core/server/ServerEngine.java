@@ -5,13 +5,19 @@ import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
+
+import core.shared.SoundManager;
+
 import gameCode.obj.Obj;
 import gameCode.obj.getObjUID;
+import gameCode.obj.effect.projectile.Projectile;
 import gameCode.obj.item.Item;
 import gameCode.obj.item.weapon.Weapon;
 import gameCode.obj.mob.Mob;
+import gameCode.obj.mob.humans.EnemySoldier;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
+import gameCode.ai.EnemyAI;
 import helpers.Hand;
 
 import java.io.IOException;
@@ -26,6 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.primitives.MutableInteger;
 
+import com.badlogic.gdx.graphics.GLTexture;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
@@ -58,7 +65,12 @@ public class ServerEngine extends Thread
 	public LinkedList<Obj> ProcessingObjects = new LinkedList<Obj>();
 	
 	Obj onlyPlayer;
+	ArrayList<EnemyAI> enemies;
 	public TweenManager tweenManager;
+	
+	public SoundManager soundManager;
+	
+	int playerHealth = 100;
 	
 	public ServerEngine() 
 	{
@@ -70,7 +82,7 @@ public class ServerEngine extends Thread
 		p.yUp = true;
 		p.convertObjectToTileSpace = true;
 		
-		Texture.setEnforcePotImages(false);
+		GLTexture.setEnforcePotImages(false);
 		map = new TmxMapLoader().load("maps/Map.tmx" , p );
 		
 		standby.lock();
@@ -78,6 +90,7 @@ public class ServerEngine extends Thread
 		standby.unlock();
 		
 		tweenManager = new TweenManager();
+		soundManager = new SoundManager();
 		
 	}
 	
@@ -101,6 +114,25 @@ public class ServerEngine extends Thread
 		
 	}
 	
+	public class Pair
+	{
+		
+		int x;
+		int y;
+		
+		Pair(int x, int y)
+		{
+			this.x = x;
+			this.y = y;
+		}
+		
+	}
+	
+	// INITIAL ENEMY POSITIONS
+	Pair[] enemyPositions = { new Pair(25, 10), new Pair(40, 29), new Pair(26, 26),
+							  new Pair(8, 58), new Pair(2, 91), new Pair(40, 114), new Pair(40, 118), new Pair(40, 116),
+							  new Pair(40, 119), new Pair(40, 117)};
+	
 	@Override
 	public void run() 
 	{
@@ -120,15 +152,22 @@ public class ServerEngine extends Thread
 	
 			tweenManager.update(DeltaInSeconds);
 			
+			
+			// Perform AI actions
+			if (enemies != null)
+			{
+				for (EnemyAI e : enemies)
+				{
+					e.doAction();
+				}
+			}			
+
 			for(int i = 0; i < ProcessingObjects.size(); i++)
 			{
 
 				ProcessingObjects.get(i).process();
 				
 			}
-			
-			
-			
 			
 			
 			masterLoopTime = System.currentTimeMillis();
@@ -318,8 +357,42 @@ public class ServerEngine extends Thread
 		addToWorld(aGun);
 		addToWorld(onlyPlayer);
 		
+		// Create enemy objects/assign them to AI controllers
+		
+		enemies = new ArrayList<EnemyAI>();
+		
+		for (Pair p : enemyPositions)
+		{
+			Mob enemyMob = new Mob(p.x, p.y);
+
+			enemyMob.setAIcontrolled(true);
+			enemyMob.setTexture(ConfigOptions.enemyTexture);
+			
+			Weapon enemyGun = new Weapon(-1, -1);
+			
+			
+			enemyGun.containerUID = enemyMob.UID;
+			enemyMob.leftHand = enemyGun;
+			
+			/*
+			 * Passes server engine into enemyAI so it can refer to objects.
+			 * Was not aware of ServerEngineReference at this time. Should probably
+			 * update this eventually.
+			 * 
+			 * 100 is starting HP for enemy, but should probably be changed to be
+			 * derived from some constant, or if we make different enemy types or something.
+			 */
+			EnemyAI enemy = new EnemyAI(enemyMob, m, this, 100);
+			
+			enemies.add(enemy);
+			
+			addToWorld(enemyGun);
+			addToWorld(enemy.getEnemyObject());		
+		}
+		
 		
 		network.sendAll(Message.YOUCONTROL, onlyPlayer.UID);
+		network.sendAll(Message.CHANGEHEALTH, playerHealth);
 		
 	}
 	
@@ -362,18 +435,67 @@ public class ServerEngine extends Thread
 	public void removeObject(int objectUID)
 	{
 		Obj o = ObjectArrayByID.get(objectUID);
-		ObjectArrayByID.remove(objectUID);
 		
-		ProcessingObjects.remove(o);
-
-		if(o.tileXPosition >= 0)
+		
+		// If the object to be removed is an enemy, kill the AI as well
+		if (Mob.class.isAssignableFrom(o.getClass()))
 		{
-			ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+			if (((Mob) o).isAIcontrolled())
+			{
+				// an enemy was hit!
+				for (EnemyAI e : enemies)
+				{
+					if (e.getEnemyObject().UID == objectUID)
+					{
+						/*
+						 * Hit enemy for 100 damage -- this should probably be dependent on weapon, so
+						 * should change later.
+						 */
+						e.getHit(100);
+						System.out.println("Enemy at "+e.getHealth()+"% HP");
+						
+						if (e.getHealth() <= 0)
+						{
+							enemies.remove(e);
+							if(o.tileXPosition >= 0)
+							{
+								ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+								ObjectArrayByID.remove(objectUID);
+								network.sendAll(Message.REMOVEOBJECT, objectUID);
+							}
+						}
+						break; // break or else for each loop will die terribly
+					}
+				}
+			}
+			else
+			{
+				// player was hit!
+				playerHealth -= 25;
+				network.sendAll(Message.CHANGEHEALTH, playerHealth);
+				
+				if (playerHealth == 0)
+				{
+					if(o.tileXPosition >= 0)
+					{
+						System.out.println("Kill player");
+						ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+						ObjectArrayByID.remove(objectUID);
+						network.sendAll(Message.REMOVEOBJECT, objectUID);
+					}
+				}
+			}
 		}
-		
-
-		network.sendAll(Message.REMOVEOBJECT, objectUID);
-		
+		else {
+			ProcessingObjects.remove(o);
+			if(o.tileXPosition >= 0)
+			{
+				ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
+				ObjectArrayByID.remove(objectUID);
+			}
+			
+			network.sendAll(Message.REMOVEOBJECT, objectUID);
+		}
 	}
 	
 	
@@ -454,7 +576,7 @@ public class ServerEngine extends Thread
 			
 			//System.out.println("Collided with " + collidedObjectUID.intValue());
 			Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
-			
+
 			collidedObject.collide(p.UID);
 			
 			UidPair u = new UidPair();
@@ -493,7 +615,6 @@ public class ServerEngine extends Thread
 		// Do checks that we can actually click it, etc, etc...
 		Item inHand = getActiveHandItem();
 		// TODO:  Send what we actually clicked it with (empty hand, divine rapier, etc.)
-
 		
 		
 		if(IsMapAdjacent(onlyPlayer, o))
@@ -647,6 +768,10 @@ public class ServerEngine extends Thread
 	}
 
 
+	public ArrayList<ArrayList<ArrayList<Obj>>> getObjects()
+	{
+		return ( this.ObjectArray );
+	}
 
 
 }

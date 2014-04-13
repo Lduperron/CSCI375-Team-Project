@@ -20,6 +20,7 @@ import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Linear;
 import aurelienribon.tweenengine.equations.Quad;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -30,6 +31,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GLTexture;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -38,7 +40,6 @@ import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObjects;
@@ -71,9 +72,6 @@ import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.badlogic.gdx.utils.reflect.Constructor;
 import com.badlogic.gdx.Screen;
-
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-
 import core.network.NetClient;
 import core.server.ServerEngine;
 import core.shared.ConfigOptions;
@@ -81,7 +79,6 @@ import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
 import core.shared.Background;
-import core.shared.UidPair;
 import core.client.ConnectingScreen;
 import core.client.ErrorScreen;
 import core.client.HostingScreen;
@@ -90,12 +87,12 @@ import core.client.PauseScreen;
 import core.client.ScreenEnumerations;
 import core.client.SettingsScreen;
 import core.client.MenuNinePatch;
+import core.shared.UidPair;
 import static core.shared.ConfigOptions.MAP_SIZE_X;
 import static core.shared.ConfigOptions.MAP_SIZE_Y;
 import static core.shared.ConfigOptions.TILE_SIZE;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y;
-
 import static core.shared.ConfigOptions.VIEW_DISTANCE_X_EXTENDED;
 import static core.shared.ConfigOptions.VIEW_DISTANCE_Y_EXTENDED;
 
@@ -191,6 +188,12 @@ public class ClientEngine extends Game {
 
 	List<Position> QueuedEvents = new LinkedList<Position>();
 
+	// fbackground music
+	Music music;
+	
+	int playerHealth;
+
+
 	public static class ClientEngineReference {
 		static ClientEngine Self;
 
@@ -217,7 +220,7 @@ public class ClientEngine extends Game {
 		p.yUp = true;
 		p.convertObjectToTileSpace = true;
 
-		Texture.setEnforcePotImages(false);
+		GLTexture.setEnforcePotImages(false);
 		map = new TmxMapLoader().load("maps/Map.tmx", p);
 
 		mapRenderer = new OrthogonalTiledMapRenderer(map);
@@ -300,12 +303,28 @@ public class ClientEngine extends Game {
 				(float) (Gdx.graphics.getWidth() * 0.63),
 				Gdx.graphics.getHeight());
 
+
+		
+		/*
+		 * camera = new OrthographicCamera(1, h/w); batch = new SpriteBatch();
+		 * 
+		 * texture = new Texture(Gdx.files.internal("data/libgdx.png"));
+		 * texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		 * 
+		 * TextureRegion region = new TextureRegion(texture, 0, 0, 512, 275);
+		 * 
+		 * sprite = new Sprite(region); sprite.setSize(0.9f, 0.9f *
+		 * sprite.getHeight() / sprite.getWidth());
+		 * sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
+		 * sprite.setPosition(-sprite.getWidth()/2, -sprite.getHeight()/2);
+		 */
+
 		// ***SidePanel
 		cameraSidePanel = new OrthographicCamera(w, h);
 
 		shapeRenderer = new ShapeRenderer();
 		batchSidePanel = new SpriteBatch();
-
+		
 		uiStage.setCamera(cameraSidePanel);
 
 		uiStage.setViewport((float) (Gdx.graphics.getWidth() * 0.37),
@@ -326,18 +345,29 @@ public class ClientEngine extends Game {
 		table.debug();
 		table.align(Align.top | Align.center);
 		table.setPosition((float) (Gdx.graphics.getWidth() * 0.08),
-				(Gdx.graphics.getHeight() - 175));
+				(Gdx.graphics.getHeight() - 325));
 
 		Label inventoryLabel = new Label("Inventory", rawTextStyle);
-		inventoryLabel.setWrap(true);
+		inventoryLabel.setWrap(true); 
 		inventoryLabel.setAlignment(Align.top | Align.center);
 		table.add(inventoryLabel).minWidth(200).minHeight(150).fill();
+		
+		table.row();
+		
+		TextFieldStyle textStyle = new TextFieldStyle();
+		textStyle.font = gameFont;
+		textStyle.fontColor = Color.BLACK;
+		TextField text = new TextField("", textStyle);
+		text.setText("Test");
+		text.setMessageText("Type here!");
+		table.add(text).minWidth(200).minHeight(150).fill();
 
 		table.pack();
 
 		gunItem = new Texture(Gdx.files.internal("assets/tilesets/gun0.png"));
 
 		gunItemRegion = new TextureRegion(gunItem, 0, 0, 32, 32);
+		
 	}
 
 	@Override
@@ -374,7 +404,6 @@ public class ClientEngine extends Game {
 			P.x = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
-
 	}
 
 	public void focusCameraOnControlled() {
@@ -511,6 +540,7 @@ public class ClientEngine extends Game {
 				(float) (Gdx.graphics.getWidth() * 0.63),
 				Gdx.graphics.getHeight());
 
+
 		camera.viewportHeight = VIEW_DISTANCE_X * TILE_SIZE;
 		camera.viewportWidth = VIEW_DISTANCE_Y * TILE_SIZE;
 
@@ -520,10 +550,14 @@ public class ClientEngine extends Game {
 
 	@Override
 	public void pause() {
+		if (music != null)
+			music.pause();
 	}
 
 	@Override
 	public void resume() {
+		if (music != null)
+			music.play();
 	}
 
 	public void MoveCameraRelative(int x, int y) {
@@ -898,6 +932,9 @@ public class ClientEngine extends Game {
 
 	public void assignControl(int UID) {
 		controlledObject = ObjectArrayByID.get(UID);
+		
+		// this is the last stage of loading -- initialize the music player
+		initMusic();
 	}
 
 	public static void main(String[] args) {
@@ -921,6 +958,21 @@ public class ClientEngine extends Game {
 				"assets/AutopackingTiles/Door/", "PackedDoor");
 
 		new LwjglApplication(new ClientEngine(), cfg);
+	}
+	
+	public void initMusic()
+	{
+		// setup looping background music
+		music=Gdx.audio.newMusic(Gdx.files.internal("assets/music/bgmusic.mp3"));
+		music.setLooping(true);
+		music.setVolume(1.0f);
+		music.play();
+	}
+	
+	public void changeHealth(Integer hp)
+	{
+		playerHealth = hp;
+		System.out.println("Life at "+hp+"%");
 	}
 
 
