@@ -415,22 +415,23 @@ public class ServerEngine extends Thread
 		
 		
 		
-		if(currentTime < movingObject.lastMoveTime + movingObject.moveDelay)
-		{
-			return;
-			
-		}
-		else
-		{
-			movingObject.lastMoveTime = currentTime;
-			
-		}
+	
 		
 		
 		collidedObjectUID.setValue(-1);
 		if(isCellPassable(nextTileX, nextTileY, collidedObjectUID))
 		{
-
+			if(currentTime < movingObject.lastMoveTime + movingObject.moveDelay)
+			{
+				return;
+				
+			}
+			else
+			{
+				movingObject.lastMoveTime = currentTime;
+				
+				
+			}
 			
 			p.x = nextTileX;
 			p.y = nextTileY;
@@ -439,6 +440,17 @@ public class ServerEngine extends Thread
 		
 		else if(collidedObjectUID.intValue() >= 0)
 		{
+			
+			if(currentTime < movingObject.lastActionTime + movingObject.actionDelay)
+			{
+				return;
+				
+			}
+			else
+			{
+				movingObject.lastActionTime = currentTime;
+				
+			}
 			
 			//System.out.println("Collided with " + collidedObjectUID.intValue());
 			Obj collidedObject = ObjectArrayByID.get(collidedObjectUID.intValue());
@@ -481,10 +493,14 @@ public class ServerEngine extends Thread
 		// Do checks that we can actually click it, etc, etc...
 		Item inHand = getActiveHandItem();
 		// TODO:  Send what we actually clicked it with (empty hand, divine rapier, etc.)
+
+		
 		
 		if(IsMapAdjacent(onlyPlayer, o))
 		{
 			o.onClick(inHand);
+
+			network.sendAll(Message.MOUSEEVENTFROMSERVER, mouseEventTargetUID);
 		}
 		else
 		{
@@ -499,7 +515,6 @@ public class ServerEngine extends Thread
 			
 		}
 		
-		network.sendAll(Message.MOUSEEVENTFROMSERVER, mouseEventTargetUID);
 		
 		
 		
@@ -522,7 +537,6 @@ public class ServerEngine extends Thread
 			movingObject.lastActionTime = currentTime;
 			
 		}
-		
 		
 		
 		
