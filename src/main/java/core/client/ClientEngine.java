@@ -245,6 +245,9 @@ public class ClientEngine extends Game {
 
 		Backgrounds.put(Background.MENUSCREEN, new AssetDescriptor<Texture>(
 				"backgrounds/spacebg.png", Texture.class));
+		
+		Backgrounds.put(Background.SETTINGS, new AssetDescriptor<Texture>(
+				"backgrounds/settings.png", Texture.class));
 
 		// AssetManager
 		for (AssetDescriptor<Texture> theTexture : Backgrounds.values()) {

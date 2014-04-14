@@ -78,7 +78,8 @@ public class mainMenuScreen implements Screen{
     	    @Override
     	    public void clicked(InputEvent event, float x, float y) 
     	    {
-    	    	
+    	    	parentEngine.screenRender=false;
+    	    	parentEngine.switchToNewScreen(ScreenEnumerations.Settings);
     	    	
     	    };
     		
@@ -104,7 +105,6 @@ public class mainMenuScreen implements Screen{
 		Gdx.graphics.getGL20().glClearColor( 0, 0, 0, 1 );
 		Gdx.graphics.getGL20().glClear( GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT );
 		
-		//camera = new OrthographicCamera();
 		camera.update();
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();

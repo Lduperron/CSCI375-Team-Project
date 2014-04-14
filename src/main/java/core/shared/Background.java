@@ -6,7 +6,8 @@ package core.shared;
  */
 public enum Background {
 	WAITING, 
-	MENUSCREEN, 
+	MENUSCREEN,
+	SETTINGS,
 	ERROR, 
 	;
 }
