@@ -24,5 +24,10 @@ public enum Message {
 	/**
 	 * Health change
 	 */
-	CHANGEHEALTH
+	CHANGEHEALTH,
+	
+	/*
+	 * Update enemy direction on client
+	 */
+	UPDATEENEMY
 }

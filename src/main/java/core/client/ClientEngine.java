@@ -9,6 +9,7 @@ import java.util.List;
 
 import gameCode.obj.Obj;
 import gameCode.obj.getObjUID;
+import gameCode.obj.mob.Direction;
 import gameCode.obj.mob.Mob;
 import gameCode.obj.structure.Door;
 import gameCode.obj.structure.Wall;
@@ -410,24 +411,41 @@ public class ClientEngine extends Game {
 	public void handleKeyPresses() {
 
 		if (pressedKeys[Keys.UP] || pressedKeys[Keys.W]) {
+			
+			Mob m = (Mob) controlledObject;
+			m.setDirection(Direction.UP);
+			
 			P.UID = controlledObject.UID;
 			P.x = 0;
 			P.y = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.DOWN] || pressedKeys[Keys.S]) {
+			
+			Mob m = (Mob) controlledObject;
+			m.setDirection(Direction.DOWN);
+			
 			P.UID = controlledObject.UID;
 			P.x = 0;
 			P.y = -1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.RIGHT] || pressedKeys[Keys.D]) {
+			
+			Mob m = (Mob) controlledObject;
+			m.setDirection(Direction.RIGHT);
+			
+			
 			P.UID = controlledObject.UID;
 			P.y = 0;
 			P.x = 1;
 			network.send(Message.REQUESTMOVE, P);
 		}
 		if (pressedKeys[Keys.LEFT] || pressedKeys[Keys.A]) {
+			
+			Mob m = (Mob) controlledObject;
+			m.setDirection(Direction.LEFT);
+			
 			P.UID = controlledObject.UID;
 			P.y = 0;
 			P.x = -1;
@@ -989,6 +1007,14 @@ public class ClientEngine extends Game {
 		
 		// this is the last stage of loading -- initialize the music player
 		initMusic();
+		
+		Mob m = (Mob) controlledObject;
+		
+		m.setTextures(ConfigOptions.charUp, ConfigOptions.charRight, 
+			      ConfigOptions.charDown, ConfigOptions.charLeft);
+	
+		m.setDirection(Direction.UP);
+	
 	}
 
 	public static void main(String[] args) {
@@ -1029,6 +1055,11 @@ public class ClientEngine extends Game {
 		System.out.println("Life at "+hp+"%");
 	}
 
+	public void updateEnemy(int uID, Direction d)
+	{
+		Mob m = (Mob) ObjectArrayByID.get(uID);
+		m.setDirection(d);
+	}
 
 
 }

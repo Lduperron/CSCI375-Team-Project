@@ -10,7 +10,7 @@ public class EnemySoldier extends Human
 		super(x, y);
 
 		this.AIcontrolled = true;
-		this.texture = ConfigOptions.enemyTexture;
+		//this.texture = ConfigOptions.enemyTexture;
 	}
 
 }

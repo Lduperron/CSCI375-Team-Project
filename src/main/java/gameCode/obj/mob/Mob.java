@@ -21,6 +21,7 @@ public class Mob extends Obj
 		this.dense = true;
 	}
 	
+	@Override
 	public TextureRegion getTexture()
 	{
 		
@@ -64,25 +65,33 @@ public class Mob extends Obj
 	
 	public void setDirection(Direction d)
 	{
-		System.out.println(d);
-		switch (d)
+		if (d != null)
 		{
-			case UP:
-				this.texture = this.upTexture;
-				break;
-			
-			case RIGHT:
-				this.texture = this.rightTexture;
-				break;
+			switch (d)
+			{
+				case UP:
+					this.texture = this.upTexture;
+					this.currentFrame = this.texture;
+					break;
 				
-			case DOWN:
-				this.texture = this.downTexture;
-				break;
-			
-			case LEFT:
-			default:
-				this.texture = this.leftTexture;
-				break;
+				case RIGHT:
+					this.texture = this.rightTexture;
+					this.currentFrame = this.texture;
+					break;
+					
+				case DOWN:
+					this.texture = this.downTexture;
+					this.currentFrame = this.texture;
+					break;
+				
+				case LEFT:
+					this.texture = this.leftTexture;
+					this.currentFrame = this.texture;
+					break;
+					
+				default:
+					break;
+			}
 		}
 	}
 }
