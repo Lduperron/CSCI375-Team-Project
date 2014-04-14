@@ -120,7 +120,13 @@ public class ServerEngine extends Thread
 	// INITIAL ENEMY POSITIONS
 	Pair[] enemyPositions = { new Pair(25, 10), new Pair(40, 29), new Pair(26, 26),
 							  new Pair(8, 58), new Pair(2, 91), new Pair(40, 114), new Pair(40, 118), new Pair(40, 116),
-							  new Pair(40, 119), new Pair(40, 117)};
+							  new Pair(40, 119), new Pair(40, 117), new Pair(43, 10), new Pair(49, 16), new Pair(52, 2),
+							  new Pair(58, 3), new Pair(20, 20), new Pair(14, 23), new Pair(8, 26), new Pair(14, 31),
+							  new Pair(14, 42), new Pair(40, 45), new Pair(53, 28), new Pair(48, 28), new Pair(46, 22),
+							  new Pair(45, 37), new Pair(58, 37), new Pair(63, 39), new Pair(58, 50), new Pair(44, 50),
+							  new Pair(62, 13), new Pair(74, 13), new Pair(62, 24), new Pair(63, 35), new Pair(65, 2),
+							  new Pair(59, 17), new Pair(35, 1), new Pair(45, 13), new Pair(47, 12), new Pair(45, 15),
+							  new Pair(40, 118)};
 	
 	@Override
 	public void run() 
@@ -468,6 +474,29 @@ public class ServerEngine extends Thread
 						ObjectArray.get(o.tileXPosition).get(o.tileYPosition).remove(o);
 						ObjectArrayByID.remove(objectUID);
 						network.sendAll(Message.REMOVEOBJECT, objectUID);
+						
+						// Restart the game with a new player
+						onlyPlayer = new Mob(2,3);
+						playerHealth = 100;
+						Weapon aGun = new Weapon(-1, -1);
+
+						Mob m = (Mob) onlyPlayer;
+					
+						aGun.containerUID = m.UID;
+						m.leftHand = aGun;
+						
+						
+						addToWorld(aGun);
+						addToWorld(onlyPlayer);
+						
+						// Update each enemy AI with the player changes
+						for (EnemyAI e : enemies)
+						{
+							e.updatePlayerObject(m);
+						}
+						
+						network.sendAll(Message.YOUCONTROL, onlyPlayer.UID);
+						network.sendAll(Message.CHANGEHEALTH, playerHealth);
 					}
 				}
 			}

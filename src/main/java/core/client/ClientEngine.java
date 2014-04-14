@@ -39,6 +39,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -166,6 +167,9 @@ public class ClientEngine extends Game {
 	Texture gunItem;
 	TextureRegion gunItemRegion;
 
+	Texture healthBar;
+	TextureRegion healthBarRegion;
+	
 	Stage uiStage;
 	Stage worldStage;
 
@@ -364,12 +368,17 @@ public class ClientEngine extends Game {
 		
 		table.row();
 		
-		TextFieldStyle textStyle = new TextFieldStyle();
+		Label healthLabel = new Label("Health", rawTextStyle);
+		healthLabel.setWrap(true); 
+		healthLabel.setAlignment(Align.top | Align.center);
+		table.add(healthLabel).minWidth(200).minHeight(150).fill();
+				
+		/*TextFieldStyle textStyle = new TextFieldStyle();
 		textStyle.font = gameFont;
 		textStyle.fontColor = Color.BLACK;
 		final TextField text = new TextField("", textStyle);
-		text.setText("Test");
-		text.setMessageText("Type here!");
+		text.setText("");
+		text.setMessageText("");
 		table.add(text).minWidth(200).minHeight(150).fill();
 
 	
@@ -387,16 +396,19 @@ public class ClientEngine extends Game {
                 }
                 
             }
-        });
+        });*/
 		
 		table.pack();
 	
 		uiStage.addActor(table);
-		uiStage.addActor(text);
+		//uiStage.addActor(text);
 		
 		gunItem = new Texture(Gdx.files.internal("assets/tilesets/gun0.png"));
 
 		gunItemRegion = new TextureRegion(gunItem, 0, 0, 32, 32);
+		
+		healthBar = new Texture(Gdx.files.internal("assets/data/healthBar.png"));
+		healthBarRegion = new TextureRegion(healthBar, 0, 0, 48, 96);
 		
 	}
 
@@ -567,6 +579,13 @@ public class ClientEngine extends Game {
 					(float) (Gdx.graphics.getWidth() * 0.25),
 					(float) (Gdx.graphics.getWidth() * 0.5), 0, 0, 32, 32,
 					(float) 2.5, 1, 0);
+			for (int i = 0; i < playerHealth; i+=25)
+			{
+				batchSidePanel.draw(healthBarRegion,
+						(float) (Gdx.graphics.getWidth() * 0.25) + 50*(i/25),
+						(float) (Gdx.graphics.getHeight() * 0.51), 0, 0, 48, 96,
+						1, 1, 0);
+			}
 			batchSidePanel.end();
 	
 		}

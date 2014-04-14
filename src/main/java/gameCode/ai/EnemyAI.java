@@ -24,6 +24,9 @@ public class EnemyAI {
 	// time until next AI move
 	private int timeTillAction = 7;
 	
+	// time until AI can shoot again
+	private int timeTillFire = 14;
+	
 	private ServerEngine server;
 	
 	private int enemyHealth;
@@ -79,41 +82,49 @@ public class EnemyAI {
 				p.UID = this.enemyObject.UID;
 				if (this.enemyObject.tileYPosition == this.playerObject.tileYPosition)
 				{
-					// shoot at the player!
-					System.out.println(enemyObject.UID+" shoots it up.");
-					Position shootingAt = new Position();
-					shootingAt.UID = -1;
-					shootingAt.x = this.enemyObject.tileXPosition - this.distanceXToPlayer();
-					shootingAt.y = this.enemyObject.tileYPosition;
-					Mob eObj = (Mob) this.enemyObject;
-					eObj.leftHand.rangedEvent(shootingAt);
-					
-					if (this.distanceXToPlayer() < 0)
+					if (this.timeTillFire < 0)
 					{
-						d = Direction.RIGHT;
-					}
-					else
-					{
-						d = Direction.LEFT;
+						// shoot at the player!
+						System.out.println(enemyObject.UID+" shoots it up.");
+						Position shootingAt = new Position();
+						shootingAt.UID = -1;
+						shootingAt.x = this.enemyObject.tileXPosition - this.distanceXToPlayer();
+						shootingAt.y = this.enemyObject.tileYPosition;
+						Mob eObj = (Mob) this.enemyObject;
+						eObj.leftHand.rangedEvent(shootingAt);
+						
+						if (this.distanceXToPlayer() < 0)
+						{
+							d = Direction.RIGHT;
+						}
+						else
+						{
+							d = Direction.LEFT;
+						}
+						this.timeTillFire = 14;
 					}
 				}
 				else if (this.enemyObject.tileXPosition == this.playerObject.tileXPosition)
 				{
-					// shoot at the player!
-					System.out.println(enemyObject.UID+" shoots it up.");
-					Position shootingAt = new Position();
-					shootingAt.UID = -1;
-					shootingAt.x = this.enemyObject.tileXPosition;
-					shootingAt.y = this.enemyObject.tileYPosition - this.distanceYToPlayer();
-					Mob eObj = (Mob) this.enemyObject;
-					eObj.leftHand.rangedEvent(shootingAt);
-					if (this.distanceYToPlayer() < 0)
+					if (this.timeTillFire < 0)
 					{
-						d = Direction.UP;
-					}
-					else
-					{
-						d = Direction.DOWN;
+						// shoot at the player!
+						System.out.println(enemyObject.UID+" shoots it up.");
+						Position shootingAt = new Position();
+						shootingAt.UID = -1;
+						shootingAt.x = this.enemyObject.tileXPosition;
+						shootingAt.y = this.enemyObject.tileYPosition - this.distanceYToPlayer();
+						Mob eObj = (Mob) this.enemyObject;
+						eObj.leftHand.rangedEvent(shootingAt);
+						if (this.distanceYToPlayer() < 0)
+						{
+							d = Direction.UP;
+						}
+						else
+						{
+							d = Direction.DOWN;
+						}
+						this.timeTillFire = 14;
 					}
 				}
 				else 
@@ -164,6 +175,7 @@ public class EnemyAI {
 		{
 			this.timeTillAction--;
 		}
+		this.timeTillFire--;
 	}
 	
 	/*
@@ -192,5 +204,10 @@ public class EnemyAI {
 	public int getHealth()
 	{
 		return this.enemyHealth;
+	}
+	
+	public void updatePlayerObject(Mob m)
+	{
+		this.playerObject = m;
 	}
 }
