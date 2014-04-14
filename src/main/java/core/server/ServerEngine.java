@@ -73,7 +73,7 @@ public class ServerEngine extends Thread
 	
 	public SoundManager soundManager;
 	
-	int playerHealth = 1000000;
+	int playerHealth = 100;
 	
 	public ServerEngine() 
 	{
