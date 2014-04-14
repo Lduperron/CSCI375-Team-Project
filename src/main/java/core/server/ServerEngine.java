@@ -73,7 +73,7 @@ public class ServerEngine extends Thread
 	
 	public SoundManager soundManager;
 	
-	int playerHealth = 100;
+	int playerHealth = 200;
 	
 	public ServerEngine() 
 	{
@@ -477,7 +477,7 @@ public class ServerEngine extends Thread
 						
 						// Restart the game with a new player
 						onlyPlayer = new Mob(2,3);
-						playerHealth = 100;
+						playerHealth = 200;
 						Weapon aGun = new Weapon(-1, -1);
 
 						Mob m = (Mob) onlyPlayer;
