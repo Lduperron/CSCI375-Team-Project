@@ -52,6 +52,7 @@ import core.shared.ConfigOptions;
 import core.shared.Message;
 import core.shared.Position;
 import core.shared.UidPair;
+import core.shared.Pair;
 
 public class ServerEngine extends Thread
 {
@@ -72,7 +73,7 @@ public class ServerEngine extends Thread
 	
 	public SoundManager soundManager;
 	
-	int playerHealth = 100;
+	int playerHealth = 1000000;
 	
 	public ServerEngine() 
 	{
@@ -112,20 +113,6 @@ public class ServerEngine extends Thread
 			
 			return Self;
 			
-		}
-		
-	}
-	
-	public class Pair
-	{
-		
-		int x;
-		int y;
-		
-		Pair(int x, int y)
-		{
-			this.x = x;
-			this.y = y;
 		}
 		
 	}
@@ -349,11 +336,7 @@ public class ServerEngine extends Thread
 
 		
 		Mob m = (Mob) onlyPlayer;
-		m.setTextures(ConfigOptions.charUp, ConfigOptions.charRight, 
-				      ConfigOptions.charDown, ConfigOptions.charLeft);
-		
-		m.setDirection(Direction.RIGHT);
-		
+	
 		aGun.containerUID = m.UID;
 		m.leftHand = aGun;
 		
@@ -365,12 +348,11 @@ public class ServerEngine extends Thread
 		
 		enemies = new ArrayList<EnemyAI>();
 		
-		for (Pair p : enemyPositions)
+		for (Pair<Integer, Integer> p : enemyPositions)
 		{
 			Mob enemyMob = new Mob(p.x, p.y);
 
 			enemyMob.setAIcontrolled(true);
-			enemyMob.setTexture(ConfigOptions.enemyTexture);
 			
 			Weapon enemyGun = new Weapon(-1, -1);
 			
@@ -792,6 +774,11 @@ public class ServerEngine extends Thread
 		{
 			m.setDirection(Direction.LEFT);
 		}
+	}
+	
+	public void updateEnemyDirection(int id, Direction d)
+	{
+		this.network.sendAll(Message.UPDATEENEMY, new Pair<Integer, Direction>(id, d));
 	}
 
 

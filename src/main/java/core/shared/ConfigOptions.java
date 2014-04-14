@@ -31,13 +31,33 @@ public class ConfigOptions
 	
 	public static TextureRegion charUp = new TextureRegion(charReg, 96, 96, 32, 32);
 	public static TextureRegion charRight = new TextureRegion(charReg, 160, 64, 32, 32);
-	public static TextureRegion charDown = new TextureRegion(charReg, 160, 32, 32, 32);
-	public static TextureRegion charLeft = new TextureRegion(charReg, 96, 0, 32, 32);
+	public static TextureRegion charDown = new TextureRegion(charReg, 96, 0, 32, 32);
+	public static TextureRegion charLeft = new TextureRegion(charReg, 96, 32, 32, 32);
 	
-	public static Texture enemyreg = new Texture((Gdx.files.internal("data/enemyTemp.png")));
-	public static TextureRegion enemyTexture = new TextureRegion(enemyreg);
+	public static Texture enemyReg = new Texture((Gdx.files.internal("tilesets/enemies.png")));
 	
-
+	public static TextureRegion[] enemyUp = new TextureRegion[] 
+	{ 
+		new TextureRegion(enemyReg, 160, 224, 32, 32), 
+		new TextureRegion(enemyReg, 192, 224, 32, 32)
+	};
+	
+	public static TextureRegion[] enemyRight = new TextureRegion[]
+	{
+		new TextureRegion(enemyReg, 160, 192, 32, 32),
+		new TextureRegion(enemyReg, 192, 192, 32, 32)
+	};
+	public static TextureRegion[] enemyDown = new TextureRegion[]
+	{
+		new TextureRegion(enemyReg, 96, 128, 32, 32),
+		new TextureRegion(enemyReg, 192, 128, 32, 32)
+	};
+	public static TextureRegion[] enemyLeft = new TextureRegion[]
+	{
+		new TextureRegion(enemyReg, 128, 160, 32, 32),
+		new TextureRegion(enemyReg, 192, 160, 32, 32)
+	};
+	
 	public static Texture cakeTex = new Texture((Gdx.files.internal("tilesets/laser.png")));
 
 	public static TextureRegion cakeTexture = new TextureRegion(cakeTex);

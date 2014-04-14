@@ -1,6 +1,7 @@
 package core.network;
 
 import gameCode.obj.Obj;
+import gameCode.obj.mob.Direction;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -19,6 +20,7 @@ import core.shared.DistilledObject;
 import core.shared.Message;
 import core.shared.Position;
 import core.shared.UidPair;
+import core.shared.Pair;
 
 /**
  * Client end for KryoNet network communications
@@ -132,7 +134,12 @@ public class NetClient extends Network {
 					case CHANGEHEALTH:
 						int healthValue = (Integer) netMsg.obj;
 						gameClient.changeHealth(healthValue);
+						break;
 						
+					case UPDATEENEMY:
+						Pair<Integer, Direction> p = (Pair) netMsg.obj;
+						gameClient.updateEnemy(p.x, p.y);
+						break;
 						
 					default:
 						// invalid messages are simply ignored
